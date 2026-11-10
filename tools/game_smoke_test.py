@@ -162,6 +162,108 @@ def query_name(pid):
     return None, None
 
 
+def query_any(pid):
+    """What a player's server browser would get (Steam query on the ports it listens on)."""
+    from core.network import listening_ports
+    from core.a2s import query_info
+    for port, protos in sorted((listening_ports(pid) or {}).items()):
+        if "UDP" in protos:
+            try:
+                info = query_info("127.0.0.1", port, timeout=1.0)
+            except Exception:
+                info = None
+            if info and info.get("name"):
+                return info
+    return None
+
+
+def _kind(label):
+    low = str(label or "").strip().lower()
+    if low.startswith("server name"):
+        return "name"
+    if low in ("password", "password to join", "server password"):
+        return "password"
+    if low.startswith("max players"):
+        return "players"
+    return None
+
+
+def essentials_check(mgr, sid, wait, log):
+    """Set the server name, join password and max players through Essentials (what an
+    "Add a server" form would fill in), restart, and see what the game kept and what
+    players would see. The test password itself is never written to the report."""
+    from core import quick_settings
+    ess = quick_settings.get(mgr, sid)
+    out = {"supported": bool(ess.get("supported")), "auto": bool(ess.get("auto")),
+           "fields_found": [f.get("label") for f in ess.get("fields") or []], "fields": {}}
+    targets = {}
+    for f in ess.get("fields") or []:
+        k = _kind(f.get("label"))
+        if k and k not in targets and not f.get("error"):
+            targets[k] = f
+    if not targets:
+        out["result"] = "no server name, password or max players in Essentials"
+        return out
+    stamp = int(time.time()) % 10000
+    old_players = str(targets["players"].get("value") or "").strip() if "players" in targets else ""
+    want = {"name": "BaoBun Check %d" % stamp, "password": "check%04dpw" % stamp,
+            "players": "7" if old_players != "7" else "9"}
+    log("  essentials check: " + ", ".join(sorted(targets)))
+    try:
+        mgr.stop_server(sid, user="smoke-test")
+    except Exception:
+        pass
+    for k, f in targets.items():
+        entry = {"label": f.get("label"), "old": None if k == "password" else f.get("value")}
+        try:
+            quick_settings.save(mgr, sid, {f["key"]: want[k]}, user="smoke-test")
+            entry["saved"] = True
+        except Exception as e:
+            entry.update(saved=False, result="save failed", error=str(e)[:300])
+        out["fields"][k] = entry
+    mgr.start_server(sid, user="smoke-test")
+    out["restart"] = wait_ready(mgr, sid, wait)
+    time.sleep(10)
+    st = next((s for s in mgr.get_all_statuses() if s["id"] == sid), {}) or {}
+    info = query_any(st.get("pid")) if st.get("isRunning") else None
+    out["answers_query"] = bool(info)
+    try:
+        mgr.stop_server(sid, user="smoke-test")
+    except Exception:
+        pass
+    time.sleep(2)
+    try:
+        after = {f["key"]: f for f in quick_settings.get(mgr, sid).get("fields") or []}
+    except Exception:
+        after = {}
+    for k, f in targets.items():
+        e = out["fields"][k]
+        if not e.get("saved"):
+            continue
+        now = after.get(f["key"])
+        if now is None:
+            e["result"] = "setting not found afterwards"
+            continue
+        if k == "password":
+            kept = bool(now.get("has_value"))
+            seen = info.get("password") if info else None
+            ok = seen
+        elif k == "name":
+            kept = str(now.get("value")) == want[k]
+            seen = info.get("name") if info else None
+            ok = None if seen is None else want[k] in str(seen)
+        else:
+            kept = str(now.get("value")).strip() == want[k]
+            seen = info.get("max_players") if info else None
+            ok = None if seen is None else str(seen) == want[k]
+        e["kept"], e["players_see"] = kept, seen
+        if ok is None:
+            e["result"] = "kept (not checkable)" if kept else "game rewrote it"
+        else:
+            e["result"] = "works" if ok else ("game ignores it" if kept else "game rewrote it")
+    return out
+
+
 def wait_ready(mgr, sid, wait):
     from core import discord_logic
     started, state = time.time(), "waiting"
@@ -185,7 +287,10 @@ def settings_check(mgr, sid, wait, log):
     new = "BaoBun Check %d" % (int(time.time()) % 10000)
     log("  settings check: %s in %s -> %r" % (key, path, new))
     try:
-        mgr.stop_server(sid, user="smoke-test")
+        try:
+            mgr.stop_server(sid, user="smoke-test")
+        except Exception:
+            pass          # already stopped by the essentials check
         r = config_forms.save(mgr, sid, file_id, {field_id: new}, user="smoke-test")
         out["saved"] = bool(r.get("saved"))
     except Exception as e:
@@ -297,9 +402,14 @@ def test_game(mgr, api, name, wait, keep, log):
             res["settings_error"] = str(e)
         if SETTINGS_CHECK and state == "ready" and st.get("isRunning"):
             try:
-                res["settings_check"] = settings_check(mgr, sid, wait, log)
+                res["essentials_check"] = essentials_check(mgr, sid, wait, log)
             except Exception as e:
-                res["settings_check"] = {"result": "check error", "error": str(e)[:400]}
+                res["essentials_check"] = {"result": "check error", "error": str(e)[:400]}
+            if "name" not in (res["essentials_check"].get("fields") or {}):
+                try:      # Essentials has no server name: look for one in any settings file
+                    res["settings_check"] = settings_check(mgr, sid, wait, log)
+                except Exception as e:
+                    res["settings_check"] = {"result": "check error", "error": str(e)[:400]}
         try:
             res["written_outside"] = files_written_outside(started, res.get("directory"))
         except Exception:
@@ -347,6 +457,17 @@ def write_report(path_md, results):
             lines.append("| %s | %s | %s | %s |" % (r["game"], c.get("result"),
                          ("%s in %s" % (c.get("key"), c.get("file"))) if c.get("key") else "-",
                          c.get("players_see") or "-"))
+    ess = [r for r in results if (r.get("essentials_check") or {}).get("fields")]
+    if ess:
+        lines += ["", "## Essentials check (set name, password and max players, restart, look again)", "",
+                  "| Game | Essentials | Server name | Password | Max players | Answers Steam query |",
+                  "|---|---|---|---|---|---|"]
+        for r in ess:
+            c = r["essentials_check"]
+            cell = lambda k: (c["fields"].get(k) or {}).get("result") or "not found"
+            lines.append("| %s | %s | %s | %s | %s | %s |" % (
+                r["game"], "found automatically" if c.get("auto") else "made for this game",
+                cell("name"), cell("password"), cell("players"), "yes" if c.get("answers_query") else "no"))
     for r in results:
         if r.get("result") == "ok" and r.get("support") == "full" and \
                 str((r.get("settings_check") or {}).get("result", "works")).startswith(("works", "kept")) and \

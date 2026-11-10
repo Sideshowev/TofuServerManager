@@ -248,12 +248,13 @@ class ProtocolTests(unittest.TestCase):
             data, addr = sock.recvfrom(1024)
             assert data.endswith(b"\x01\x02\x03\x04")
             body = (b"\xFF\xFF\xFF\xFFI\x11" + b"My Server\x00" + b"map\x00" + b"folder\x00"
-                    + b"game\x00" + struct.pack("<H", 0) + bytes([3, 16, 0]))
+                    + b"game\x00" + struct.pack("<H", 0) + bytes([3, 16, 0]) + b"dw\x01")
             sock.sendto(body, addr)
         threading.Thread(target=serve, daemon=True).start()
         info = query_info("127.0.0.1", port, timeout=2)
         sock.close()
         self.assertEqual((info["players"], info["max_players"], info["name"]), (3, 16, "My Server"))
+        self.assertIs(info["password"], True)           # dedicated, Windows, needs a password
 
 
 class LogicTests(unittest.TestCase):

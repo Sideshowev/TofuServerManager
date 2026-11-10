@@ -20,7 +20,8 @@ def _cstr(data: bytes, pos: int):
 
 
 def query_info(host: str, port: int, timeout: float = 1.5) -> Optional[dict]:
-    """Return {"name", "map", "players", "max_players", "bots"} or None if no answer."""
+    """Return {"name", "map", "players", "max_players", "bots", "password"} or None if no answer.
+    "password" is True when players need a password to join (None if the game didn't say)."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
     try:
@@ -38,8 +39,10 @@ def query_info(host: str, port: int, timeout: float = 1.5) -> Optional[dict]:
         _game, pos = _cstr(data, pos)
         pos += 2  # app id (short)
         players, max_players, bots = struct.unpack_from("<BBB", data, pos)
+        # then: server type (1), environment (1), visibility (1: 0 = open, 1 = needs a password)
+        locked = bool(data[pos + 5]) if len(data) > pos + 5 else None
         return {"name": name, "map": map_name, "players": players,
-                "max_players": max_players, "bots": bots}
+                "max_players": max_players, "bots": bots, "password": locked}
     except (OSError, ValueError, struct.error):
         return None
     finally:
