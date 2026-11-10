@@ -114,6 +114,11 @@ PATTERNS = [
      "The world save looks damaged",
      "Restore the latest good backup from the Backups tab (the current world is kept as a safety backup).",
      None),
+    ("source_game_folder",
+     r"unable to find gameinfo\.txt",
+     "The server wasn't told which game folder to use",
+     "This is a Source engine game. In Edit Server, add -game followed by the name of the folder that has gameinfo.txt in it to the launch options (for example -game cstrike), then start it again.",
+     None),
     ("mod_error",
      r"(failed (loading|to load) mod|exception (while|when) loading mod|mod .* (failed|threw|crashed)|"
      r"missing dependency|requires mod|incompatible mod|modloader.*error|\[mod\].*error)",

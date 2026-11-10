@@ -601,6 +601,9 @@ class CrashHelpAndAlertTests(unittest.TestCase):
         f = explain(1, ["FATAL  : Failed to initialize Steam. Probably Steam client is not running."])
         self.assertEqual(f[0]["key"], "needs_steam_client")
         self.assertEqual(explain(1, ["SteamAPI_Init() failed"])[0]["key"], "steam_init")   # the general one still works
+        f = explain(1, ["Unable to find gameinfo.txt. Solutions:"])
+        self.assertEqual(f[0]["key"], "source_game_folder")
+        self.assertIn("-game", f[0]["fix"])
 
     def test_crash_reason_reaches_status_and_alert(self):
         from core.alerts import AlertCenter
