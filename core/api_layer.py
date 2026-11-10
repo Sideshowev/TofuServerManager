@@ -796,6 +796,8 @@ class ApiLayer:
                  "port": int(params["port"]) if params.get("port") else p.get("port"),
                  "autoRestart": True, "manualStart": not bool(params.get("auto_start")),
                  "updateBeforeStart": False, "folder": ""}
+        from core import game_defaults
+        entry["launchArgs"] = game_defaults.new_server_args(entry, servers)
         servers.append(entry)
         self.mgr.save_servers(servers)
         self.mgr._audit("server_add", entry["id"], user=params.get("user", "api"), game=game)

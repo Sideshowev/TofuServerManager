@@ -401,6 +401,11 @@ class AddServerWizard(ctk.CTkToplevel):
             self.app.show_error("Folder", "Could not create the folder:\n" + str(e), parent=self)
             return None
         servers = self.mgr.load_servers()
+        try:      # e.g. Project Zomboid: a server name of its own, so it doesn't share another's settings
+            from core import game_defaults
+            entry["launchArgs"] = game_defaults.new_server_args(entry, servers)
+        except Exception:
+            pass
         servers.append(entry)
         self.mgr.save_servers(servers)
         self.server_id = entry["id"]

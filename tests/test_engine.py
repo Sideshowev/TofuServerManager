@@ -3982,6 +3982,19 @@ class GameDefaultsTests(unittest.TestCase):
             odd.write_bytes(b"not a database at all" * 10)
             self.assertEqual(G.required({"appId": "380870", "launchArgs": "-servername odd"})[1], [])
 
+    def test_a_new_zomboid_server_gets_its_own_name(self):
+        from core import game_defaults as G
+        a = {"appId": "380870", "name": "Friday Night!", "launchArgs": ""}
+        args = G.new_server_args(a, [])
+        self.assertEqual(args, "-servername FridayNight")           # not "servertest", which every server shares
+        others = [dict(a, launchArgs=args), {"appId": "896660", "launchArgs": "-servername FridayNight2"}]
+        self.assertEqual(G.new_server_args(a, others), "-servername FridayNight2")   # Valheim's doesn't count
+        self.assertEqual(G.new_server_args({"appId": "380870", "name": "!!!", "launchArgs": "-port 1"}, []),
+                         "-port 1 -servername server")
+        kept = {"appId": "380870", "name": "X", "launchArgs": "-servername mine"}
+        self.assertEqual(G.new_server_args(kept, []), "-servername mine")
+        self.assertEqual(G.new_server_args({"appId": "896660", "name": "V", "launchArgs": "-x"}, []), "-x")
+
     def test_zomboid_launcher_passes_every_option(self):
         from core import game_defaults as G
         BAT = ('@setlocal enableextensions\n@cd /d "%~dp0"\nSET PZ_CLASSPATH=java/;java/projectzomboid.jar\n'

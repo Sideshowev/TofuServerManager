@@ -173,6 +173,25 @@ def working_dir(srv: dict, exe: str, directory: str) -> str:
     return directory
 
 
+def new_server_args(srv: dict, others: list) -> str:
+    """Launch options for a server that is being added right now (never for one that exists).
+    Project Zomboid keeps every server's settings and world in one folder per Windows user,
+    told apart only by -servername - and without it every server is "servertest", so a
+    second server would share (and overwrite) the first one's settings and world. A new
+    server gets a name of its own."""
+    args = srv.get("launchArgs") or ""
+    zomboid = ("380870", "108600")
+    if str(srv.get("appId") or "") in zomboid and not _either(args, "-servername"):
+        base = re.sub(r"[^A-Za-z0-9]", "", str(srv.get("name") or "")) or "server"
+        used = {"servertest"} | {(_either(o.get("launchArgs") or "", "-servername") or "servertest").lower()
+                                 for o in others or [] if str(o.get("appId") or "") in zomboid}
+        name, i = base, 2
+        while name.lower() in used:
+            name, i = "%s%d" % (base, i), i + 1
+        args = ("%s -servername %s" % (args, name)).strip()
+    return args
+
+
 def start_blocker(srv: dict) -> str:
     """Why this server can't work yet, in plain words ("" when nothing is in the way).
     Don't Starve Together runs but lets nobody in without a server token from Klei."""
