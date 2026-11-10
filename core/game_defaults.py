@@ -149,6 +149,9 @@ PREFIX = {
     "565060": ("--galaxy-name avorion_galaxy", []),                                   # Avorion
     "294420": ("-quit -batchmode -nographics -configfile=serverconfig.xml -dedicated", []),  # 7 Days to Die
     "2089300": ("-log", [("-Port=", "{port}")]),                                       # Icarus
+    # Necesse: its own .bat opens the game in a second window and ends, so BaoBun thought it had
+    # crashed. BaoBun runs the game's Java itself; without -world it stops to ask which world.
+    "1169370": ("-jar Server.jar -nogui", [("-world ", "BaoBun"), ("-port ", "{port}")]),
 }
 
 

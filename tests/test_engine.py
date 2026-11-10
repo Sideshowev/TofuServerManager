@@ -4061,6 +4061,9 @@ class GameDefaultsTests(unittest.TestCase):
         self.assertTrue(sm.startswith("Level01_Main -server") and "-Port=8777" in sm, sm)
         self.assertEqual(G.required({"appId": "3017310", "port": 8777, "launchArgs": sm}), (sm, []))
         self.assertNotIn("-PORT=", G.required({"appId": "2857200", "launchArgs": ""})[0])   # no port known
+        nec, _ = G.required({"appId": "1169370", "port": 14159, "launchArgs": ""})          # Necesse: Java itself
+        self.assertEqual(nec, "-jar Server.jar -nogui -world BaoBun -port 14159")
+        self.assertEqual(G.required({"appId": "1169370", "port": 14159, "launchArgs": nec}), (nec, []))
         kf, _ = G.required({"appId": "232130", "launchArgs": ""})
         self.assertTrue(kf.startswith("KF-BioticsLab"))
         # saved to the server before it starts

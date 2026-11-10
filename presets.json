@@ -1249,7 +1249,7 @@
       "type": "steamcmd",
       "appId": "1169370",
       "port": 14159,
-      "executable": null,
+      "executable": "jre/bin/java.exe",
       "config_files": [],
       "description": "Necesse dedicated server",
       "anonymous_login": true,
