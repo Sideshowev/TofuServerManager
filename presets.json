@@ -699,7 +699,7 @@
       "executable": null,
       "config_files": [],
       "description": "Eden Star dedicated server",
-      "anonymous_login": true,
+      "anonymous_login": false,
       "category": "survival"
     },
     {
@@ -1774,7 +1774,7 @@
       "executable": null,
       "config_files": [],
       "description": "Serious Sam HD: The Second Encounter dedicated server",
-      "anonymous_login": true,
+      "anonymous_login": false,
       "category": "other"
     },
     {
@@ -1970,7 +1970,7 @@
       "executable": "srcds.exe",
       "config_files": [],
       "description": "Takedown: Red Sabre dedicated server",
-      "anonymous_login": true,
+      "anonymous_login": false,
       "category": "other"
     },
     {
