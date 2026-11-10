@@ -41,6 +41,8 @@ PORT_HINTS = {
     "2465200": [(0, "UDP", "Game"), ("27016", "UDP", "Query"), ("9700", "UDP", "Blob sync")],    # Sons of the Forest
     "1110390": [(0, "TCP/UDP", "Game"), (1, "TCP/UDP", "Game + 1")],                             # Unturned
     "343050": [(0, "UDP", "Game")],                                                              # DST
+    "565060": [(0, "TCP/UDP", "Game"), (3, "UDP", "Query"), ("27020", "UDP", "Steam query"),     # Avorion
+               ("27021", "UDP", "Steam")],
     "403240": [(0, "UDP", "Game"), ("27165", "UDP", "Query"), ("15000", "UDP", "Beacon")],       # Squad
     "232130": [(0, "UDP", "Game"), ("27015", "UDP", "Query"), ("20560", "UDP", "Steam")],        # KF2
     "4020": [(0, "TCP/UDP", "Game")], "730": [(0, "TCP/UDP", "Game")],                           # GMod, CS2

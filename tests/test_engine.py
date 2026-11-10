@@ -2672,6 +2672,43 @@ class DiscordBotTests(unittest.TestCase):
         self.assertEqual(L.ready_state(m, "a", 0, now=30), "waiting")
         self.assertEqual(L.ready_state(m, "a", 0, now=90), "ready")
 
+    def test_ready_when_any_of_its_ports_is_open(self):
+        # Icarus / Avorion use Steam's networking: only the query port is ever opened
+        from core import discord_logic as L
+        from core import network
+
+        class M:
+            def get_all_statuses(self):
+                return [{"id": "a", "state": "running", "isRunning": True, "pid": 4242}]
+            def get_server(self, sid):
+                return {"id": "a"}
+        ports = [{"port": 17777, "proto": "UDP", "label": "Game"}, {"port": 27017, "proto": "UDP", "label": "Query"}]
+        with mock.patch.object(network, "expected_ports", return_value=ports):
+            with mock.patch.object(network, "listening_ports", return_value={27017: {"UDP"}}):
+                self.assertEqual(L.ready_state(M(), "a", 0, now=10), "ready")
+            with mock.patch.object(network, "listening_ports", return_value={5555: {"UDP"}}):
+                self.assertEqual(L.ready_state(M(), "a", 0, now=10), "waiting")
+                self.assertEqual(L.ready_state(M(), "a", 0, now=130), "ready")   # can't tell: assume up
+            with mock.patch.object(network, "listening_ports", return_value={}):
+                self.assertEqual(L.ready_state(M(), "a", 0, now=10), "waiting")
+        srv = {"id": "x", "appId": "565060", "port": 27000}
+        self.assertIn(27003, [p["port"] for p in network.expected_ports(srv)])   # Avorion's query port
+
+    def test_dont_starve_needs_its_klei_token(self):
+        from core import game_defaults as G
+        root = Path(tempfile.mkdtemp())
+        srv = {"appId": "343050", "launchArgs": '-persistent_storage_root "%s" -cluster MyWorld' % root}
+        msg = G.start_blocker(srv)
+        self.assertIn("token from Klei", msg)
+        self.assertIn("MyWorld", msg)                       # says where it goes
+        cluster = root / "DoNotStarveTogether" / "MyWorld"
+        cluster.mkdir(parents=True)
+        (cluster / "cluster_token.txt").write_text("")
+        self.assertTrue(G.start_blocker(srv))               # an empty file isn't a token
+        (cluster / "cluster_token.txt").write_text("pds-g^fake")
+        self.assertEqual(G.start_blocker(srv), "")
+        self.assertEqual(G.start_blocker({"appId": "896660"}), "")
+
     def test_bot_actions(self):
         import asyncio, importlib, types
         import fake_discord

@@ -170,6 +170,28 @@ def working_dir(srv: dict, exe: str, directory: str) -> str:
     return directory
 
 
+def start_blocker(srv: dict) -> str:
+    """Why this server can't work yet, in plain words ("" when nothing is in the way).
+    Don't Starve Together runs but lets nobody in without a server token from Klei."""
+    import os
+    if str(srv.get("appId") or "") != "343050":
+        return ""
+    try:
+        from core.quick_settings import _resolve
+        token = _resolve(srv, "{dst}/cluster_token.txt")
+    except Exception:
+        return ""
+    try:
+        if os.path.isfile(token) and os.path.getsize(token) > 0:
+            return ""
+    except OSError:
+        return ""
+    return ("Don't Starve Together needs a server token from Klei before it can start. Sign in at "
+            "https://accounts.klei.com/account/game/servers?game=DontStarveTogether , add a server, and "
+            "either download its settings and put them in %s , or copy the token into a file called "
+            "cluster_token.txt in that folder." % os.path.dirname(token))
+
+
 def _either(args: str, flag: str) -> str:
     """Value of "-flag value" or "-flag=value"."""
     m = re.search(r'(?i)(?:^|\s)%s(?:=|\s+)("([^"]*)"|(\S+))' % re.escape(flag), args or "")

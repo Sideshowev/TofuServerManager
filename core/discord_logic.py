@@ -195,9 +195,11 @@ def ready_state(mgr, server_id: str, started_at: float, now: Optional[float] = N
         ports = expected_ports(srv, mgr)
         if ports and st.get("pid"):
             open_ports = listening_ports(st.get("pid"))
-            if open_ports and ports[0]["port"] in open_ports:
+            # any of its ports: games on Steam's networking (Icarus, Avorion...) never open
+            # their game port themselves, only the query port
+            if open_ports and any(p["port"] in open_ports for p in ports):
                 return "ready"
-            if not open_ports and now - started_at > 120:
+            if now - started_at > 120:
                 return "ready"   # can't tell - assume it's up after two minutes
             return "waiting"
     except Exception:

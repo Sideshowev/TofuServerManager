@@ -1139,6 +1139,10 @@ class ServerManager:
         exe, _args = self._resolve_executable(srv_def)
         if not Path(exe).exists():
             raise FileNotFoundError(f"Executable not found: {exe}")
+        from core import game_defaults as _gd0
+        blocked = _gd0.start_blocker(srv_def)
+        if blocked:
+            raise RuntimeError(blocked)      # plain words: what's missing and how to get it
         from core import minecraft as _mc
         if _mc.looks_minecraft(srv_def) and exe.lower().endswith((".jar", "run.bat")):
             _mc.resolve_java(srv_def)   # clear "install Java" message instead of a crash
@@ -2409,6 +2413,11 @@ class ServerManager:
         else:
             exe = self._guess_game_executable(directory, app_id)
         if not exe:
+            if os.path.isdir(os.path.join(directory, "EmptySteamDepot")):
+                raise FileNotFoundError(
+                    "Steam finished without giving any game files for this server. Either its server "
+                    "isn't offered on Steam for Windows any more, or it needs a Steam account that owns "
+                    "the game (set one in Settings and install again).")
             raise FileNotFoundError(f"Could not find game executable for app {app_id} in {directory}")
 
         launch_args = srv_def.get("launchArgs", "") or ""

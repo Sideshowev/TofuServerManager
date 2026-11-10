@@ -341,6 +341,15 @@ def test_game(mgr, api, name, wait, keep, log):
         sid = next(s["id"] for s in mgr.load_servers() if s.get("name") == "Smoke " + name[:40])
     srv = mgr.get_server(sid)
     res["directory"] = srv.get("directory")
+    if str(p.get("appId")) == "380870" and srv.get("directory"):
+        # Project Zomboid keeps worlds and accounts in the Windows user's Zomboid folder,
+        # shared with a real server or the game itself - keep the test's inside its own folder
+        servers = mgr.load_servers()
+        for s in servers:
+            if s.get("id") == sid:
+                s["launchArgs"] = ('-cachedir="%s" %s' % (os.path.join(srv["directory"], "ZomboidData"),
+                                                          s.get("launchArgs") or "")).strip()
+        mgr.save_servers(servers)
     try:
         # 1. install
         t0 = time.time()
@@ -385,6 +394,10 @@ def test_game(mgr, api, name, wait, keep, log):
             res["listening_ports"] = sorted("%s/%s" % (p, "+".join(sorted(v)))
                                             for p, v in (listening_ports(st.get("pid")) or {}).items())
             res["expected_ports"] = [e["port"] for e in expected_ports(mgr.get_server(sid), mgr)]
+            if state == "ready" and st.get("playerCount") is None:
+                opened = {int(str(x).split("/")[0]) for x in res["listening_ports"]}
+                res["ready_by"] = "port" if opened & set(res["expected_ports"]) else \
+                    "time only (none of the ports BaoBun expects is open)"
         except Exception:
             pass
         if state != "ready" or not st.get("isRunning"):
