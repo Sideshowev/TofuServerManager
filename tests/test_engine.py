@@ -586,6 +586,10 @@ class CrashHelpAndAlertTests(unittest.TestCase):
         self.assertEqual(explain(0, ["all fine"], uptime=3)[0]["key"], "quick_exit")
         self.assertEqual(explain(7, ["all fine"], uptime=600)[0]["key"], "unknown")
         self.assertEqual(explain(0, ["all fine"], uptime=600), [])
+        for line in ("LogBRAuthSubsystem: Error: Authentication failed on dedicated server. Exiting now.",
+                     '[00:00:04]: [200] Account Failed (6): "E_INVALID_TOKEN"',
+                     "[00:00:04]: No auth token could be found."):
+            self.assertEqual(explain(1, [line])[0]["key"], "needs_signin", line)
 
     def test_crash_reason_reaches_status_and_alert(self):
         from core.alerts import AlertCenter

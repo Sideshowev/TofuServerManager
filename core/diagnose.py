@@ -49,6 +49,12 @@ NTSTATUS = {
 
 # (key, regex, title, fix, link) - checked against the last lines of output.
 PATTERNS = [
+    ("needs_signin",
+     r"(authentication failed|e_invalid_token|no auth token)",
+     "The game's server has to be signed in first",
+     "This game only runs a server that is linked to an account with the game's maker. Follow the "
+     "game's own server guide to get a server token (or to sign the server in), then start it again.",
+     None),
     ("port_taken",
      r"(address already in use|only one usage of each socket address|failed to bind|"
      r"could not bind|bind\(\) failed|port \d+ (is )?(already )?in use|unable to (start|open) .*port|"
