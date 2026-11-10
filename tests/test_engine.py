@@ -598,6 +598,9 @@ class CrashHelpAndAlertTests(unittest.TestCase):
         self.assertEqual(explain(1, ["Failed to load mod 'bettertrees': missing dependency"])[0]["key"], "mod_error")
         self.assertEqual(explain(1, ["Failed to load world: savegame corrupt"])[0]["key"], "corrupt_save")
         self.assertNotIn("needs_signin", [x["key"] for x in explain(1, ["RCON: authentication failed for 10.0.0.5"])])
+        f = explain(1, ["FATAL  : Failed to initialize Steam. Probably Steam client is not running."])
+        self.assertEqual(f[0]["key"], "needs_steam_client")
+        self.assertEqual(explain(1, ["SteamAPI_Init() failed"])[0]["key"], "steam_init")   # the general one still works
 
     def test_crash_reason_reaches_status_and_alert(self):
         from core.alerts import AlertCenter
