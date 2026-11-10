@@ -1,0 +1,637 @@
+[
+ {
+  "id": "crash-help-signin",
+  "title": "Crash help: the server has to be signed in first",
+  "allowed": [
+   "core/diagnose.py",
+   "tests/test_engine.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/diagnose.py",
+    "around": "^PATTERNS = \\[",
+    "before": 1,
+    "after": 66
+   },
+   {
+    "path": "tests/test_engine.py",
+    "around": "def test_explain_patterns_and_exit_codes",
+    "before": 0,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_engine.py",
+    "-k",
+    "explain"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "core/diagnose.py",
+    "regex": "\\(\"needs_signin\",",
+    "why": "the new entry's key"
+   },
+   {
+    "path": "tests/test_engine.py",
+    "regex": "needs_signin",
+    "why": "a test for the new entry"
+   }
+  ],
+  "instruction": "Add ONE new entry to the PATTERNS list in core/diagnose.py, in the same 5-part form as the\nothers: (key, regex, title, fix, link).\n\n- key: \"needs_signin\"\n- where in the list: as the FIRST entry of PATTERNS (before \"port_taken\")\n- the regex (case is ignored) must match these console lines: 'LogBRAuthSubsystem: Error: Authentication failed on dedicated server. Exiting now.' and '[200] Account Failed (6): \"E_INVALID_TOKEN\"' and 'No auth token could be found.'\n- title (exactly): \"The game's server has to be signed in first\"\n- fix (exactly, split over lines like the other entries so no line is over 118 characters): \"This game only runs a server that is linked to an account with the game's maker. Follow the game's own server guide to get a server token (or to sign the server in), then start it again.\"\n- link: None\n\nThen add assertions at the END of test_explain_patterns_and_exit_codes in tests/test_engine.py (same style,\n8 spaces of indentation):\n        for line in (\"LogBRAuthSubsystem: Error: Authentication failed on dedicated server. Exiting now.\",\n                     '[00:00:04]: [200] Account Failed (6): \"E_INVALID_TOKEN\"',\n                     \"[00:00:04]: No auth token could be found.\"):\n            self.assertEqual(explain(1, [line])[0][\"key\"], \"needs_signin\", line)"
+ },
+ {
+  "id": "crash-help-steam-client",
+  "title": "Crash help: the game needs Steam running",
+  "allowed": [
+   "core/diagnose.py",
+   "tests/test_engine.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/diagnose.py",
+    "around": "^PATTERNS = \\[",
+    "before": 1,
+    "after": 66
+   },
+   {
+    "path": "tests/test_engine.py",
+    "around": "def test_explain_patterns_and_exit_codes",
+    "before": 0,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_engine.py",
+    "-k",
+    "explain"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "core/diagnose.py",
+    "regex": "\\(\"needs_steam_client\",",
+    "why": "the new entry's key"
+   },
+   {
+    "path": "tests/test_engine.py",
+    "regex": "needs_steam_client",
+    "why": "a test for the new entry"
+   }
+  ],
+  "instruction": "Add ONE new entry to the PATTERNS list in core/diagnose.py, in the same 5-part form as the\nothers: (key, regex, title, fix, link).\n\n- key: \"needs_steam_client\"\n- where in the list: directly BEFORE the \"steam_init\" entry (that entry also matches \"failed to initialize steam\", and the first match wins)\n- the regex (case is ignored) must match these console lines: 'FATAL  : Failed to initialize Steam. Probably Steam client is not running.' - match on the 'steam client is not running' part, not on 'failed to initialize steam'\n- title (exactly): \"This game needs Steam running on the PC\"\n- fix (exactly, split over lines like the other entries so no line is over 118 characters): \"This game's server only works while the Steam app is open and signed in on this PC. Start Steam, then start the server again.\"\n- link: None\n\nThen add assertions at the END of test_explain_patterns_and_exit_codes in tests/test_engine.py (same style,\n8 spaces of indentation):\n        f = explain(1, [\"FATAL  : Failed to initialize Steam. Probably Steam client is not running.\"])\n        self.assertEqual(f[0][\"key\"], \"needs_steam_client\")\n        self.assertEqual(explain(1, [\"SteamAPI_Init() failed\"])[0][\"key\"], \"steam_init\")   # the general one still works"
+ },
+ {
+  "id": "crash-help-gameinfo",
+  "title": "Crash help: Source game folder not given",
+  "allowed": [
+   "core/diagnose.py",
+   "tests/test_engine.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/diagnose.py",
+    "around": "^PATTERNS = \\[",
+    "before": 1,
+    "after": 66
+   },
+   {
+    "path": "tests/test_engine.py",
+    "around": "def test_explain_patterns_and_exit_codes",
+    "before": 0,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_engine.py",
+    "-k",
+    "explain"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "core/diagnose.py",
+    "regex": "\\(\"source_game_folder\",",
+    "why": "the new entry's key"
+   },
+   {
+    "path": "tests/test_engine.py",
+    "regex": "source_game_folder",
+    "why": "a test for the new entry"
+   }
+  ],
+  "instruction": "Add ONE new entry to the PATTERNS list in core/diagnose.py, in the same 5-part form as the\nothers: (key, regex, title, fix, link).\n\n- key: \"source_game_folder\"\n- where in the list: directly BEFORE the \"missing_install\" entry\n- the regex (case is ignored) must match these console lines: 'Unable to find gameinfo.txt. Solutions:'\n- title (exactly): \"The server wasn't told which game folder to use\"\n- fix (exactly, split over lines like the other entries so no line is over 118 characters): \"This is a Source engine game. In Edit Server, add -game followed by the name of the folder that has gameinfo.txt in it to the launch options (for example -game cstrike), then start it again.\"\n- link: None\n\nThen add assertions at the END of test_explain_patterns_and_exit_codes in tests/test_engine.py (same style,\n8 spaces of indentation):\n        f = explain(1, [\"Unable to find gameinfo.txt. Solutions:\"])\n        self.assertEqual(f[0][\"key\"], \"source_game_folder\")\n        self.assertIn(\"-game\", f[0][\"fix\"])"
+ },
+ {
+  "id": "crash-help-library",
+  "title": "Crash help: one of the game's own files won't load",
+  "allowed": [
+   "core/diagnose.py",
+   "tests/test_engine.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/diagnose.py",
+    "around": "^PATTERNS = \\[",
+    "before": 1,
+    "after": 66
+   },
+   {
+    "path": "tests/test_engine.py",
+    "around": "def test_explain_patterns_and_exit_codes",
+    "before": 0,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_engine.py",
+    "-k",
+    "explain"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "core/diagnose.py",
+    "regex": "\\(\"game_library\",",
+    "why": "the new entry's key"
+   },
+   {
+    "path": "tests/test_engine.py",
+    "regex": "game_library",
+    "why": "a test for the new entry"
+   }
+  ],
+  "instruction": "Add ONE new entry to the PATTERNS list in core/diagnose.py, in the same 5-part form as the\nothers: (key, regex, title, fix, link).\n\n- key: \"game_library\"\n- where in the list: directly AFTER the \"vcredist_missing\" entry (Microsoft's own DLLs must still be reported as vcredist_missing, which comes first)\n- the regex (case is ignored) must match these console lines: 'src\\public\\tier1\\interface.h (273) : Assertion Failed: Failed to load \"SDL3.dll\"' and 'Could not load library steam_api64.dll'\n- title (exactly): \"One of the game's own files couldn't be loaded\"\n- fix (exactly, split over lines like the other entries so no line is over 118 characters): \"Use Install / repair to re-check the game files. If it keeps happening, this server may need to be started from a different folder or program - check the game's server guide.\"\n- link: None\n\nThen add assertions at the END of test_explain_patterns_and_exit_codes in tests/test_engine.py (same style,\n8 spaces of indentation):\n        f = explain(1, ['src\\\\public\\\\tier1\\\\interface.h (273) : Assertion Failed: Failed to load \"SDL3.dll\"'])\n        self.assertEqual(f[0][\"key\"], \"game_library\")\n        self.assertEqual(explain(1, [\"Could not load library steam_api64.dll\"])[0][\"key\"], \"game_library\")\n        self.assertEqual(explain(1, [\"Failed to load vcruntime140.dll\"])[0][\"key\"], \"vcredist_missing\")"
+ },
+ {
+  "id": "later-ark-window",
+  "allowed": [
+   "ui/ark_window.py"
+  ],
+  "title": "Closed-window errors: use later() in ark_window.py",
+  "excerpts": [
+   {
+    "path": "ui/ark_window.py",
+    "head": 14
+   },
+   {
+    "path": "ui/ark_window.py",
+    "around": "app\\.after\\(0, lambda: done\\(res, err\\) if win\\.winfo_exists\\(\\) else None\\)",
+    "before": 7,
+    "after": 3
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_desktop_smoke.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "ui/ark_window.py",
+    "regex": "from ui\\.app_common import [^\\n]*\\blater\\b",
+    "why": "the import of later"
+   }
+  ],
+  "must_not_contain": [
+   {
+    "path": "ui/ark_window.py",
+    "regex": "app\\.after\\(0, lambda: done\\(res, err\\) if win\\.winfo_exists\\(\\) else None\\)",
+    "why": "this call must go through later()"
+   }
+  ],
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+ },
+ {
+  "id": "later-checkup-dialog",
+  "allowed": [
+   "ui/checkup_dialog.py"
+  ],
+  "title": "Closed-window errors: use later() in checkup_dialog.py",
+  "excerpts": [
+   {
+    "path": "ui/checkup_dialog.py",
+    "head": 14
+   },
+   {
+    "path": "ui/checkup_dialog.py",
+    "around": "app\\.after\\(0, lambda: show\\(res, err\\)\\)",
+    "before": 7,
+    "after": 3
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_desktop_smoke.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "ui/checkup_dialog.py",
+    "regex": "from ui\\.app_common import [^\\n]*\\blater\\b",
+    "why": "the import of later"
+   }
+  ],
+  "must_not_contain": [
+   {
+    "path": "ui/checkup_dialog.py",
+    "regex": "app\\.after\\(0, lambda: show\\(res, err\\)\\)",
+    "why": "this call must go through later()"
+   }
+  ],
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+ },
+ {
+  "id": "later-install-dialog",
+  "allowed": [
+   "ui/install_dialog.py"
+  ],
+  "title": "Closed-window errors: use later() in install_dialog.py",
+  "excerpts": [
+   {
+    "path": "ui/install_dialog.py",
+    "head": 14
+   },
+   {
+    "path": "ui/install_dialog.py",
+    "around": "^            app\\.after\\(0, show\\)$",
+    "before": 7,
+    "after": 3
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_desktop_smoke.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "ui/install_dialog.py",
+    "regex": "from ui\\.app_common import [^\\n]*\\blater\\b",
+    "why": "the import of later"
+   }
+  ],
+  "must_not_contain": [
+   {
+    "path": "ui/install_dialog.py",
+    "regex": "^            app\\.after\\(0, show\\)$",
+    "why": "this call must go through later()"
+   }
+  ],
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+ },
+ {
+  "id": "later-mod-browser",
+  "allowed": [
+   "ui/mod_browser.py"
+  ],
+  "title": "Closed-window errors: use later() in mod_browser.py",
+  "excerpts": [
+   {
+    "path": "ui/mod_browser.py",
+    "head": 14
+   },
+   {
+    "path": "ui/mod_browser.py",
+    "around": "self\\.after\\(0, lambda: self\\._show_results\\(gen, res, err\\)\\)",
+    "before": 7,
+    "after": 3
+   },
+   {
+    "path": "ui/mod_browser.py",
+    "around": "self\\.after\\(0, lambda: self\\._show_detail\\(gen, m, d, err\\)\\)",
+    "before": 7,
+    "after": 3
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_desktop_smoke.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "ui/mod_browser.py",
+    "regex": "from ui\\.app_common import [^\\n]*\\blater\\b",
+    "why": "the import of later"
+   }
+  ],
+  "must_not_contain": [
+   {
+    "path": "ui/mod_browser.py",
+    "regex": "self\\.after\\(0, lambda: self\\._show_results\\(gen, res, err\\)\\)",
+    "why": "this call must go through later()"
+   },
+   {
+    "path": "ui/mod_browser.py",
+    "regex": "self\\.after\\(0, lambda: self\\._show_detail\\(gen, m, d, err\\)\\)",
+    "why": "this call must go through later()"
+   }
+  ],
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
+ },
+ {
+  "id": "later-nightly-dialog",
+  "allowed": [
+   "ui/nightly_dialog.py"
+  ],
+  "title": "Closed-window errors: use later() in nightly_dialog.py",
+  "excerpts": [
+   {
+    "path": "ui/nightly_dialog.py",
+    "head": 14
+   },
+   {
+    "path": "ui/nightly_dialog.py",
+    "around": "app\\.after\\(0, lambda: show_boot\\(mode, ok\\)\\)",
+    "before": 7,
+    "after": 3
+   },
+   {
+    "path": "ui/nightly_dialog.py",
+    "around": "app\\.after\\(0, lambda: show_preview\\(\\*res\\)\\)",
+    "before": 7,
+    "after": 3
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_desktop_smoke.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "ui/nightly_dialog.py",
+    "regex": "from ui\\.app_common import [^\\n]*\\blater\\b",
+    "why": "the import of later"
+   }
+  ],
+  "must_not_contain": [
+   {
+    "path": "ui/nightly_dialog.py",
+    "regex": "app\\.after\\(0, lambda: show_boot\\(mode, ok\\)\\)",
+    "why": "this call must go through later()"
+   },
+   {
+    "path": "ui/nightly_dialog.py",
+    "regex": "app\\.after\\(0, lambda: show_preview\\(\\*res\\)\\)",
+    "why": "this call must go through later()"
+   }
+  ],
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
+ },
+ {
+  "id": "presets-need-account",
+  "title": "Game list: three games need a Steam account",
+  "allowed": [
+   "presets.json"
+  ],
+  "excerpts": [
+   {
+    "path": "presets.json",
+    "around": "\"name\": \"Serious Sam HD: The Second Encounter\"",
+    "before": 1,
+    "after": 11
+   },
+   {
+    "path": "presets.json",
+    "around": "\"name\": \"Takedown: Red Sabre\"",
+    "before": 1,
+    "after": 11
+   },
+   {
+    "path": "presets.json",
+    "around": "\"name\": \"Eden Star\"",
+    "before": 1,
+    "after": 11
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-c",
+    "from core.game_catalog import GAME_PRESETS as G; import sys; bad=[n for n in ['Serious Sam HD: The Second Encounter', 'Takedown: Red Sabre', 'Eden Star'] if G[n].get('anonymous_login') is not False]; print('still anonymous:', bad); sys.exit(1 if bad else 0)"
+   ],
+   [
+    "{python}",
+    "-c",
+    "from core.game_catalog import GAME_PRESETS as G; import sys; n=sum(1 for v in G.values() if v.get('anonymous_login') is False); print(n); sys.exit(0 if n < 60 else 1)"
+   ]
+  ],
+  "instruction": "The smoke test showed that Steam refuses to give these three games' server files without a Steam account\nthat owns the game. In presets.json, change \"anonymous_login\": true to \"anonymous_login\": false for exactly these\nthree games and no others: Serious Sam HD: The Second Encounter, Takedown: Red Sabre, Eden Star.\n\n\"anonymous_login\": true appears for many games, so each SEARCH part must start at the game's \"name\" line and\nrun down to its \"anonymous_login\" line so that it matches only that game. Change nothing else."
+ },
+ {
+  "id": "tests-rel-or-abs",
+  "title": "Tests: rel_or_abs",
+  "allowed": [
+   "tests/test_local_rel_or_abs.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/mods_common.py",
+    "around": "^def rel_or_abs",
+    "before": 1,
+    "after": 12
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_local_rel_or_abs.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "tests/test_local_rel_or_abs.py",
+    "regex": "def test_\\w+",
+    "why": "at least one test"
+   },
+   {
+    "path": "tests/test_local_rel_or_abs.py",
+    "regex": "(?s)(self\\.assert.*){6}",
+    "why": "at least 6 assertions"
+   }
+  ],
+  "instruction": "`rel_or_abs(base, path)` in core/mods_common.py has no tests. Create the NEW file tests/test_local_rel_or_abs.py (empty SEARCH part) with a unittest.TestCase that\ntests it: at least 6 assertions, covering the normal cases and the edge cases you can see in the code.\nOnly assert behaviour you can read from the code shown - work each expected value out step by step from the code,\ndon't guess. Use os.path.join / tempfile for paths so the test works on any PC; never write a drive letter you don't build with os.path.\n\nThe file must start with exactly these lines, then your import (`from core.mods_common import rel_or_abs`) and the test class:\n\nimport sys\nimport unittest\nfrom pathlib import Path\n\nsys.path.insert(0, str(Path(__file__).resolve().parent.parent))\n"
+ },
+ {
+  "id": "tests-tuple-parse",
+  "title": "Tests: _tuple_parse",
+  "allowed": [
+   "tests/test_local_tuple_parse.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/quick_settings.py",
+    "around": "^def _tuple_parse",
+    "before": 1,
+    "after": 24
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_local_tuple_parse.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "tests/test_local_tuple_parse.py",
+    "regex": "def test_\\w+",
+    "why": "at least one test"
+   },
+   {
+    "path": "tests/test_local_tuple_parse.py",
+    "regex": "(?s)(self\\.assert.*){6}",
+    "why": "at least 6 assertions"
+   }
+  ],
+  "instruction": "`_tuple_parse(text)` in core/quick_settings.py (it reads Palworld's OptionSettings=(Key=Value,...) line) has no tests. Create the NEW file tests/test_local_tuple_parse.py (empty SEARCH part) with a unittest.TestCase that\ntests it: at least 6 assertions, covering the normal cases and the edge cases you can see in the code.\nOnly assert behaviour you can read from the code shown - work each expected value out step by step from the code,\ndon't guess. \n\nThe file must start with exactly these lines, then your import (`from core.quick_settings import _tuple_parse`) and the test class:\n\nimport sys\nimport unittest\nfrom pathlib import Path\n\nsys.path.insert(0, str(Path(__file__).resolve().parent.parent))\n"
+ },
+ {
+  "id": "tests-split-args",
+  "title": "Tests: split_args",
+  "allowed": [
+   "tests/test_local_split_args.py"
+  ],
+  "excerpts": [
+   {
+    "path": "server_manager.py",
+    "around": "^def split_args",
+    "before": 1,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_local_split_args.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "tests/test_local_split_args.py",
+    "regex": "def test_\\w+",
+    "why": "at least one test"
+   },
+   {
+    "path": "tests/test_local_split_args.py",
+    "regex": "(?s)(self\\.assert.*){6}",
+    "why": "at least 6 assertions"
+   }
+  ],
+  "instruction": "`split_args(arg_string)` in server_manager.py has no tests. Create the NEW file tests/test_local_split_args.py (empty SEARCH part) with a unittest.TestCase that\ntests it: at least 6 assertions, covering the normal cases and the edge cases you can see in the code.\nOnly assert behaviour you can read from the code shown - work each expected value out step by step from the code,\ndon't guess. \n\nThe file must start with exactly these lines, then your import (`from server_manager import split_args`) and the test class:\n\nimport sys\nimport unittest\nfrom pathlib import Path\n\nsys.path.insert(0, str(Path(__file__).resolve().parent.parent))\n"
+ },
+ {
+  "id": "tests-launch-flags",
+  "title": "Tests: _has, _value and _set",
+  "allowed": [
+   "tests/test_local_launch_flags.py"
+  ],
+  "excerpts": [
+   {
+    "path": "core/game_defaults.py",
+    "around": "^def _has",
+    "before": 1,
+    "after": 16
+   }
+  ],
+  "checks": [
+   [
+    "{python}",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_local_launch_flags.py"
+   ]
+  ],
+  "must_contain": [
+   {
+    "path": "tests/test_local_launch_flags.py",
+    "regex": "def test_\\w+",
+    "why": "at least one test"
+   },
+   {
+    "path": "tests/test_local_launch_flags.py",
+    "regex": "(?s)(self\\.assert.*){6}",
+    "why": "at least 6 assertions"
+   }
+  ],
+  "instruction": "The three helpers `_has(args, flag)`, `_value(args, flag)` and `_set(args, flag, value)` in core/game_defaults.py has no tests. Create the NEW file tests/test_local_launch_flags.py (empty SEARCH part) with a unittest.TestCase that\ntests it: at least 6 assertions, covering the normal cases and the edge cases you can see in the code.\nOnly assert behaviour you can read from the code shown - work each expected value out step by step from the code,\ndon't guess. Call them as G._has, G._value, G._set.\n\nThe file must start with exactly these lines, then your import (`from core import game_defaults as G`) and the test class:\n\nimport sys\nimport unittest\nfrom pathlib import Path\n\nsys.path.insert(0, str(Path(__file__).resolve().parent.parent))\n"
+ }
+]

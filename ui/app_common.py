@@ -81,6 +81,18 @@ def build_theme(accent="cyan", mode="dark"):
 THEME = build_theme("gold")
 
 
+def later(widget, fn):
+    """Run fn on the window's own thread - for background threads that finished their
+    work and want to show it. Does nothing when the window is gone or BaoBun is closing
+    (tkinter otherwise raises "main thread is not in main loop" inside the thread).
+    Returns True when fn was handed over."""
+    try:
+        widget.after(0, fn)
+        return True
+    except Exception:       # RuntimeError (no main loop) or TclError (window destroyed)
+        return False
+
+
 def load_image(name, size=(24, 24)):
     if not PIL_AVAILABLE:
         return None
