@@ -1,0 +1,21 @@
+{
+  "id": "steamcmd",
+  "name": "SteamCMD Game Server",
+  "version": "1.0.0",
+  "description": "Base plugin for SteamCMD-powered dedicated servers (CS2, ARK, Rust, Valheim, Palworld, etc.)",
+  "author": "BaoBun",
+  "game_name": "SteamCMD Games",
+  "game_id": "steamcmd",
+  "capabilities": [
+    "server_lifecycle",
+    "config_editing",
+    "mod_management",
+    "backup_restore",
+    "updating",
+    "monitoring",
+    "rcon",
+    "workshop"
+  ],
+  "dependencies": [],
+  "min_baobun_version": "1.0.0"
+}

@@ -1,0 +1,25 @@
+{
+  "game": "Valheim",
+  "app_id": "896660",
+  "executable": "valheim_server.exe",
+  "required_args": "-nographics -batchmode -name \"{name}\" -port {port} -world \"Dedicated\" -password \"{password}\"",
+  "optional_args": "-public 0 -savedir \"{dir}\\saves\" -crossplay",
+  "ports": [
+    {"use": "game", "port": 2456, "protocol": "udp"},
+    {"use": "query", "port": 2457, "protocol": "udp"}
+  ],
+  "settings_files": [],
+  "essentials": {
+    "server_name": {"launch_option": "-name"},
+    "password": {"launch_option": "-password", "rules": "at least 5 characters, not part of the server name"},
+    "admin_password": null,
+    "max_players": null,
+    "pvp": null,
+    "public": {"launch_option": "-public", "values": "1 = listed, 0 = not listed"}
+  },
+  "ready_log_line": "Game server connected",
+  "saves": "%USERPROFILE%\\AppData\\LocalLow\\IronGate\\Valheim\\worlds_local (or -savedir)",
+  "needs_steam_account": false,
+  "gotchas": ["Exits immediately with 'The password is too short' if -password is missing or under 5 characters"],
+  "sources": ["https://valheim.fandom.com/wiki/Dedicated_servers", "WindowsGSM Valheim plugin"]
+}

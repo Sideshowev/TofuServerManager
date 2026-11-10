@@ -1,0 +1,46 @@
+# --- The owner's live data and secrets (never commit) ---
+discord_config.json
+settings.json
+servers.json
+servers_activity.json
+servers_installs.json
+servers_boot.json
+deploy_target.txt
+data_dir.txt
+/settings/
+/runtime/
+/backups/
+/logs/
+/diagnostics/
+/mods/
+/presets/
+/SteamCMD/
+
+# --- Build output ---
+/build/
+/dist/
+*.exe
+*.sha256
+
+# --- Test and smoke-test leftovers ---
+/smoke_test_data/
+.pytest_cache/
+HANDOFF.md
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# --- Old manual backups and editor files ---
+/_backups/
+_backup_*.zip
+*.bak
+*.zip
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+desktop.ini

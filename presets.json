@@ -1,0 +1,2304 @@
+{
+  "presets": [
+    {
+      "name": "Abiotic Factor",
+      "type": "steamcmd",
+      "appId": "2857200",
+      "port": 7777,
+      "executable": "AbioticFactor/Binaries/Win64/AbioticFactorServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Abiotic Factor dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Age of Chivalry",
+      "type": "steamcmd",
+      "appId": "17515",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Age of Chivalry dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Alien Swarm",
+      "type": "steamcmd",
+      "appId": "635",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Alien Swarm dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Alien Swarm: Reactive Drop",
+      "type": "steamcmd",
+      "appId": "582400",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Alien Swarm: Reactive Drop dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Aliens vs Predator",
+      "type": "steamcmd",
+      "appId": "34120",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Aliens vs Predator dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Aloft",
+      "type": "steamcmd",
+      "appId": "1660080",
+      "port": 25565,
+      "executable": "Aloft.exe",
+      "config_files": [],
+      "description": "Sky-island survival (needs a Steam account that owns it)",
+      "anonymous_login": false,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "alt:V (GTA V)",
+      "type": "custom",
+      "appId": null,
+      "port": 7788,
+      "executable": "altv-server.exe",
+      "config_files": [],
+      "description": "GTA V multiplayer platform",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://altv.mp/#/downloads",
+        "how": "Pick Windows / Server on the downloads page and unzip it into this folder."
+      }
+    },
+    {
+      "name": "America's Army 3",
+      "type": "steamcmd",
+      "appId": "13180",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "America's Army 3 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "America's Army: Proving Grounds",
+      "type": "steamcmd",
+      "appId": "203300",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "America's Army: Proving Grounds dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Among Us (Impostor)",
+      "type": "custom",
+      "appId": null,
+      "port": 22023,
+      "executable": "Impostor.Server.exe",
+      "config_files": [],
+      "description": "Private Among Us server",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false,
+      "manual": {
+        "url": "https://github.com/Impostor/Impostor/releases",
+        "how": "Download the win-x64 release zip and unzip it into this folder. Players add your server in Among Us with the Impostor guide."
+      }
+    },
+    {
+      "name": "ARK: Survival Evolved",
+      "type": "steamcmd",
+      "appId": "376030",
+      "port": 7777,
+      "executable": "ShooterGame/Binaries/Win64/ShooterGameServer.exe",
+      "config_files": [
+        "ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini"
+      ],
+      "description": "ARK: Survival Evolved dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "ARMA 2",
+      "type": "steamcmd",
+      "appId": "33905",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "ARMA 2 dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Arma 2: Operation Arrowhead",
+      "type": "steamcmd",
+      "appId": "33935",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Arma 2: Operation Arrowhead dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Arma 3",
+      "type": "steamcmd",
+      "appId": "233780",
+      "port": 2302,
+      "executable": "arma3server.exe",
+      "config_files": [
+        "server.cfg"
+      ],
+      "description": "Arma 3 server (needs game purchase)",
+      "anonymous_login": false,
+      "category": "shooter",
+      "popular": true
+    },
+    {
+      "name": "ASKA",
+      "type": "steamcmd",
+      "appId": "3246670",
+      "port": 7777,
+      "executable": "AskaServer.exe",
+      "config_files": [],
+      "description": "ASKA dedicated server (settings in \"server properties.txt\")",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Assetto Corsa",
+      "type": "steamcmd",
+      "appId": "302550",
+      "port": 9600,
+      "executable": "acServer.exe",
+      "config_files": [
+        "cfg/server_cfg.ini"
+      ],
+      "description": "Assetto Corsa racing server (needs game purchase)",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Assetto Corsa Competizione",
+      "type": "steamcmd",
+      "appId": "1430110",
+      "port": 9231,
+      "executable": "server/accServer.exe",
+      "config_files": [],
+      "description": "GT racing (needs a Steam account that owns it)",
+      "anonymous_login": false,
+      "category": "other",
+      "popular": false
+    },
+    {
+      "name": "Astro Colony",
+      "type": "steamcmd",
+      "appId": "2934900",
+      "port": 7777,
+      "executable": "AstroColony/Binaries/Win64/AstroColonyServer.exe",
+      "config_files": [],
+      "description": "Space colony automation",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Avorion",
+      "type": "steamcmd",
+      "appId": "565060",
+      "port": 27000,
+      "executable": "bin/AvorionServer.exe",
+      "config_files": [],
+      "description": "Avorion dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "Barotrauma",
+      "type": "steamcmd",
+      "appId": "1026340",
+      "port": 27015,
+      "executable": "DedicatedServer.exe",
+      "config_files": [
+        "serversettings.xml"
+      ],
+      "description": "Barotrauma dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "BeamMP (BeamNG.drive)",
+      "type": "custom",
+      "appId": null,
+      "port": 30814,
+      "executable": "BeamMP-Server.exe",
+      "config_files": [],
+      "description": "BeamNG.drive multiplayer",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false,
+      "manual": {
+        "url": "https://beammp.com/",
+        "how": "Download BeamMP-Server.exe from beammp.com into this folder and put your BeamMP auth key in ServerConfig.toml."
+      }
+    },
+    {
+      "name": "Black Mesa: Deathmatch",
+      "type": "steamcmd",
+      "appId": "346680",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Black Mesa Deathmatch server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Blade Symphony",
+      "type": "steamcmd",
+      "appId": "228780",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Blade Symphony dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "BlazeRush",
+      "type": "steamcmd",
+      "appId": "332850",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "BlazeRush dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "BrainBread 2",
+      "type": "steamcmd",
+      "appId": "475370",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "BrainBread 2 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Breach",
+      "type": "steamcmd",
+      "appId": "72310",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Breach dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Brickadia",
+      "type": "steamcmd",
+      "appId": "3017590",
+      "port": 7777,
+      "executable": "Brickadia/Binaries/Win64/BrickadiaServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Brick-building sandbox (needs a hosting token)",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Brink",
+      "type": "steamcmd",
+      "appId": "72780",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Brink dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Call of Duty: Modern Warfare 3",
+      "type": "steamcmd",
+      "appId": "42750",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Call of Duty: Modern Warfare 3 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Capsa",
+      "type": "steamcmd",
+      "appId": "667230",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Capsa dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Carrier Command 2",
+      "type": "steamcmd",
+      "appId": "1489630",
+      "port": 25565,
+      "executable": "dedicated_server.exe",
+      "config_files": [],
+      "description": "Naval combined-arms strategy (needs a Steam account that owns it)",
+      "anonymous_login": false,
+      "category": "shooter",
+      "popular": false
+    },
+    {
+      "name": "Chivalry: Deadliest Warrior",
+      "type": "steamcmd",
+      "appId": "258680",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Chivalry: Deadliest Warrior dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Chivalry: Medieval Warfare",
+      "type": "steamcmd",
+      "appId": "220070",
+      "port": 27015,
+      "executable": "CMW.exe",
+      "config_files": [
+        "UDKGame/Config/DefaultEngine.ini"
+      ],
+      "description": "Chivalry Medieval Warfare server (needs Steam account)",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Citadel: Forged with Fire",
+      "type": "steamcmd",
+      "appId": "489650",
+      "port": 7777,
+      "executable": "CitadelServer.exe",
+      "config_files": [],
+      "description": "Magic sandbox survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Colony Survival",
+      "type": "steamcmd",
+      "appId": "748090",
+      "port": 27004,
+      "executable": "colonyserver.exe",
+      "config_files": [],
+      "description": "Colony building and defence",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Contagion",
+      "type": "steamcmd",
+      "appId": "238430",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Contagion dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Core Keeper",
+      "type": "steamcmd",
+      "appId": "1963720",
+      "port": null,
+      "executable": "CoreKeeperServer.exe",
+      "config_files": [],
+      "description": "Core Keeper dedicated server (players join with the Game ID it prints)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Counter-Strike 1.6",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [
+        "cstrike/server.cfg"
+      ],
+      "description": "Counter-Strike 1.6 server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Counter-Strike: Condition Zero",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Counter-Strike: Condition Zero dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Counter-Strike: Global Offensive",
+      "type": "steamcmd",
+      "appId": "740",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Counter-Strike: Global Offensive dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Counter-Strike: Source",
+      "type": "steamcmd",
+      "appId": "232330",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Counter-Strike: Source server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Craftopia",
+      "type": "steamcmd",
+      "appId": "1670340",
+      "port": 6587,
+      "executable": null,
+      "config_files": [],
+      "description": "Craftopia dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Cubic Odyssey",
+      "type": "steamcmd",
+      "appId": "3858450",
+      "port": 27015,
+      "executable": "server/CubicOdysseyServer.exe",
+      "config_files": [],
+      "description": "Voxel space survival (claim the free dedicated server tool on Steam first)",
+      "anonymous_login": false,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "D.I.P.R.I.P.",
+      "type": "steamcmd",
+      "appId": "17535",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "D.I.P.R.I.P. dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Dark Messiah of Might & Magic",
+      "type": "steamcmd",
+      "appId": "2145",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Dark Messiah of Might & Magic dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Darkest Hour",
+      "type": "steamcmd",
+      "appId": "1290",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Darkest Hour dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Day of Defeat",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Day of Defeat dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Day of Defeat: Source",
+      "type": "steamcmd",
+      "appId": "232290",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Day of Defeat: Source dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Day of Infamy",
+      "type": "steamcmd",
+      "appId": "462310",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Day of Infamy dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "DayZ",
+      "type": "steamcmd",
+      "appId": "223350",
+      "port": 2302,
+      "executable": "DayZServer_x64.exe",
+      "config_files": [
+        "serverDZ.cfg"
+      ],
+      "description": "DayZ server (needs game purchase)",
+      "anonymous_login": false,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "DDNet (Teeworlds)",
+      "type": "custom",
+      "appId": null,
+      "port": 8303,
+      "executable": "DDNet-Server.exe",
+      "config_files": [],
+      "description": "DDraceNetwork / Teeworlds server",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false,
+      "manual": {
+        "url": "https://ddnet.org/downloads/",
+        "how": "Download the Windows zip and unzip it into this folder."
+      }
+    },
+    {
+      "name": "Dead Matter",
+      "type": "steamcmd",
+      "appId": "2584780",
+      "port": 7001,
+      "executable": "DeadMatter/Binaries/Win64/DeadMatterServer-Win64-Test.exe",
+      "config_files": [],
+      "description": "Zombie survival shooter",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Deathmatch Classic",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Deathmatch Classic dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Dino D-Day",
+      "type": "steamcmd",
+      "appId": "70010",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Dino D-Day dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Double Action",
+      "type": "steamcmd",
+      "appId": "317800",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Double Action dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Dystopia",
+      "type": "steamcmd",
+      "appId": "17585",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Dystopia dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "E.Y.E: Divine Cybermancy",
+      "type": "steamcmd",
+      "appId": "91720",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "E.Y.E - dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Eco",
+      "type": "steamcmd",
+      "appId": "739590",
+      "port": 3000,
+      "executable": "EcoServer.exe",
+      "config_files": [],
+      "description": "Eco dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "Eden Star",
+      "type": "steamcmd",
+      "appId": "419790",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Eden Star dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Empires",
+      "type": "steamcmd",
+      "appId": "460040",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Empires dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Empyrion - Galactic Survival",
+      "type": "steamcmd",
+      "appId": "530870",
+      "port": 30000,
+      "executable": "EmpyrionDedicated.exe",
+      "config_files": [],
+      "description": "Empyrion - Galactic Survival dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Enshrouded",
+      "type": "steamcmd",
+      "appId": "2278520",
+      "port": 15636,
+      "executable": "enshrouded_server.exe",
+      "config_files": [
+        "enshrouded_server.json"
+      ],
+      "description": "Enshrouded dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Eternal Silence",
+      "type": "steamcmd",
+      "appId": "17555",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Eternal Silence dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Euro Truck Simulator 2",
+      "type": "steamcmd",
+      "appId": "1948160",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Euro Truck Simulator 2 dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Factorio",
+      "type": "custom",
+      "appId": null,
+      "port": 34197,
+      "executable": "bin/x64/factorio",
+      "config_files": [
+        "config/config.ini"
+      ],
+      "description": "Factorio dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "manual": {
+        "url": "https://factorio.com/download",
+        "how": "Download the Windows zip of Factorio (needs your Factorio account) and unzip it into this folder. Create a save first (or use --create), then the server loads the newest save."
+      },
+      "args": "--start-server-load-latest"
+    },
+    {
+      "name": "Fistful of Frags",
+      "type": "steamcmd",
+      "appId": "295230",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Fistful of Frags dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "FiveM (GTA V roleplay)",
+      "type": "custom",
+      "appId": null,
+      "port": 30120,
+      "executable": "FXServer.exe",
+      "config_files": [],
+      "description": "GTA V multiplayer / roleplay server",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": true,
+      "manual": {
+        "url": "https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/",
+        "how": "Download the latest recommended server.zip, unzip it into this folder, and add a server.cfg plus your Cfx.re license key (keymaster.fivem.net)."
+      },
+      "args": "+exec server.cfg"
+    },
+    {
+      "name": "Fortress Forever",
+      "type": "steamcmd",
+      "appId": "329710",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Fortress Forever dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Foundry",
+      "type": "steamcmd",
+      "appId": "2915550",
+      "port": 3724,
+      "executable": "FoundryDedicatedServer.exe",
+      "config_files": [],
+      "description": "Voxel factory building",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Frozen Flame",
+      "type": "steamcmd",
+      "appId": "1348640",
+      "port": 7777,
+      "executable": "FrozenFlame/Binaries/Win64/FrozenFlameServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Frozen Flame dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Ground Branch",
+      "type": "steamcmd",
+      "appId": "476400",
+      "port": 7777,
+      "executable": null,
+      "config_files": [],
+      "description": "Ground Branch dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Half-Life",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Half-Life dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Half-Life 2: Deathmatch",
+      "type": "steamcmd",
+      "appId": "232370",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "hl2mp/cfg/server.cfg"
+      ],
+      "description": "Half-Life 2 Deathmatch server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Half-Life: Opposing Force",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Half-Life: Opposing Force dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "HL Deathmatch: Source",
+      "type": "steamcmd",
+      "appId": "255470",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "hl1mp/cfg/server.cfg"
+      ],
+      "description": "HL2 Deathmatch Source server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Holdfast: Nations At War",
+      "type": "steamcmd",
+      "appId": "1424230",
+      "port": 20100,
+      "executable": null,
+      "config_files": [],
+      "description": "Holdfast: Nations At War dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Homefront",
+      "type": "steamcmd",
+      "appId": "55280",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Homefront dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "HumanitZ",
+      "type": "steamcmd",
+      "appId": "2728330",
+      "port": 7777,
+      "executable": "TSSGame/Binaries/Win64/TSSGameServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Top-down zombie survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Hurtworld",
+      "type": "steamcmd",
+      "appId": "405100",
+      "port": 12871,
+      "executable": "Hurtworld.exe",
+      "config_files": [
+        "hostconfig.cfg"
+      ],
+      "description": "Hurtworld dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Hytale",
+      "type": "hytale",
+      "appId": null,
+      "port": 5520,
+      "executable": "Server/HytaleServer.jar",
+      "config_files": [],
+      "description": "Hytale dedicated server (UDP port 5520)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true,
+      "manual": {
+        "url": "https://support.hytale.com/hc/en-us/articles/45326769420827",
+        "how": "Install / Update downloads Java 25 and runs Hytale's own downloader - it shows a link to sign in with your Hytale account the first time. Or copy the Server folder and Assets.zip from your Hytale install into this server's folder. After the first start, use Sign the server in (or /auth login device in the console) once."
+      }
+    },
+    {
+      "name": "Icarus",
+      "type": "steamcmd",
+      "appId": "2089300",
+      "port": 17777,
+      "executable": "Icarus/Binaries/Win64/IcarusServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Icarus dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Insurgency (2014)",
+      "type": "steamcmd",
+      "appId": "237410",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "insurgency/cfg/server.cfg"
+      ],
+      "description": "Insurgency dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Insurgency: Modern Infantry Combat",
+      "type": "steamcmd",
+      "appId": "17705",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Insurgency: Modern Infantry Combat dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Insurgency: Sandstorm",
+      "type": "steamcmd",
+      "appId": "581330",
+      "port": 27102,
+      "executable": "Insurgency/Binaries/Win64/InsurgencyServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Insurgency: Sandstorm dedicated server",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": true
+    },
+    {
+      "name": "JBMod",
+      "type": "steamcmd",
+      "appId": "2181210",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "JBMod dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Just Cause 2 MP",
+      "type": "steamcmd",
+      "appId": "261140",
+      "port": 7777,
+      "executable": "Jcmp-Server.exe",
+      "config_files": [
+        "config.lua"
+      ],
+      "description": "JC2-MP dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "Killing Floor",
+      "type": "steamcmd",
+      "appId": "215350",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Killing Floor dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Kingdoms Rise",
+      "type": "steamcmd",
+      "appId": "265360",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Kingdoms Rise dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Lambda Wars",
+      "type": "steamcmd",
+      "appId": "319060",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Lambda Wars dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Last Oasis",
+      "type": "steamcmd",
+      "appId": "920720",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Last Oasis dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Left 4 Dead",
+      "type": "steamcmd",
+      "appId": "222840",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "left4dead/cfg/server.cfg"
+      ],
+      "description": "Left 4 Dead dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Life is Feudal: Your Own",
+      "type": "steamcmd",
+      "appId": "320850",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Life is Feudal: Your Own dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Luanti (Minetest)",
+      "type": "custom",
+      "appId": null,
+      "port": 30000,
+      "executable": "bin/luanti.exe",
+      "config_files": [],
+      "description": "Open-source voxel sandbox",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://www.luanti.org/downloads/",
+        "how": "Download the Windows zip and unzip it into this folder. Games go in the games folder, worlds are created on first start."
+      },
+      "args": "--server"
+    },
+    {
+      "name": "Medieval Engineers",
+      "type": "steamcmd",
+      "appId": "367970",
+      "port": 27016,
+      "executable": "DedicatedServer64/MedievalEngineersDedicated.exe",
+      "config_files": [],
+      "description": "Medieval Engineers dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "Military Conflict: Vietnam",
+      "type": "steamcmd",
+      "appId": "1136190",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Military Conflict: Vietnam dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Minecraft Bedrock",
+      "type": "custom",
+      "appId": null,
+      "port": 19132,
+      "executable": "bedrock_server.exe",
+      "config_files": [
+        "server.properties",
+        "whitelist.json",
+        "ops.json"
+      ],
+      "description": "Minecraft Bedrock Edition dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "manual": {
+        "url": "https://www.minecraft.net/en-us/download/server/bedrock",
+        "how": "Download the Windows Bedrock server zip and unzip it into this folder."
+      }
+    },
+    {
+      "name": "Mod and Play",
+      "type": "steamcmd",
+      "appId": "1301040",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Mod and Play dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Monday Night Combat",
+      "type": "steamcmd",
+      "appId": "63220",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Monday Night Combat dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Mordhau",
+      "type": "steamcmd",
+      "appId": "629800",
+      "port": 7777,
+      "executable": "MordhauServer.exe",
+      "config_files": [],
+      "description": "Mordhau dedicated server",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": true
+    },
+    {
+      "name": "Mount & Blade II: Bannerlord",
+      "type": "steamcmd",
+      "appId": "1863440",
+      "port": 7210,
+      "executable": "bin/Win64_Shipping_Server/DedicatedCustomServer.Starter.exe",
+      "config_files": [],
+      "description": "Bannerlord dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Multi Theft Auto (GTA San Andreas)",
+      "type": "custom",
+      "appId": null,
+      "port": 22003,
+      "executable": "server/MTA Server.exe",
+      "config_files": [],
+      "description": "San Andreas multiplayer",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://multitheftauto.com/",
+        "how": "Install MTA:SA and copy its server folder into this server's folder."
+      }
+    },
+    {
+      "name": "Myth of Empires",
+      "type": "steamcmd",
+      "appId": "1794810",
+      "port": null,
+      "executable": "MOE/Binaries/Win64/MOEServer.exe",
+      "config_files": [],
+      "description": "Myth of Empires dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Natural Selection 2",
+      "type": "steamcmd",
+      "appId": "4940",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Natural Selection 2 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Necesse",
+      "type": "steamcmd",
+      "appId": "1169370",
+      "port": 14159,
+      "executable": null,
+      "config_files": [],
+      "description": "Necesse dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "NEOTOKYO",
+      "type": "steamcmd",
+      "appId": "313600",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "NEOTOKYO dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Nexuiz",
+      "type": "steamcmd",
+      "appId": "96810",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Nexuiz dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Night of the Dead",
+      "type": "steamcmd",
+      "appId": "1420710",
+      "port": 27015,
+      "executable": "LF/Binaries/Win64/LFServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Night of the Dead dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Nightingale",
+      "type": "steamcmd",
+      "appId": "3796810",
+      "port": 7777,
+      "executable": "NWX/Binaries/Win64/NWXServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Gaslamp fantasy survival crafting",
+      "anonymous_login": false,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "No More Room in Hell",
+      "type": "steamcmd",
+      "appId": "317670",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "No More Room in Hell dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "No One Survived",
+      "type": "steamcmd",
+      "appId": "2329680",
+      "port": 5761,
+      "executable": "WRSHServer.exe",
+      "config_files": [],
+      "description": "Zombie apocalypse survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "NS2: Combat",
+      "type": "steamcmd",
+      "appId": "313900",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "NS2: Combat dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Nuclear Dawn",
+      "type": "steamcmd",
+      "appId": "111710",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Nuclear Dawn dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Nuclear Option",
+      "type": "steamcmd",
+      "appId": "3930080",
+      "port": 27015,
+      "executable": "NuclearOptionServer.exe",
+      "config_files": [],
+      "description": "Combat flight and combined arms",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": false
+    },
+    {
+      "name": "open.mp (GTA San Andreas)",
+      "type": "custom",
+      "appId": null,
+      "port": 7777,
+      "executable": "omp-server.exe",
+      "config_files": [],
+      "description": "San Andreas multiplayer (SA-MP compatible)",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://www.open.mp/",
+        "how": "Download the Windows server package and unzip it into this folder."
+      }
+    },
+    {
+      "name": "OpenTTD",
+      "type": "custom",
+      "appId": null,
+      "port": 3979,
+      "executable": "openttd.exe",
+      "config_files": [],
+      "description": "Transport tycoon (dedicated mode)",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false,
+      "manual": {
+        "url": "https://www.openttd.org/downloads/",
+        "how": "Download the Windows zip and unzip it into this folder."
+      },
+      "args": "-D"
+    },
+    {
+      "name": "Operation: Harsh Doorstop",
+      "type": "steamcmd",
+      "appId": "950900",
+      "port": 7777,
+      "executable": null,
+      "config_files": [],
+      "description": "Operation: Harsh Doorstop dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Out of Reach",
+      "type": "steamcmd",
+      "appId": "406800",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Out of Reach dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Painkiller Hell & Damnation",
+      "type": "steamcmd",
+      "appId": "230030",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Painkiller Hell & Damnation dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Path of Titans",
+      "type": "custom",
+      "appId": null,
+      "port": 7777,
+      "executable": "PathOfTitansServer.exe",
+      "config_files": [],
+      "description": "Dinosaur survival (Alderon Games)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true,
+      "manual": {
+        "url": "https://alderongames.com/oauth/hosting-token",
+        "how": "Download AlderonGamesCmd from Alderon Games and use it to install the server into this folder, then put your hosting token (from the linked page, you must own the game) in the launch options as -AuthToken=..."
+      },
+      "args": "-Port=7777"
+    },
+    {
+      "name": "Pavlov",
+      "type": "steamcmd",
+      "appId": "622970",
+      "port": 7777,
+      "executable": "PavlovServer.exe",
+      "config_files": [],
+      "description": "Pavlov dedicated server",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": true
+    },
+    {
+      "name": "PixARK",
+      "type": "steamcmd",
+      "appId": "824360",
+      "port": 27015,
+      "executable": "ShooterGame/Binaries/Win64/PixARKServer.exe",
+      "config_files": [],
+      "description": "Voxel dinosaur survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Plains of Pain",
+      "type": "steamcmd",
+      "appId": "2227360",
+      "port": 7777,
+      "executable": "PlainsOfPain.exe",
+      "config_files": [],
+      "description": "Wasteland survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Portal Knights",
+      "type": "steamcmd",
+      "appId": "374040",
+      "port": 16365,
+      "executable": "pk_dedicated_server.exe",
+      "config_files": [],
+      "description": "Co-op action RPG sandbox (needs a Steam account that owns it)",
+      "anonymous_login": false,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Primal Carnage",
+      "type": "steamcmd",
+      "appId": "224620",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Primal Carnage dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Project Zomboid",
+      "type": "steamcmd",
+      "appId": "380870",
+      "port": 16261,
+      "executable": "StartServer64.bat",
+      "config_files": [
+        "servertest.ini"
+      ],
+      "description": "Project Zomboid dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "PVKII",
+      "type": "steamcmd",
+      "appId": "17575",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Pirates Vikings Knights II server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "RACE 07",
+      "type": "steamcmd",
+      "appId": "8610",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "RACE 07 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "RAGE Multiplayer (GTA V)",
+      "type": "custom",
+      "appId": null,
+      "port": 22005,
+      "executable": "ragemp-server.exe",
+      "config_files": [],
+      "description": "GTA V multiplayer platform",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://rage.mp/",
+        "how": "Install RAGE:MP, then copy its server-files folder into this server's folder."
+      }
+    },
+    {
+      "name": "Ravaged",
+      "type": "steamcmd",
+      "appId": "223160",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Ravaged dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Red Orchestra 2",
+      "type": "steamcmd",
+      "appId": "212542",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Red Orchestra 2 dedicated server",
+      "anonymous_login": false,
+      "category": "shooter"
+    },
+    {
+      "name": "Red Orchestra Windows",
+      "type": "steamcmd",
+      "appId": "223240",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Red Orchestra Windows dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "RedM (RDR2 roleplay)",
+      "type": "custom",
+      "appId": null,
+      "port": 30120,
+      "executable": "FXServer.exe",
+      "config_files": [],
+      "description": "Red Dead Redemption 2 multiplayer server",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false,
+      "manual": {
+        "url": "https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/",
+        "how": "Same server files as FiveM: download server.zip, unzip it here, add a server.cfg and a Cfx.re license key."
+      },
+      "args": "+exec server.cfg +set gamename rdr3"
+    },
+    {
+      "name": "Reflex",
+      "type": "steamcmd",
+      "appId": "329740",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Reflex dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Reign Of Kings",
+      "type": "steamcmd",
+      "appId": "381690",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Reign Of Kings dedicated server",
+      "anonymous_login": false,
+      "category": "survival"
+    },
+    {
+      "name": "Renown",
+      "type": "steamcmd",
+      "appId": "1512690",
+      "port": 7777,
+      "executable": "Renown_Combat/Binaries/Win64/Renown_CombatServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Medieval melee combat",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": false
+    },
+    {
+      "name": "rFactor 2",
+      "type": "steamcmd",
+      "appId": "400300",
+      "port": 54297,
+      "executable": "Bin64/rFactor2 Dedicated.exe",
+      "config_files": [],
+      "description": "Racing simulator",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false
+    },
+    {
+      "name": "Ricochet",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Ricochet dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Rising Storm 2: Vietnam",
+      "type": "steamcmd",
+      "appId": "418480",
+      "port": 7777,
+      "executable": "Binaries/Win64/VNGame.exe",
+      "config_files": [],
+      "description": "Rising Storm 2: Vietnam dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Rising World",
+      "type": "steamcmd",
+      "appId": "339010",
+      "port": 4255,
+      "executable": "RisingWorldServer.exe",
+      "config_files": [],
+      "description": "Voxel sandbox survival",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Risk of Rain 2",
+      "type": "steamcmd",
+      "appId": "1180760",
+      "port": 27015,
+      "executable": "Risk of Rain 2.exe",
+      "config_files": [],
+      "description": "Co-op roguelike",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false
+    },
+    {
+      "name": "Rust",
+      "type": "steamcmd",
+      "appId": "258550",
+      "port": 28015,
+      "executable": "RustDedicated.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Rust survival dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "SCP: Secret Laboratory",
+      "type": "steamcmd",
+      "appId": "996560",
+      "port": 7777,
+      "executable": "LocalAdmin.exe",
+      "config_files": [],
+      "description": "Asymmetric horror multiplayer",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": false
+    },
+    {
+      "name": "SCUM",
+      "type": "steamcmd",
+      "appId": "3792580",
+      "port": 7777,
+      "executable": "SCUM/Binaries/Win64/SCUMServer.exe",
+      "config_files": [],
+      "description": "Prison-island survival (players connect to port +2)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Serious Sam 3",
+      "type": "steamcmd",
+      "appId": "41080",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Serious Sam 3 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Serious Sam Classics: Revolution",
+      "type": "steamcmd",
+      "appId": "41005",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Serious Sam Classics: Revolution dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Serious Sam HD",
+      "type": "steamcmd",
+      "appId": "41005",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Serious Sam HD dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Serious Sam HD: The Second Encounter",
+      "type": "steamcmd",
+      "appId": "41015",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Serious Sam HD: The Second Encounter dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Smalland: Survive the Wilds",
+      "type": "steamcmd",
+      "appId": "808040",
+      "port": 7777,
+      "executable": "SMALLAND/Binaries/Win64/SMALLANDServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Smalland dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "Sniper Elite 3",
+      "type": "steamcmd",
+      "appId": "266910",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Sniper Elite 3 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Sniper Elite V2",
+      "type": "steamcmd",
+      "appId": "208050",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Sniper Elite V2 dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Soulmask",
+      "type": "steamcmd",
+      "appId": "3017310",
+      "port": 8777,
+      "executable": "WS/Binaries/Win64/WSServer-Win64-Shipping.exe",
+      "config_files": [
+        "Config.ini"
+      ],
+      "description": "Soulmask survival dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Space Engineers",
+      "type": "steamcmd",
+      "appId": "298740",
+      "port": 27016,
+      "executable": "DedicatedServer64/SpaceEngineersDedicated.exe",
+      "config_files": [
+        "SpaceEngineers-Dedicated.cfg"
+      ],
+      "description": "Space Engineers dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Space Station 14",
+      "type": "custom",
+      "appId": null,
+      "port": 1212,
+      "executable": "Robust.Server.exe",
+      "config_files": [],
+      "description": "Space Station 14 server",
+      "anonymous_login": true,
+      "category": "other",
+      "popular": false,
+      "manual": {
+        "url": "https://wiki.spacestation14.com/wiki/Server_Hosting",
+        "how": "Download the Windows server build linked from the hosting guide and unzip it into this folder."
+      }
+    },
+    {
+      "name": "Squad 44 (Post Scriptum)",
+      "type": "steamcmd",
+      "appId": "746200",
+      "port": 10027,
+      "executable": "PostScriptumServer.exe",
+      "config_files": [],
+      "description": "Squad 44 / Post Scriptum dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Starbound",
+      "type": "steamcmd",
+      "appId": "211820",
+      "port": 21025,
+      "executable": "starbound_server.exe",
+      "config_files": [
+        "storage/starbound_server.config"
+      ],
+      "description": "Starbound dedicated server (needs game purchase)",
+      "anonymous_login": false,
+      "category": "survival"
+    },
+    {
+      "name": "StarRupture",
+      "type": "steamcmd",
+      "appId": "3809400",
+      "port": 7777,
+      "executable": "StarRupture/Binaries/Win64/StarRuptureServerEOS-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Alien-planet survival and base building",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Starvoid",
+      "type": "steamcmd",
+      "appId": "210370",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Starvoid dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Stationeers",
+      "type": "steamcmd",
+      "appId": "600760",
+      "port": 27500,
+      "executable": "rocketstation_DedicatedServer.exe",
+      "config_files": [],
+      "description": "Stationeers dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Stormworks: Build and Rescue",
+      "type": "steamcmd",
+      "appId": "1247090",
+      "port": 25564,
+      "executable": "server64.exe",
+      "config_files": [],
+      "description": "Stormworks dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "Sunkenland",
+      "type": "steamcmd",
+      "appId": "2667530",
+      "port": 25000,
+      "executable": "Sunkenland-DedicatedServer.exe",
+      "config_files": [],
+      "description": "Post-apocalyptic water-world survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Sven Co-op",
+      "type": "steamcmd",
+      "appId": "276060",
+      "port": 27015,
+      "executable": "svends.exe",
+      "config_files": [
+        "svencoop/server.cfg"
+      ],
+      "description": "Sven Co-op dedicated server",
+      "anonymous_login": true,
+      "category": "shooter"
+    },
+    {
+      "name": "Synergy",
+      "type": "steamcmd",
+      "appId": "17525",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Synergy co-op server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Takedown: Red Sabre",
+      "type": "steamcmd",
+      "appId": "261020",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "Takedown: Red Sabre dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Team Fortress 2",
+      "type": "steamcmd",
+      "appId": "232250",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Team Fortress 2 dedicated server",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": true
+    },
+    {
+      "name": "Team Fortress Classic",
+      "type": "steamcmd",
+      "appId": "90",
+      "port": 27015,
+      "executable": "hlds.exe",
+      "config_files": [],
+      "description": "Team Fortress Classic dedicated server",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Terraria",
+      "type": "steamcmd",
+      "appId": "105600",
+      "port": 7777,
+      "executable": "TerrariaServer.exe",
+      "config_files": [
+        "serverconfig.txt"
+      ],
+      "description": "Terraria via Steam (needs a Steam account that owns it) - or use 'Terraria (official server)'",
+      "anonymous_login": false,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Terraria (official server)",
+      "type": "custom",
+      "appId": null,
+      "port": 7777,
+      "executable": "TerrariaServer.exe",
+      "config_files": [],
+      "description": "Vanilla Terraria server (free download)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false,
+      "manual": {
+        "url": "https://terraria.org/",
+        "how": "Download the free 'PC Dedicated Server' zip from the bottom of terraria.org and copy the Windows folder's files into this server's folder. No Steam account needed."
+      }
+    },
+    {
+      "name": "TerraTech Worlds",
+      "type": "steamcmd",
+      "appId": "2533070",
+      "port": 7777,
+      "executable": "TT2/Binaries/Win64/TT2Server-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Vehicle-building open-world survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "The Forest",
+      "type": "steamcmd",
+      "appId": "556450",
+      "port": 8766,
+      "executable": "TheForestDedicatedServer.exe",
+      "config_files": [],
+      "description": "The Forest dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "The Front",
+      "type": "steamcmd",
+      "appId": "2334200",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "The Front dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "The Haunted: Hells Reach",
+      "type": "steamcmd",
+      "appId": "43210",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "The Haunted: Hells Reach dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "The Isle (Evrima)",
+      "type": "steamcmd",
+      "appId": "412680",
+      "port": 7777,
+      "executable": "TheIsle/Binaries/Win64/TheIsleServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Dinosaur survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "The Lord of the Rings: Return to Moria",
+      "type": "steamcmd",
+      "appId": "3349480",
+      "port": 7777,
+      "executable": null,
+      "config_files": [],
+      "description": "Return to Moria dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "The Ship",
+      "type": "steamcmd",
+      "appId": "2403",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [],
+      "description": "The Ship dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "tModLoader (Terraria mods)",
+      "type": "custom",
+      "appId": null,
+      "port": 7777,
+      "executable": "start-tModLoaderServer.bat",
+      "config_files": [],
+      "description": "Modded Terraria server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false,
+      "manual": {
+        "url": "https://github.com/tModLoader/tModLoader/releases",
+        "how": "Download tModLoader.zip from the latest release, unzip it into this folder. Mods go in the mods folder of the tModLoader save path."
+      }
+    },
+    {
+      "name": "Tower Unite",
+      "type": "steamcmd",
+      "appId": "439660",
+      "port": 27015,
+      "executable": "TowerServer.exe",
+      "config_files": [
+        "Tower/Config/serverconfig.cfg"
+      ],
+      "description": "Tower Unite dedicated server",
+      "anonymous_login": true,
+      "category": "sandbox"
+    },
+    {
+      "name": "TShock (Terraria)",
+      "type": "custom",
+      "appId": null,
+      "port": 7777,
+      "executable": "TShock.Server.exe",
+      "config_files": [],
+      "description": "Terraria server with admin tools and plugins",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false,
+      "manual": {
+        "url": "https://github.com/Pryaxis/TShock/releases",
+        "how": "Download the Windows release zip and unzip it into this folder."
+      }
+    },
+    {
+      "name": "Unturned",
+      "type": "steamcmd",
+      "appId": "1110390",
+      "port": 27015,
+      "executable": "Unturned_Headless.exe",
+      "config_files": [
+        "Commands.dat",
+        "ServerConfig.json"
+      ],
+      "description": "Unturned server (free game)",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "V Rising",
+      "type": "steamcmd",
+      "appId": "1829350",
+      "port": 9876,
+      "executable": "VRisingServer.exe",
+      "config_files": [
+        "ServerHostSettings.json"
+      ],
+      "description": "V Rising dedicated server",
+      "anonymous_login": true,
+      "category": "survival"
+    },
+    {
+      "name": "VEIN",
+      "type": "steamcmd",
+      "appId": "2131400",
+      "port": 7777,
+      "executable": null,
+      "config_files": [],
+      "description": "VEIN dedicated server",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": true
+    },
+    {
+      "name": "Veloren",
+      "type": "custom",
+      "appId": null,
+      "port": 14004,
+      "executable": "veloren-server-cli.exe",
+      "config_files": [],
+      "description": "Open-source voxel RPG",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false,
+      "manual": {
+        "url": "https://veloren.net/download/",
+        "how": "Download the Windows server (or the Airshipper bundle) and put veloren-server-cli.exe and its assets folder here."
+      }
+    },
+    {
+      "name": "Vintage Story",
+      "type": "vintage-story",
+      "appId": null,
+      "port": 42420,
+      "executable": "StratumServer.exe",
+      "config_files": [
+        "serverconfig.json",
+        "stratum.json",
+        "servermagicnumbers.json"
+      ],
+      "description": "Vintage Story dedicated server (Stratum)",
+      "anonymous_login": true,
+      "category": "other"
+    },
+    {
+      "name": "Voyagers of Nera",
+      "type": "steamcmd",
+      "appId": "3937860",
+      "port": 7777,
+      "executable": "BoatGame/Binaries/Win64/BoatGameServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Co-op sailing survival",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Windrose",
+      "type": "steamcmd",
+      "appId": "4129620",
+      "port": 7777,
+      "executable": "R5/Binaries/Win64/WindroseServer-Win64-Shipping.exe",
+      "config_files": [],
+      "description": "Pirate-age survival with ships and bosses",
+      "anonymous_login": true,
+      "category": "survival",
+      "popular": false
+    },
+    {
+      "name": "Wurm Unlimited",
+      "type": "steamcmd",
+      "appId": "402370",
+      "port": 3724,
+      "executable": "WurmServerLauncher.exe",
+      "config_files": [],
+      "description": "Sandbox MMO-style survival",
+      "anonymous_login": true,
+      "category": "sandbox",
+      "popular": false
+    },
+    {
+      "name": "Xonotic",
+      "type": "custom",
+      "appId": null,
+      "port": 26000,
+      "executable": "xonotic-x64-dedicated.exe",
+      "config_files": [],
+      "description": "Open-source arena shooter",
+      "anonymous_login": true,
+      "category": "shooter",
+      "popular": false,
+      "manual": {
+        "url": "https://xonotic.org/download/",
+        "how": "Download the Xonotic zip and unzip it into this folder."
+      }
+    },
+    {
+      "name": "Zombie Grinder",
+      "type": "steamcmd",
+      "appId": "374980",
+      "port": null,
+      "executable": null,
+      "config_files": [],
+      "description": "Zombie Grinder dedicated server",
+      "anonymous_login": false,
+      "category": "other"
+    },
+    {
+      "name": "Zombie Panic Source",
+      "type": "steamcmd",
+      "appId": "17505",
+      "port": 27015,
+      "executable": "srcds.exe",
+      "config_files": [
+        "cfg/server.cfg"
+      ],
+      "description": "Zombie Panic Source server",
+      "anonymous_login": true,
+      "category": "shooter"
+    }
+  ]
+}

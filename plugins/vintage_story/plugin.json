@@ -1,0 +1,18 @@
+{
+  "id": "vintage_story",
+  "name": "Vintage Story",
+  "version": "1.0.0",
+  "description": "Vintage Story dedicated server plugin with ModDB integration",
+  "author": "BaoBun",
+  "game_name": "Vintage Story",
+  "game_id": "",
+  "capabilities": [
+    "server_lifecycle",
+    "config_editing",
+    "mod_management",
+    "backup_restore",
+    "monitoring"
+  ],
+  "dependencies": [],
+  "min_baobun_version": "1.0.0"
+}

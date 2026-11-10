@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BaoBun Control Panel</title>
+<link rel="icon" href="/favicon.png">
+<style>
+:root{
+  --bg:#0a0a0a; --card:#121212; --input:#1a1a1a; --border:#2e2e2e; --border2:#3d3d3d;
+  --text:#e8e0d0; --muted:#9a8a70; --gold:#e6c87e; --accent:#a67c00;
+  --ok:#4ade80; --okbtn:#15803d; --bad:#ef4444; --badbtn:#b91c1c; --warn:#f59e0b; --off:#64748b;
+  --code:#0d1117; --codefg:#c9d1d9; --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer;border:0;border-radius:10px;padding:9px 16px;background:var(--input);transition:filter .15s,background .15s}
+button:hover:not(:disabled){filter:brightness(1.15)}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);color:#fff;font-weight:600}
+button.go{background:var(--okbtn);color:#fff;font-weight:600}
+button.stop{background:var(--badbtn);color:#fff;font-weight:600}
+button.ghost{background:transparent;border:1px solid var(--border2)}
+input,select,textarea{font:inherit;color:var(--text);background:var(--input);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;width:100%}
+input[type=checkbox]{width:auto;accent-color:var(--accent)}
+label{display:block;color:var(--muted);font-size:12px;margin:12px 0 4px}
+label.check{display:flex;gap:8px;align-items:center;color:var(--text);font-size:14px}
+header{display:flex;align-items:center;gap:14px;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--border)}
+header h1{font-size:19px;margin:0;color:var(--gold);letter-spacing:.3px}
+header .sp{flex:1}
+.chip{display:flex;align-items:center;gap:8px;background:var(--input);border-radius:999px;padding:4px 12px 4px 4px}
+.chip img,.chip .av{width:28px;height:28px;border-radius:50%;background:var(--border2)}
+.role{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+main{padding:22px 24px 40px;max-width:1600px;margin:0 auto}
+.headrow{display:flex;align-items:center;margin-bottom:12px}
+.headrow h2{margin:0;font-size:22px;flex:1}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.tile .cap{font-size:11px;color:var(--muted);letter-spacing:.6px}
+.tile .val{font-size:20px;font-weight:700;margin-top:2px}
+.tile .sub{font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px}
+.card .top{display:flex;gap:12px;align-items:center}
+.badge{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.card .names{flex:1;min-width:0}
+.card .name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .game{color:var(--muted);font-size:12px}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--input);white-space:nowrap}
+.stats{font-size:13px;min-height:20px}
+.bar{height:6px;border-radius:3px;background:var(--input);overflow:hidden}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .4s}
+.foot{font-size:12px;color:var(--muted)}
+.card .btns{display:flex;gap:8px}
+.card .btns .main{flex:1}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.panel h3{margin:0 0 8px;font-size:14px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.act{font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border)}
+.side{display:flex;flex-direction:column;gap:18px}
+header button{white-space:nowrap}
+.ck{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.ck:last-child{border-bottom:0}.ck .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none}
+.ck .lv-problem{background:var(--bad)}.ck .lv-warning{background:var(--warn)}.ck .lv-tip{background:var(--off)}
+.ck .fix{color:var(--muted);font-size:12px;margin-top:2px}.ck button{margin-top:6px}
+button.small{padding:4px 10px;font-size:12px}
+.act:last-child{border:0}
+.act b{color:var(--gold);font-weight:600}
+.act .t{color:var(--muted);float:right}
+.empty{padding:40px;text-align:center;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px dashed var(--border2)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:stretch;justify-content:center;padding:28px;z-index:10}
+.modal.open{display:flex}
+.sheet{background:var(--card);border:1px solid var(--border2);border-radius:16px;width:min(1100px,100%);display:flex;flex-direction:column;overflow:hidden}
+.sheet.small{width:min(620px,100%);max-height:90vh;margin:auto}
+.sheet .sh{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.sheet .sh h2{margin:0;font-size:18px;flex:1}
+.tabs{display:flex;gap:4px;padding:0 14px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin}
+.tabs button{flex:none}
+header .logo{width:34px;height:34px;object-fit:contain}
+.card{border-left:3px solid var(--border)}
+.card.s-running{border-left-color:var(--ok)}.card.s-crashed{border-left-color:var(--bad)}.card.s-busy{border-left-color:var(--warn)}
+#toast.ok{border-color:rgba(74,222,128,.5)}#toast.err{border-color:rgba(239,68,68,.6);color:#fecaca}
+#offline{position:fixed;top:0;left:0;right:0;background:#7c2d12;color:#fff;text-align:center;padding:6px;font-size:13px;display:none;z-index:30}
+.tabs button{background:transparent;border-radius:0;padding:11px 14px;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--text);border-color:var(--accent)}
+.body{padding:16px 18px;overflow:auto;flex:1}
+#console{background:var(--code);color:var(--codefg);font:12.5px/1.45 Consolas,"Cascadia Mono",monospace;height:52vh;overflow:auto;border-radius:10px;padding:10px 12px;white-space:pre-wrap;word-break:break-word}
+#console .e{color:#f87171}#console .w{color:#fbbf24}#console .c{color:var(--gold)}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:none}.row .grow{flex:1}
+.row.wrap{flex-wrap:wrap}
+.mbbar{margin-top:12px}
+.mbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:12px;margin-top:12px}
+.mcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:border-color .15s,transform .15s}
+.mcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.mcard .top{display:flex;gap:10px;align-items:flex-start}
+.micon{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none;background:var(--input);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted)}
+.mcard .nm{font-weight:600;line-height:1.25}.mcard .by{color:var(--muted);font-size:12px}
+.mcard .sm{color:var(--muted);font-size:12.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:3.9em}
+.mcard .ft{display:flex;align-items:center;gap:8px;margin-top:auto}
+.mcard .stat{color:var(--muted);font-size:12px}
+.chip{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--input);color:var(--muted);border:1px solid var(--border);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);color:#111;border-color:var(--accent)}
+.badge-ok{font-size:12px;color:var(--ok);font-weight:600}
+.mdhead{display:flex;gap:14px;align-items:center;min-width:0;flex:1}.mdhead .micon{width:64px;height:64px}
+.mdhead h2{margin:0;font-size:20px}.mdhead .by{color:var(--muted);font-size:13px}
+.mshots{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:12px 0}
+.mshots img{height:150px;border-radius:10px;cursor:zoom-in;flex:none;border:1px solid var(--border)}
+.mdesc{line-height:1.55;font-size:14px}.mdesc h4{margin:16px 0 6px;color:var(--accent)}.mdesc p{margin:6px 0}
+.mdesc li{margin:3px 0 3px 18px}.mdesc img{max-width:100%;border-radius:8px;margin:8px 0}
+.compat{padding:10px 12px;border-radius:10px;margin:10px 0;font-size:13px;border:1px solid var(--border)}
+.compat.ok{border-color:var(--okbtn)}.compat.warn{border-color:var(--warn);color:var(--warn)}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:99;cursor:zoom-out}
+#lightbox[hidden]{display:none}#lightbox img{max-width:94vw;max-height:90vh;border-radius:10px}
+.afbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:-14px;z-index:2;background:var(--bg2,var(--card));padding:10px 0;border-bottom:1px solid var(--border)}
+details.afg{border:1px solid var(--border);border-radius:12px;margin-top:12px;background:var(--card)}
+details.afg>summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center}
+details.afg>summary::-webkit-details-marker{display:none}
+details.afg>summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+details.afg[open]>summary::before{transform:rotate(90deg)}
+details.afg>summary .n{color:var(--muted);font-weight:400;font-size:12px}
+.afgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:4px 22px;padding:0 16px 14px}
+.aff{padding:8px 0 8px 10px;border-left:3px solid transparent}
+.aff.changed{border-left-color:var(--accent)}
+.aff label{margin:0 0 4px;color:var(--text);font-size:13px}
+.aff .k{color:var(--muted);font-family:Consolas,monospace;font-size:11px;margin-left:6px}
+.aff .h{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.35}
+.aff .reset{font-size:11px;color:var(--accent);cursor:pointer;margin-left:8px}
+.sw{position:relative;display:inline-block;width:42px;height:24px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:var(--input);border:1px solid var(--border2);border-radius:24px;transition:.15s;cursor:pointer}
+.sw span::after{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;border-radius:50%;background:var(--muted);transition:.15s}
+.sw input:checked+span{background:var(--accent);border-color:var(--accent)}
+.sw input:checked+span::after{transform:translateX(18px);background:#fff}
+.sw input:disabled+span{opacity:.5;cursor:default}
+.swrow{display:flex;gap:10px;align-items:center}
+.afmiss .aff:not(.changed){opacity:.8}
+.body a,.note a{color:var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px}
+th{color:var(--muted);font-weight:600}
+.games{max-height:46vh;overflow:auto;margin-top:8px}
+.gamebtn{display:block;width:100%;text-align:left;margin:4px 0;background:var(--input);padding:10px 12px}
+.gamebtn small{display:block;color:var(--muted)}
+.gamebtn.sel{outline:2px solid var(--accent)}
+.note{color:var(--muted);font-size:12.5px}
+.seg{display:inline-flex;background:var(--input);border-radius:10px;padding:3px}
+.seg button{background:transparent;padding:6px 12px;border-radius:8px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text)}
+.chart{position:relative;margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px 4px}
+.chart h4{margin:0;font-size:13px;font-weight:600}
+.chart svg{display:block;width:100%;height:150px;overflow:visible}
+.chart .tip{position:absolute;top:8px;right:12px;font-size:12.5px;color:var(--muted)}
+.chart .tip b{color:var(--text)}
+svg.spark{display:block;width:100%;height:30px}
+.crow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.crow>div{flex:1}.crow:last-child{border:0}
+code.addr{font:600 15px Consolas,monospace;color:var(--gold)}
+a.upd{color:var(--gold);text-decoration:none;font-weight:600}a.upd:hover{text-decoration:underline}
+a.btnlink{display:inline-block;padding:9px 16px;border-radius:10px;border:1px solid var(--border2);color:var(--text);text-decoration:none}
+a.btnlink:hover{filter:brightness(1.15)}
+.help{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.help b{color:#fca5a5}.help p{margin:4px 0 8px;color:var(--text)}.help a{color:var(--gold)}
+.help code{font:12px Consolas,monospace;color:var(--muted)}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid var(--border2);padding:10px 18px;border-radius:10px;display:none;z-index:20;max-width:80vw}
+.pt-srv{border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.pt-srv .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}.pt-srv .hd b{flex:1}
+.pt-srv table td{padding:3px 8px 3px 0;font-size:13px;border:0}.pt-srv td.p{font:600 13px Consolas,monospace;width:120px}
+.pt-srv td.l{color:var(--muted);width:170px}.pt-srv .clash{color:var(--bad)}.pt-srv input{width:110px;padding:4px 8px}
+@media (max-width:600px){.pt-srv tr{display:grid;grid-template-columns:1fr auto;margin-bottom:4px}.pt-srv td.l,.pt-srv td.p{width:auto}
+.pt-srv td.p{text-align:right}.pt-srv td.note{grid-column:1/-1;padding-top:0}.pt-srv .hd{flex-wrap:wrap}}
+.pt-ok{color:var(--ok);margin-bottom:10px}.pt-bad{display:flex;gap:12px;align-items:center}
+.pwbox{display:flex;gap:8px;align-items:center;background:var(--input);border-radius:10px;padding:8px 12px;margin-top:10px}
+.pwbox code{font:600 15px Consolas,monospace;flex:1;word-break:break-all;user-select:all}
+.ak-iss{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.ak-iss .dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none}
+.ak-iss.problem{border-color:rgba(239,68,68,.45)}.ak-iss.problem .dot{background:var(--bad)}
+.ak-iss.warning .dot{background:var(--warn)}.ak-iss.tip .dot{background:var(--off)}
+.ak-iss .t{font-weight:600}.ak-iss .f{color:var(--muted);font-size:12.5px;margin-top:2px}
+.ak-maps td{padding:6px 10px 6px 0;font-size:13px;border-bottom:1px solid var(--border)}
+.ak-cre{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:6px 16px;padding:0 16px 14px}
+.ak-c{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;border-left:3px solid transparent}
+.ak-c.off{background:rgba(239,68,68,.07);border-left-color:var(--bad)}.ak-c.rep{background:rgba(245,158,11,.07);border-left-color:var(--warn)}
+.ak-c .n{flex:1;min-width:0}.ak-c .n small{display:block;color:var(--muted);font:11px Consolas,monospace;overflow:hidden;text-overflow:ellipsis}
+.ak-c select{width:150px;padding:5px 8px;font-size:12.5px}
+.ak-crate{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+.ak-crate .hd{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.ak-crate .hd b{flex:1;min-width:160px}
+.ak-items{width:100%;border-collapse:collapse}.ak-items th{font-size:11px;color:var(--muted);text-align:left;font-weight:500;padding:4px 6px 4px 0}
+.ak-items td{padding:3px 6px 3px 0;vertical-align:middle}.ak-items input,.ak-items select{padding:5px 7px;font-size:12.5px}
+.ak-items .num{width:72px}
+@media (max-width:700px){.ak-items thead{display:none}.ak-items tr{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid var(--border);padding:6px 0}
+  .ak-items td.it{grid-column:1/-1}.ak-items .num{width:100%}.ak-c select{width:120px}
+  .ak-items td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);margin-bottom:2px}}
+.mgr-only{}
+body.operator .mgr-only{display:none!important}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){.sheet .sh{flex-wrap:wrap}.sheet .sh h2{min-width:50%}header{padding:10px 14px}header h1{font-size:16px}}
+@media (max-width:560px){.tiles{grid-template-columns:1fr 1fr;gap:8px}.tile{padding:10px 12px}.tile .val{font-size:16px}.tile .sub{display:none}.two{grid-template-columns:1fr}main{padding:14px}.modal{padding:0}}
+</style>
+</head>
+<body>
+<header>
+  <img src="/logo.png" alt="" class="logo" onerror="this.remove()"><h1>BaoBun Control Panel</h1>
+  <span class="sp"></span>
+  <div class="chip" id="me"><span class="av"></span><span><span id="me-name">…</span><br><span class="role" id="me-role"></span></span></div>
+  <button class="ghost" onclick="location.href='/logout'">Log out</button>
+</header>
+<main>
+  <div class="headrow"><h2>Your servers</h2><button class="ghost" onclick="openHost()" style="margin-right:8px">Server PC</button><button class="ghost" onclick="openPorts()" style="margin-right:8px">Ports</button><button class="primary mgr-only" onclick="openAdd()">+ Add Server</button></div>
+  <div class="help" id="su-bar" hidden style="display:none;gap:12px;align-items:center;border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.07)"></div>
+  <div class="tiles">
+    <div class="tile"><div class="cap">SERVERS ONLINE</div><div class="val" id="t-online">-</div><div class="sub">running now</div></div>
+    <div class="tile"><div class="cap">PLAYERS ONLINE</div><div class="val" id="t-players">-</div><div class="sub">on servers that report players</div></div>
+    <div class="tile"><div class="cap">SERVER LOAD</div><div class="val" id="t-load">-</div><div class="sub" id="t-pc"></div></div>
+    <div class="tile"><div class="cap">NEXT SCHEDULED TASK</div><div class="val" id="t-next">-</div><div class="sub" id="t-next2"></div></div>
+  </div>
+  <div class="layout">
+    <div><div class="grid" id="grid"></div></div>
+    <div class="side">
+      <div class="panel" id="ck-panel" hidden><h3>Needs attention <span id="ck-count" class="note" style="text-transform:none;letter-spacing:0;font-weight:400;margin-left:4px"></span></h3><div id="ck-list"></div>
+        <div class="row" style="margin-top:8px"><button class="ghost small" id="ck-more" hidden>Show all</button><span class="grow"></span><button class="ghost small" id="ck-refresh">Check again</button></div></div>
+      <div class="panel"><h3>Recent activity</h3><div id="activity" class="note">Loading…</div></div>
+    </div>
+  </div>
+</main>
+
+<!-- Manage -->
+<div class="modal" id="m-manage"><div class="sheet">
+  <div class="sh"><span class="badge" id="mg-badge"></span><h2 id="mg-title"></h2>
+    <span class="pill" id="mg-pill"></span>
+    <button class="go" id="mg-toggle"></button><button id="mg-restart">Restart</button>
+    <button class="ghost" onclick="closeManage()">Close</button></div>
+  <div class="tabs" id="mg-tabs">
+    <button data-t="console" class="on">Console</button><button data-t="game">Game settings</button><button data-t="connect">Connect</button><button data-t="mods">Mods</button><button data-t="ark" id="tab-ark" hidden>ARK world</button><button data-t="history">History</button><button data-t="backups">Backups</button>
+    <button data-t="players" class="mgr-only">Players</button><button data-t="schedules" class="mgr-only">Schedules</button><button data-t="settings" class="mgr-only">Settings</button>
+    <button data-t="config" class="mgr-only">Config files</button>
+  </div>
+  <div class="body">
+    <section data-p="console">
+      <div id="mg-help" class="help" hidden></div>
+      <div id="mg-players" class="note" style="margin-bottom:8px"></div>
+      <div class="row" style="margin-bottom:8px"><input class="grow" id="c-filter" placeholder="Filter (text or regex)">
+        <label class="check"><input type="checkbox" id="c-follow" checked> Follow</label>
+        <label class="check"><input type="checkbox" id="c-err"> Errors &amp; warnings only</label></div>
+      <div id="console"></div>
+      <div class="row" style="margin-top:8px"><select id="c-quick" style="width:auto;max-width:220px" hidden><option value="">Quick commands…</option></select><input class="grow" id="c-cmd" placeholder="Type a server command and press Enter (e.g. /announce Hello)">
+        <button class="primary" id="c-send">Send</button></div>
+      <div class="note" id="c-note"></div>
+    </section>
+    <section data-p="game" hidden>
+      <div id="gs-body"><p class="note">Loading…</p></div>
+      <div id="af" class="mgr-only" style="margin-top:22px">
+        <div class="afbar">
+          <h3 style="margin:0">All settings</h3>
+          <select id="af-file" style="width:auto;max-width:320px"></select>
+          <input id="af-search" placeholder="Search settings (e.g. pvp, password, rate)" style="flex:1;min-width:180px">
+          <span class="note" id="af-count"></span>
+          <button class="ghost" id="af-discard" hidden>Discard</button>
+          <button class="primary" id="af-save" disabled>Save changes</button>
+        </div>
+        <p class="note" id="af-note"></p>
+        <div id="af-body"></div>
+      </div>
+    </section>
+    <section data-p="connect" hidden>
+      <div id="cn-body"><p class="note">Loading…</p></div>
+    </section>
+    <section data-p="ark" hidden>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <div class="seg" id="ak-seg"><button data-v="health" class="on">Health</button><button data-v="creatures">Creatures</button><button data-v="loot">Loot</button><button data-v="rules">Rules</button></div>
+        <span class="note" id="ak-scope" style="flex:1 1 220px"></span>
+        <select id="ak-where" style="max-width:220px;display:none"><option value="all">Whole cluster</option><option value="this">This map only</option></select>
+      </div>
+      <div id="ak-body" class="note">Loading…</div>
+    </section>
+    <section data-p="mods" hidden>
+      <div class="row"><b id="md-title" class="grow">Mods</b>
+        <button id="md-check">Check for updates</button><button class="primary mgr-only" id="md-upall">Update all</button></div>
+      <div class="row mgr-only" id="md-addrow" style="margin-top:10px"><input class="grow" id="md-add" placeholder="Mod ID or link">
+        <button class="go" id="md-install">Install</button><button class="primary" id="md-search" hidden>Browse mods</button></div>
+      <div id="mb" hidden>
+        <div class="row wrap mbbar"><input id="mb-q" class="grow" placeholder="Search mods…" style="min-width:180px">
+          <select id="mb-sort" style="width:auto"><option value="popular">Most popular</option><option value="trending">Trending</option>
+            <option value="updated">Recently updated</option><option value="newest">Newest</option><option value="follows">Most followed</option></select>
+          <button class="ghost" id="mb-close">Close</button></div>
+        <div id="mb-tags" class="row wrap" style="gap:6px;margin-top:8px"></div>
+        <div id="mb-grid" class="mbgrid"></div>
+      </div>
+      <div id="md-results"></div>
+      <div id="md-banner" class="note" style="color:var(--warn);margin-top:8px"></div>
+      <div id="md-info" class="note" style="margin-top:4px"></div>
+      <div id="md-setup" class="mgr-only"></div>
+      <div class="note" id="md-status" style="margin-top:6px"></div>
+      <table style="margin-top:6px"><tbody id="md-list"></tbody></table>
+      <div id="md-auto" class="mgr-only" style="margin-top:14px"></div>
+      <div id="md-opts" class="mgr-only" style="margin-top:14px"></div>
+    </section>
+    <section data-p="history" hidden>
+      <div class="row"><div class="seg" id="h-range"><button data-r="1h">1 hour</button><button data-r="6h">6 hours</button><button data-r="24h" class="on">24 hours</button><button data-r="7d">7 days</button></div>
+        <span class="grow"></span><span class="note" id="h-stats"></span></div>
+      <div id="h-charts"></div>
+    </section>
+    <section data-p="backups" hidden>
+      <div class="row"><button class="primary mgr-only" id="b-now">Back up now</button><span class="note grow" id="b-note"></span></div>
+      <p class="note" id="b-check" style="margin:6px 0 0"></p>
+      <table style="margin-top:10px"><thead><tr><th>Backup</th><th>Size</th><th></th></tr></thead><tbody id="b-list"></tbody></table>
+    </section>
+    <section data-p="players" hidden><div id="pa-body"><p class="note">Loading…</p></div></section>
+    <section data-p="schedules" hidden>
+      <div id="s-forms"></div>
+    </section>
+    <section data-p="settings" hidden>
+      <div class="two" id="st-form"></div>
+      <div class="row wrap" style="margin-top:16px"><button class="primary" id="st-save">Save settings</button>
+        <button id="st-check">Check for game update</button><button id="st-update">Update now</button>
+        <button id="st-install">Install / repair</button><span class="grow"></span>
+        <button class="stop" id="st-remove">Remove server</button></div>
+      <div class="note" id="st-note" style="margin-top:8px">The server's program and folder can only be changed in the desktop app.</div>
+    </section>
+    <section data-p="config" hidden>
+      <div class="row"><select class="grow" id="cf-file"></select><button id="cf-load">Open</button><button class="primary" id="cf-save">Save</button></div>
+      <textarea id="cf-text" spellcheck="false" style="margin-top:10px;height:50vh;font:12.5px/1.45 Consolas,monospace;background:var(--code);color:var(--codefg)"></textarea>
+      <div class="note">A .bak copy is kept every time you save.</div>
+    </section>
+  </div>
+</div></div>
+
+<!-- Add server -->
+<div class="modal" id="m-add"><div class="sheet small">
+  <div class="sh"><h2>Add a server</h2><button class="ghost" onclick="closeModal('m-add')">Close</button></div>
+  <div class="body">
+    <p class="note" style="margin-top:0">Moving from another PC, or the old one died? <button class="ghost small" id="a-bring">Bring servers from backup copies</button></p>
+    <input id="a-search" placeholder="Search games (Valheim, ARK, Vintage…)">
+    <div class="row wrap" id="a-cats" style="gap:6px;margin-top:10px"></div>
+    <div class="games" id="a-games"></div>
+    <div id="a-details" hidden>
+      <label>Server name</label><input id="a-name">
+      <label>Game port (blank = game default)</label><input id="a-port" type="number" min="1" max="65535">
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="a-auto"> Start automatically when the PC boots</label>
+      <label class="check"><input type="checkbox" id="a-install" checked> <span id="a-install-l">Download it now</span></label>
+      <p class="note" id="a-note"></p>
+      <div class="row"><button class="primary" id="a-create">Create server</button></div>
+    </div>
+  </div>
+</div></div>
+<!-- Restore on another PC -->
+<div class="modal" id="m-bring"><div class="sheet small">
+  <div class="sh"><h2>Bring servers here</h2><button class="ghost" onclick="closeModal('m-bring')">Close</button></div>
+  <div class="body" id="br-body"><p class="note">Looking…</p></div>
+</div></div>
+<!-- Mod details -->
+<div class="modal" id="m-mod"><div class="sheet">
+  <div class="sh"><div class="mdhead" id="mm-head"></div><button class="ghost" onclick="closeModal('m-mod')">Close</button></div>
+  <div class="body" id="mm-body"></div>
+</div></div>
+<div id="lightbox" onclick="this.hidden=true" hidden><img id="lb-img" alt=""></div>
+
+<!-- Install game files (Vintage Story / Minecraft) -->
+<div class="modal" id="m-inst"><div class="sheet small">
+  <div class="sh"><h2 id="i-title">Install</h2><button class="ghost" id="i-close">Close</button></div>
+  <div class="body">
+    <p class="note" id="i-info"></p>
+    <div id="i-flavor-wrap"><label>Server type</label><select id="i-flavor"></select></div>
+    <div id="i-version-wrap"><label>Version</label><select id="i-version"><option value="">Newest</option></select></div>
+    <label class="check" id="i-eula-wrap" style="margin-top:12px"><input type="checkbox" id="i-eula"> I agree to the <a href="https://aka.ms/MinecraftEULA" target="_blank" rel="noopener">Minecraft EULA</a></label>
+    <div class="bar" id="i-bar" style="margin-top:14px" hidden><div></div></div>
+    <p class="note" id="i-prog"></p>
+    <div id="i-signin" class="note" style="display:none;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:8px">Sign in to Hytale: open <a id="i-signin-a" target="_blank" rel="noopener"></a> and enter <b id="i-signin-c" style="font-size:20px;letter-spacing:2px"></b></div>
+    <div class="row"><button class="primary" id="i-go">Install</button><button class="ghost" id="i-hy" style="display:none">Sign the server in</button></div>
+  </div>
+</div></div>
+<!-- Server PC: nightly restart, updates, watchdog -->
+<div class="modal" id="m-host"><div class="sheet small" style="width:min(720px,100%)">
+  <div class="sh"><h2>Server PC</h2><button class="ghost" onclick="closeModal('m-host')">Close</button></div>
+  <div class="body" id="hs-body"><p class="note">Loading…</p></div>
+</div></div>
+<!-- Ports -->
+<div class="modal" id="m-ports"><div class="sheet small" style="width:min(820px,100%)">
+  <div class="sh"><h2>Ports</h2><button class="ghost" onclick="closeModal('m-ports')">Close</button></div>
+  <div class="body">
+    <p class="note" style="margin-top:0">Every server needs its own ports - lots of games all default to 7777 or 27015. RCON ports are only used by BaoBun on the server PC: they are never opened in the firewall or forwarded on your router.</p>
+    <div id="pt-banner"></div>
+    <div id="pt-list" class="note">Loading…</div>
+  </div>
+</div></div>
+<div id="toast"></div>
+<div id="offline">Lost contact with BaoBun on the server PC - retrying…</div>
+
+<script>
+"use strict";
+let CSRF = "", ROLE = "", S = {statuses:[], servers:{}, summary:null}, CUR = null, LOGOFF = -1, LOGLINES = [];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const STATE = {running:"Online",starting:"Starting",updating:"Updating",stopping:"Stopping",restarting:"Restarting",crashed:"Crashed",stopped:"Offline",unreachable:"PC offline"};
+const BUSY = ["starting","updating","stopping","restarting"];
+const COLORS = ["#7a5b20","#2f6e57","#2f517f","#574f88","#7f414c","#17607a","#6b4f2a","#3f5f2a"];
+
+function toast(msg, ms){ const t=$("toast"); t.textContent=msg; t.className = /^(Failed|Not saved|Update failed|Console:)/.test(msg)?"err":/^(Saved|Started|Stopped|Installed|Updated|Created|Restarted|Copied|Removed)/.test(msg)?"ok":""; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none", ms||3500); }
+async function api(path){ const r = await fetch(path,{credentials:"same-origin"}); if(r.status===401){location.href="/";throw new Error("signed out");} return r.json(); }
+async function act(action, params){
+  const r = await fetch("/api/action",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-CSRF":CSRF},body:JSON.stringify({action,params})});
+  if(r.status===401){location.href="/";throw new Error("signed out");}
+  const j = await r.json();
+  if(!j.success) throw new Error(j.error || "Failed");
+  return j.data || {};
+}
+function mb(v){ if(v==null) return "-"; return v>=1024 ? (v/1024).toFixed(1)+" GB" : v<1 ? (v<0.1?"<0.1":v.toFixed(1))+" MB" : Math.round(v)+" MB"; }
+function up(s){ if(!s) return ""; s=Math.floor(s); const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60); return d?`${d}d ${h}h`:h?`${h}h ${m}m`:`${Math.max(m,1)}m`; }
+function ago(ts){ if(!ts) return "never"; const s=Date.now()/1000-ts; return s<3600?Math.max(1,Math.floor(s/60))+"m ago":s<86400?Math.floor(s/3600)+"h ago":Math.floor(s/86400)+"d ago"; }
+function hash(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return Math.abs(h); }
+function initials(t){ const w=t.replace(/[^\w ]/g," ").split(/\s+/).filter(Boolean); return !w.length?"?":w.length===1?w[0].slice(0,2).toUpperCase():(w[0][0]+w[1][0]).toUpperCase(); }
+function gameOf(srv){ if(!srv) return "Custom server"; if(srv.clusterId) return "ARK: Survival Ascended";
+  const g = GAMES.find(x=>srv.appId && String(x.appId)===String(srv.appId)); if(g) return g.name;
+  if(srv.type==="vintage-story") return "Vintage Story";
+  if(srv.kind==="minecraft") return ({paper:"Minecraft (Paper)",fabric:"Minecraft (Fabric)",forge:"Minecraft (Forge)",neoforge:"Minecraft (NeoForge)"})[srv.mcFlavor] || "Minecraft (Java)";
+  return "Custom server"; }
+function stateOf(st){ return st.state || (st.isRunning ? "running" : "stopped"); }
+function pillColor(s){ return s==="running"?"var(--ok)":s==="crashed"?"var(--bad)":BUSY.includes(s)?"var(--warn)":"var(--off)"; }
+
+let GAMES = [], MCFLAVORS = [];
+async function boot(){
+  const me = await api("/api/me"); CSRF = me.csrf; ROLE = me.role;
+  $("me-name").textContent = me.name; $("me-role").textContent = me.role;
+  if(me.avatar){ const i=document.createElement("img"); i.src=me.avatar; i.alt=""; $("me").querySelector(".av").replaceWith(i); }
+  document.body.classList.add(me.role);
+  try{ const gl = await act("games.list",{}); GAMES = gl.games || []; MCFLAVORS = gl.mcFlavors || []; }catch(e){ GAMES = []; }
+  refresh(); setInterval(refresh, 3000); loadActivity(); setInterval(loadActivity, 15000); loadCheckup(); setInterval(()=>loadCheckup(), 300000);
+  loadSparks(); setInterval(loadSparks, 60000);
+  loadSelfUpdate(); setInterval(loadSelfUpdate, 300000);
+}
+
+async function refresh(){
+  try{ S = await api("/api/status"); $("offline").style.display="none"; }catch(e){ $("offline").style.display="block"; return; }
+  const su = S.summary;
+  if(su){
+    $("t-online").textContent = `${su.online} / ${su.servers}`;
+    $("t-players").textContent = su.players==null ? "-" : su.players;
+    const who = S.statuses.flatMap(x=>(x.players||[]).map(p=>p.name+" ("+x.name+")"));
+    $("t-players").parentElement.title = who.length ? who.join("\n") : "";
+    $("t-load").textContent = `CPU ${su.server_cpu}% · ${mb(su.server_ram_mb)}`;
+    $("t-pc").textContent = su.system_ram_total_mb ? `PC: CPU ${su.system_cpu}%, RAM ${mb(su.system_ram_used_mb)} of ${mb(su.system_ram_total_mb)}` : "";
+    if(su.next_task){ const d=new Date(su.next_task.at*1000); $("t-next").textContent = su.next_task.kind[0].toUpperCase()+su.next_task.kind.slice(1)+" "+d.toLocaleString([], {weekday:"short",hour:"2-digit",minute:"2-digit"}); $("t-next2").textContent = su.next_task.server; }
+    else { $("t-next").textContent = "None"; $("t-next2").textContent = ""; }
+  }
+  renderGrid(); if(CUR) renderManageHead();
+}
+
+function renderGrid(){
+  const g = $("grid");
+  if(!S.statuses.length){ g.innerHTML = `<div class="empty">No servers yet.${ROLE==="admin"?" Click <b>+ Add Server</b> to set one up.":""}</div>`; return; }
+  const ids = S.statuses.map(s=>s.id);
+  [...g.children].forEach(c=>{ if(!ids.includes(c.dataset.id)) c.remove(); });
+  for(const st of S.statuses){
+    let c = g.querySelector(`[data-id="${CSS.escape(st.id)}"]`);
+    if(!c){ c = document.createElement("div"); c.className="card"; c.dataset.id = st.id;
+      c.innerHTML = `<div class="top"><span class="badge"></span><div class="names"><div class="name"></div><div class="game"></div></div><span class="pill"></span></div>
+        <div class="stats"></div><div class="bar"><div></div></div><svg class="spark" viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true"></svg><div class="foot"></div>
+        <div class="btns"><button class="main"></button><button class="ghost manage">Manage ›</button></div>`;
+      c.querySelector(".main").onclick = () => toggle(st.id);
+      c.querySelector(".manage").onclick = () => openManage(st.id);
+      g.appendChild(c); }
+    const srv = S.servers[st.id] || {}, game = gameOf(srv), s = stateOf(st);
+    c.className = "card " + (s==="running"?"s-running":s==="crashed"?"s-crashed":BUSY.includes(s)?"s-busy":"");
+    const b = c.querySelector(".badge"); b.textContent = initials(game!=="Custom server"?game:st.name); b.style.background = COLORS[hash(game)%COLORS.length];
+    c.querySelector(".name").textContent = st.name; c.querySelector(".game").textContent = game + (st.pcName ? " · on "+st.pcName : "");
+    const p = c.querySelector(".pill"); p.textContent = STATE[s]||s; p.style.color = pillColor(s);
+    let stats;
+    if(st.isRunning){ const parts=[]; if(st.playerCount!=null) parts.push(`👤 ${st.playerCount}/${st.maxPlayers??"?"}`);
+      if(st.cpuPercent!=null) parts.push(`CPU ${st.cpuPercent}%`); if(st.memUsageMB) parts.push(mb(st.memUsageMB)); if(st.uptimeSeconds) parts.push("up "+up(st.uptimeSeconds));
+      stats = parts.join("   ") || "Running"; }
+    else if(st.installed===false && !BUSY.includes(s)) stats = "Game files not installed yet";
+    else if(st.exeMissing && !BUSY.includes(s)) stats = "Can't find "+st.exeMissing+" - check the program in the desktop app";
+    else if(s==="unreachable") stats = `Can't reach ${st.pcName} - is it on, with BaoBun's Watchdog running?`;
+    else stats = s==="crashed" ? (st.crashHelp&&st.crashHelp.length ? "Stopped: "+st.crashHelp[0].title : `Stopped unexpectedly (exit code ${st.exitCode})`) : BUSY.includes(s) ? (STATE[s]+"…") : (srv.manualStart?"Ready to start · manual start":"Ready to start");
+    c.querySelector(".stats").textContent = stats;
+    c.querySelector(".stats").title = (st.players||[]).length ? "Online: "+st.players.map(p=>p.name).join(", ") : "";
+    c.querySelector(".bar").style.visibility = st.isRunning ? "visible" : "hidden";
+    c.querySelector(".bar>div").style.width = Math.min(100, st.cpuPercent||0)+"%";
+    const last = S.summary && S.summary.last_backups ? S.summary.last_backups[st.id] : null;
+    const foot = c.querySelector(".foot");
+    foot.textContent = (st.remote ? "On another PC ("+st.pcName+")" : "Last backup "+ago(last))+(srv.idleStopMinutes?` · auto-stops after ${srv.idleStopMinutes} min empty`:"");
+    if(st.updateAvailable){ const u=document.createElement("a"); u.href="#"; u.className="upd"; u.textContent=" · ⬆ Game update available";
+      u.onclick = e => { e.preventDefault(); if(ROLE!=="admin"){ toast("Ask an admin to update this server."); return; } quickUpdate(st.id, st.name); }; foot.appendChild(u); }
+    drawSpark(c.querySelector(".spark"), SPARKS[st.id]);
+    const m = c.querySelector(".main");
+    if(s==="unreachable"){ m.textContent = "PC offline"; m.className="main"; m.disabled = true; }
+    else if(BUSY.includes(s)){ m.textContent = STATE[s]+"…"; m.className="main"; m.disabled = true; }
+    else if(st.isRunning){ m.textContent="Stop"; m.className="main stop"; m.disabled=false; }
+    else if(st.installed===false && srv.kind && ROLE==="admin"){ m.textContent="Install"; m.className="main go"; m.disabled=false; }
+    else { m.textContent="Start"; m.className="main go"; m.disabled=false; }
+  }
+}
+
+async function toggle(id){
+  const st = S.statuses.find(s=>s.id===id); if(!st) return;
+  const running = st.isRunning, name = st.name, srv = S.servers[id]||{};
+  if(!running && st.installed===false && srv.kind && ROLE==="admin"){
+    if(srv.kind==="steam"){ if(!confirm(`Download ${name}'s game files now? This can take a while.`)) return;
+      try{ await act("server.install",{server_id:id}); toast("Downloading game files… the card shows Updating until it's done."); }catch(e){ toast("Failed: "+e.message,6000); }
+      refresh(); return; }
+    openInstall(id); return; }
+  if(running && !confirm(`Stop ${name}? Players will be disconnected.`)) return;
+  toast((running?"Stopping ":"Starting ")+name+"…");
+  try{ const r = await act(running?"server.stop":"server.start",{server_id:id});
+    toast(running ? (r.graceful===false?`${name} was force-stopped (it didn't exit in time)`:`Stopped ${name}`) : (r.status==="updating"?`Updating ${name} first…`:`Started ${name}`)); }
+  catch(e){ toast("Failed: "+e.message, 6000); }
+  refresh(); loadActivity();
+}
+
+async function quickUpdate(id, name){
+  if(!confirm(`Update ${name} now? If it's running, players get a warning, then it stops, updates and starts again.`)) return;
+  toast("Updating "+name+"… this can take a while", 6000);
+  try{ const r = await act("server.update",{server_id:id}); toast(r.status==="up_to_date"?name+" is already up to date":r.status==="skipped"?"Skipped: players are online":"Updated "+name, 6000); }
+  catch(e){ toast("Update failed: "+e.message, 8000); }
+  refresh(); loadActivity();
+}
+let CK = [], CKALL = false;
+async function loadCheckup(refresh){
+  try{ const r = await act("health.checkup",{refresh:!!refresh}); CK = r.items||[]; }catch(e){ return; }
+  renderCheckup(); }
+function renderCheckup(){
+  const shown = CKALL ? CK : CK.slice(0,5);
+  $("ck-panel").hidden = !CK.length;
+  const c = {problem:0,warning:0,tip:0}; CK.forEach(i=>c[i.level]=(c[i.level]||0)+1);
+  $("ck-count").textContent = [c.problem?c.problem+" problem"+(c.problem>1?"s":""):"", c.warning?c.warning+" warning"+(c.warning>1?"s":""):"", c.tip?c.tip+" tip"+(c.tip>1?"s":""):""].filter(Boolean).join(" · ");
+  const BTN = {install:"Install", backup:"Back up now", schedule:"Set up schedule", game_settings:"Open game settings", rcon:"Turn on RCON", ports:"Fix ports", ark:"Open ARK world", hytale_signin:"Sign in"};
+  $("ck-list").innerHTML = shown.map((i,n)=>`<div class="ck"><span class="dot lv-${esc(i.level)}"></span><div>${i.server?`<b>${esc(i.server)}</b> - `:""}${esc(i.title)}<div class="fix">${esc(i.fix||"")}</div>${i.action&&BTN[i.action]&&(i.server_id||i.action==="ports")&&ROLE==="admin"?`<button class="ghost small" data-n="${n}">${BTN[i.action]}</button>`:""}</div></div>`).join("");
+  $("ck-list").querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>checkupAction(shown[+b.dataset.n]));
+  $("ck-more").hidden = CK.length<=5; $("ck-more").textContent = CKALL?"Show fewer":"Show all "+CK.length;
+}
+async function checkupAction(i){
+  const sid = i.server_id, srv = S.servers[sid]||{};
+  if(i.action==="install"){ if(srv.kind==="steam"){ try{ await act("server.install",{server_id:sid}); toast("Downloading game files…"); }catch(e){ toast("Failed: "+e.message,6000); } } else openInstall(sid); }
+  else if(i.action==="backup"){ toast("Backing up "+(i.server||"")+"…"); try{ await act("backup.create",{server_id:sid}); toast("Saved a backup of "+(i.server||"")); loadCheckup(true); }catch(e){ toast("Failed: "+e.message,6000); } }
+  else if(i.action==="schedule"){ openManage(sid); showTab("schedules"); }
+  else if(i.action==="game_settings"){ openManage(sid); showTab("game"); }
+  else if(i.action==="ports"){ openPorts(); }
+  else if(i.action==="ark"){ openManage(sid); showTab("ark"); }
+  else if(i.action==="hytale_signin"){ await openInstall(sid); if(INST&&INST.kind==="hytale") $("i-hy").click(); }
+  else if(i.action==="rcon"){ openPorts(); await loadPorts(); rconOn(sid); }
+}
+$("ck-refresh").onclick = () => { $("ck-list").innerHTML = '<div class="note">Checking…</div>'; loadCheckup(true); };
+$("ck-more").onclick = () => { CKALL = !CKALL; renderCheckup(); };
+
+async function loadActivity(){
+  try{ const rows = (await act("activity.list",{limit:25})).activity || [];
+    const nice = {server_start:"started",server_stop:"stopped",server_crash:"crashed",backup_create:"backed up",backup_restore:"restored a backup of",
+      console_command:"sent a command to",settings_change:"changed settings of",schedule_change:"changed schedules of",server_update:"updated",server_add:"added",server_remove:"removed",mods_install:"installed a mod on",backup_download:"downloaded a backup of",game_settings:"changed game settings of",port_forward:"forwarded router ports for",port_forward_remove:"removed router forwards for",mods_update:"updated mods on",mods_option:"changed mod options of",mods_remove:"removed a mod from",mods_enable:"turned on a mod on",mods_disable:"turned off a mod on",mods_pin:"kept a mod at its version on",mods_unpin:"let a mod update again on",mods_rollback:"rolled back mods on",firewall_open:"opened the firewall for"};
+    $("activity").innerHTML = rows.length ? rows.map(r=>{ const who = r.user_id==="system"?"BaoBun":r.user_id.replace(/^(web|discord):/,"");
+      const t = new Date(r.timestamp*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+      return `<div class="act"><span class="t">${t}</span><b>${esc(who)}</b> ${esc(nice[r.action]||r.action)} ${esc(r.server||"")}</div>`; }).join("") : "Nothing yet.";
+  }catch(e){ $("activity").textContent = "Activity unavailable."; }
+}
+
+
+/* ---------- Server PC settings ---------- */
+function openHost(){ openModal("m-host"); loadHost(); }
+const hsWhen = ts => ts ? new Date(ts*1000).toLocaleString([], {weekday:"short", hour:"2-digit", minute:"2-digit"}) : "-";
+async function loadHost(){
+  const box = $("hs-body");
+  let r, u; try{ [r, u] = await Promise.all([act("host.settings",{}), act("agent.update_status",{}).catch(()=>({}))]); }catch(e){ box.innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  const admin = ROLE==="admin", dis = admin?"":"disabled", n = r.nightly, p = r.preview, sp = r.status_page||{port:8790,title:""};
+  const sw = (id, on) => `<label class="sw"><input type="checkbox" id="${id}" ${on?"checked":""} ${dis}><span></span></label>`;
+  const list = a => a.length ? a.map(x=>`${esc(x.name)} <span class="note">(${esc(x.why)})</span>`).join(", ") : "none";
+  box.innerHTML = `
+    <h3 style="margin:0 0 6px">Nightly restart</h3>
+    <p class="note" style="margin-top:0">Every night BaoBun warns players (${n.warn.join(", ")} min before), stops every server so it saves, backs up and restarts Windows. Afterwards only servers people played on in the last few days come back.</p>
+    <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-on", n.enabled)}<span>Restart the server PC every night at</span>
+      <input id="hs-time" value="${esc(n.time)}" style="width:90px" ${dis}><span class="note">(e.g. 05:00 or 5am - server PC's clock)</span></div>
+    <div class="row wrap" style="gap:12px;align-items:center;margin-top:10px">${sw("hs-backup", n.backup)}<span>Back up the worlds first</span></div>
+    <div class="row wrap" style="gap:8px;align-items:center;margin-top:10px"><span>Bring back servers with players in the last</span><input id="hs-days" type="number" min="1" max="60" value="${n.days}" style="width:70px" ${dis}><span>days</span></div>
+    ${r.boot_task===false&&n.enabled?`<div class="help" style="margin-top:10px">BaoBun doesn't start by itself when the server PC boots yet, so servers wait until someone signs in. Set up "Start BaoBun when the PC turns on" in BaoBun on the server PC (Settings → Nightly restart) - it needs a Windows admin prompt there.</div>`:""}
+    <p class="note" style="margin-top:10px"><b>If it ran now</b> - comes back: ${list(p.bring_back)}. Stays asleep: ${list(p.sleeping)}.<br>Next restart: ${n.enabled?hsWhen(p.next_run):"off"}${p.last&&p.last.at?" · last one: "+hsWhen(p.last.at)+(p.last.rebooted?"":" (servers only)"):""}</p>
+    <h3 style="margin:18px 0 6px">Backups on another PC</h3>
+    <p class="note" style="margin-top:0">Every backup is also copied here (another drive, or a shared folder on another PC like <code>\\\\BACKUP-PC\\BaoBun-backups</code>). Blank = off.</p>
+    <div class="row" style="gap:8px"><input id="hs-mirror" class="grow" value="${esc(r.backup_mirror_dir)}" placeholder="e.g. \\\\BACKUP-PC\\BaoBun-backups" ${dis}>${admin?'<button class="ghost small" id="hs-mtest">Test</button>':""}</div>
+    <p class="note" id="hs-mres">${r.mirror_status&&r.mirror_status.ok===false?"⚠ Last copy failed: "+esc(r.mirror_status.error||""):r.mirror_status&&r.mirror_status.ok?"Last copy: "+hsWhen(r.mirror_status.last)+" ✓":""}</p>
+    ${r.boot_mode==="s4u"&&/^(\\\\|\/\/)/.test(r.backup_mirror_dir)?`<div class="help">BaoBun starts at boot without network access, so copies to a shared folder fail after a restart. On the server PC: Settings → Nightly restart → "Set up with network access".</div>`:""}
+    <h3 style="margin:18px 0 6px">BaoBun updates</h3>
+    <p class="note" style="margin-top:0" id="hs-ver"></p>
+    <p class="note" style="margin-top:0">When a new BaoBun is deployed to the server PC${u&&u.running_text?" (running build from "+esc(u.running_text)+")":""}:</p>
+    <select id="hs-upd" style="max-width:420px" ${dis}><option value="when_idle">Switch by itself when nobody is playing</option><option value="manual">Only when someone clicks Switch now</option></select>
+    ${u&&u.ready?`<p class="note">A newer build (${esc(u.built_text||"")}) is waiting.${admin?' <button class="go small" id="hs-sw">Switch now</button>':""}</p>`:`<p class="note">It's up to date.</p>`}
+    <h3 style="margin:18px 0 6px">PC-down alerts</h3>
+    <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-hb", r.heartbeat_enabled)}<span>Let another PC check that the server PC is alive (port 8791)</span></div>
+    <p class="note">The watching itself is set up in BaoBun on your other PC (Settings → PC-down alerts). Turning this on or off applies after BaoBun restarts.</p>
+    <h3 style="margin:18px 0 6px">Public status page</h3>
+    <p class="note" style="margin-top:0">A read-only page friends can open without logging in: which servers are up, players, the address to join and the mod list. No buttons, passwords or folders on it. It runs on its own port, separate from this panel.</p>
+    <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-sp", sp.enabled)}<span>Turn on the status page on port</span><input id="hs-spport" type="number" min="1024" max="65535" value="${sp.port}" style="width:90px" ${dis}></div>
+    <div class="row wrap" style="gap:12px;align-items:center;margin-top:8px">${sw("hs-sppub", sp.public)}<span>Answer the internet too (forward that port on your router)</span></div>
+    <div class="row wrap" style="gap:12px;align-items:center;margin-top:8px">${sw("hs-spnames", sp.show_players)}<span>List player names</span></div>
+    <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Page title</span><input id="hs-sptitle" class="grow" value="${esc(sp.title)}" ${dis}></div>
+    <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Address players type</span><input id="hs-spaddr" class="grow" value="${esc(sp.address)}" placeholder="blank = this PC's public IP, e.g. play.example.com" ${dis}></div>
+    <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Discord invite</span><input id="hs-spinv" class="grow" value="${esc(sp.invite)}" placeholder="https://discord.gg/..." ${dis}></div>
+    ${sp.enabled?`<p class="note">Open it at <a href="http://${esc(location.hostname)}:${sp.port}/" target="_blank" rel="noopener">http://${esc(location.hostname)}:${sp.port}/</a>${sp.public?"":" (home network and Tailscale)"}. Windows Firewall needs a rule for the port - BaoBun on the server PC can add it (Web Panel window).</p>`:""}
+    ${admin?`<h3 style="margin:18px 0 6px">Something not working?</h3><p class="note" style="margin-top:0">Download a diagnostics zip - logs, settings and status with passwords, tokens and internet addresses removed - to share when asking for help. <a class="ghost small" href="/api/diagnostics" download>Download diagnostics</a></p>`:""}
+    ${admin?`<div class="row" style="margin-top:14px"><span class="grow"></span><button class="primary" id="hs-save">Save</button></div>`:`<p class="note">Only admins can change these.</p>`}`;
+  $("hs-upd").value = r.self_update;
+  act("app.version",{}).then(v=>{ const el=$("hs-ver"); if(!el) return;
+    el.innerHTML = `This is BaoBun ${esc(v.current)}.` + (v.newer?` <b>${esc(v.latest)} is available</b> - install it from BaoBun on the server PC.`:v.enabled?" It's the newest version.":"")
+      + (admin&&v.enabled?' <button class="ghost small" id="hs-vchk">Check now</button>':"");
+    if($("hs-vchk")) $("hs-vchk").onclick = async()=>{ try{ const c = await act("app.update_check",{}); toast(c.error?"Couldn't check: "+c.error:c.newer?"BaoBun "+c.latest+" is available":"It's the newest version", 6000); }catch(e){ toast(e.message,6000); } };
+  }).catch(()=>{});
+  if($("hs-sw")) $("hs-sw").onclick = async()=>{ if(!confirm("Switch to the new BaoBun now? Game servers keep running.")) return;
+    try{ await act("agent.update_now",{}); toast("Switching - back in about a minute", 8000); closeModal("m-host"); }catch(e){ toast("Failed: "+e.message, 7000); } };
+  if(!admin) return;
+  $("hs-mtest").onclick = async()=>{ $("hs-mres").textContent = "Checking…";
+    try{ const t = await act("host.mirror_test",{path:$("hs-mirror").value.trim()}); $("hs-mres").textContent = t.ok ? `✓ BaoBun can write there (${t.free_gb} GB free).` : "✕ Can't write there: "+(t.error||""); }
+    catch(e){ $("hs-mres").textContent = "✕ "+e.message; } };
+  $("hs-save").onclick = async()=>{
+    const values = {nightly_restart_enabled:$("hs-on").checked, nightly_restart_time:$("hs-time").value.trim(), nightly_backup:$("hs-backup").checked,
+      smart_boot_days:parseInt($("hs-days").value,10), self_update:$("hs-upd").value, heartbeat_enabled:$("hs-hb").checked,
+      backup_mirror_dir:$("hs-mirror").value.trim(), status_page_enabled:$("hs-sp").checked, status_page_public:$("hs-sppub").checked,
+      status_page_port:parseInt($("hs-spport").value,10)||8790, status_show_players:$("hs-spnames").checked, status_title:$("hs-sptitle").value.trim(),
+      status_address:$("hs-spaddr").value.trim(), status_discord_invite:$("hs-spinv").value.trim()};
+    if(values.status_page_public && !(r.status_page||{}).public && !confirm("Let anyone on the internet see the status page (once you forward the port)? It shows server names, player counts, the join address and mods - nothing secret.")) return;
+    try{ await act("host.settings_save",{values}); toast("Saved server PC settings"); loadHost(); }catch(e){ toast("Failed: "+e.message, 7000); } };
+}
+
+/* ---------- BaoBun self-update ---------- */
+async function loadSelfUpdate(){
+  let r; try{ r = await act("agent.update_status",{}); }catch(e){ return; }
+  const bar = $("su-bar");
+  if(!r.ready){
+    let v = {}; try{ v = await act("app.version",{}); }catch(e){}
+    if(v.newer){ bar.hidden = false; bar.style.display = "flex";
+      bar.innerHTML = `<div style="flex:1"><b>BaoBun ${esc(v.latest)} is available</b> (the server PC has ${esc(v.current)}). Install it from BaoBun on the server PC - press the blue "BaoBun ${esc(v.latest)}" button at the top.${v.page?` <a href="${esc(v.page)}" target="_blank" rel="noopener">What's new</a>`:""}</div>`; return; }
+    bar.hidden = true; bar.style.display = "none"; return; }
+  bar.hidden = false; bar.style.display = "flex";
+  const lost = (r.console_servers||[]).length ? ` ${r.console_servers.map(esc).join(", ")} will lose their console window until restarted.` : "";
+  const auto = r.policy==="when_idle" ? " It switches by itself when nobody is playing" + ((r.console_servers||[]).length?" and those servers are stopped":"") + ", or at the nightly restart." : "";
+  bar.innerHTML = `<div style="flex:1"><b>A newer BaoBun is on the server PC</b> (built ${esc(r.built_text||"")}).${auto}${lost}</div>${ROLE==="admin"?'<button class="go small" id="su-go">Switch now</button>':""}`;
+  if($("su-go")) $("su-go").onclick = async()=>{ if(!confirm("Switch to the new BaoBun now? Game servers keep running; this page reconnects in about a minute.")) return;
+    try{ await act("agent.update_now",{}); toast("Switching - back in about a minute", 8000); bar.hidden = true; bar.style.display="none"; }catch(e){ toast("Failed: "+e.message, 7000); } };
+}
+
+/* ---------- ports ---------- */
+let PT = null;
+const PT_SRC = {default:"game default", pending:"set on next start", baobun:"from Edit Server", set:""};
+function openPorts(){ openModal("m-ports"); loadPorts(); }
+async function loadPorts(){
+  try{ PT = await act("ports.plan",{}); }catch(e){ $("pt-list").textContent = "Couldn't read ports: "+e.message; return; }
+  renderPorts();
+}
+function renderPorts(edit){
+  const admin = ROLE==="admin", cl = PT.clashes||[];
+  $("pt-banner").innerHTML = cl.length
+    ? `<div class="help pt-bad"><div style="flex:1">${cl.map(c=>`<div><b>${c.names.map(esc).join(" and ")}</b> share port${c.ports.length>1?"s":""} ${c.ports.slice(0,6).join(", ")}</div>`).join("")}</div>${admin?'<button class="primary small" id="pt-fix">Fix automatically</button>':""}</div>`
+    : `<div class="pt-ok">✓ No two servers share a port.</div>`;
+  if($("pt-fix")) $("pt-fix").onclick = fixPorts;
+  $("pt-list").className = "";
+  $("pt-list").innerHTML = (PT.servers||[]).map(s=>{
+    const editing = edit===s.id;
+    const rows = s.rows.map(r=>{
+      const bits = [r.local?"this PC only":"", PT_SRC[r.source]||"", r.clash.length?"also used by "+r.clash.join(", "):""].filter(Boolean).join(" · ");
+      const val = editing ? `<input type="number" min="1024" max="65000" data-role="${esc(r.role)}" value="${r.port}">${r.span>1?` <span class="note">+${r.span-1} after it</span>`:""}` : esc(r.range);
+      return `<tr><td class="l">${esc(r.label)}</td><td class="p ${r.clash.length?"clash":""}">${val}</td><td class="note ${r.clash.length?"clash":""}">${esc(bits)}</td></tr>`; }).join("");
+    const btns = !admin ? "" : s.running ? `<span class="note">running - stop it to change ports</span>`
+      : (s.rcon==="off"?`<button class="small" data-rcon="${esc(s.id)}">Turn on RCON</button>`:"")
+        + (s.known ? (editing?`<button class="primary small" data-save="${esc(s.id)}">Save</button><button class="ghost small" data-cancel>Cancel</button>`:`<button class="ghost small" data-edit="${esc(s.id)}">Change</button>`) : "");
+    return `<div class="pt-srv" id="pt-${esc(s.id)}"><div class="hd"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:${s.running?"var(--ok)":"var(--off)"}"></span><b>${esc(s.name)}</b>${btns}</div>
+      ${rows?`<table><tbody>${rows}</tbody></table>`:`<div class="note">BaoBun doesn't know this game's ports - set the game port in its Settings.</div>`}
+      ${s.rows.length&&!s.known?`<div class="note">BaoBun only knows the port from its Settings for this game - change it in the game's own settings too.</div>`:""}
+      <div data-out></div></div>`; }).join("") || `<div class="note">No servers yet.</div>`;
+  const L = $("pt-list");
+  L.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>renderPorts(b.dataset.edit));
+  L.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>renderPorts());
+  L.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>savePorts(b.dataset.save));
+  L.querySelectorAll("[data-rcon]").forEach(b=>b.onclick=()=>rconOn(b.dataset.rcon));
+}
+async function fixPorts(){
+  toast("Finding free ports…");
+  try{ const r = await act("ports.fix",{});
+    let msg = r.moved.length ? "Moved "+r.moved.map(m=>m.name).join(", ")+" to free ports" : "Nothing needed moving";
+    if(r.skipped.length) msg += ". Left alone: "+r.skipped.map(s=>s.name+" ("+s.reason+")").join("; ");
+    toast(msg, 7000); }
+  catch(e){ toast("Failed: "+e.message, 7000); }
+  loadPorts(); loadCheckup(true);
+}
+async function savePorts(sid){
+  const ports = {}; let bad = false;
+  $("pt-"+sid).querySelectorAll("input[data-role]").forEach(i=>{ const v = parseInt(i.value,10); if(!(v>=1024&&v<=65000)) bad = true; ports[i.dataset.role] = v; });
+  if(bad){ toast("Failed: ports must be between 1024 and 65000", 6000); return; }
+  try{ const r = await act("ports.set",{server_id:sid, ports});
+    let msg = "Saved ports"; if(r.pending.length) msg += " - "+r.pending.join(", ")+" will be written on the next start";
+    if(r.errors.length) msg += ". Problems: "+r.errors.join("; ");
+    toast(msg, 7000); }
+  catch(e){ toast("Failed: "+e.message, 7000); return; }
+  loadPorts(); loadCheckup(true);
+}
+async function rconOn(sid){
+  let r;
+  try{ r = await act("rcon.setup",{server_id:sid}); }catch(e){ toast("Failed: "+e.message, 7000); return; }
+  await loadPorts(); loadCheckup(true);
+  const box = $("pt-"+sid) && $("pt-"+sid).querySelector("[data-out]");
+  if(!r.password || !box){ toast("Saved - "+r.note, 7000); return; }
+  box.innerHTML = `<div class="note" style="margin-top:8px">${esc(r.note)}</div><div class="pwbox"><code>${esc(r.password)}</code><button class="small" data-copy>Copy</button></div><div class="note">Shown once here - it's saved in the game's settings if you need it again.</div>`;
+  box.querySelector("[data-copy]").onclick = e => navigator.clipboard.writeText(r.password).then(()=>{ e.target.textContent = "Copied"; });
+  box.scrollIntoView({block:"nearest"});
+}
+
+
+/* ---------- ARK world: cluster health, creatures, loot, rules ---------- */
+const ARK_IDS = ["2430930","376030","346110"];
+let AK = {view:"health", cat:null, data:null, dirty:false, where:"all", whereFor:null};
+$("ak-where").onchange = ()=>{ if(AK.dirty && !confirm("Leave without saving your changes?")){ $("ak-where").value=AK.where; return; } AK.where = $("ak-where").value; loadArk(); };
+function akW(p){ p.where = AK.where; return p; }
+function isArk(srv){ return srv && (ARK_IDS.includes(String(srv.appId||"")) || !!srv.clusterId); }
+document.querySelectorAll("#ak-seg button").forEach(b=>b.onclick=()=>{ if(AK.dirty && !confirm("Leave without saving your changes?")) return; AK.view=b.dataset.v; loadArk(); });
+async function akCat(){ if(!AK.cat) AK.cat = await act("ark.catalog",{}); return AK.cat; }
+function akSeg(){ document.querySelectorAll("#ak-seg button").forEach(b=>b.classList.toggle("on", b.dataset.v===AK.view)); }
+async function loadArk(){
+  akSeg(); AK.dirty = false; const id = CUR, body = $("ak-body"); body.className = "note"; body.textContent = "Loading…";
+  if(AK.whereFor!==id){ AK.where = "all"; AK.whereFor = id; $("ak-where").value = "all"; }
+  $("ak-where").style.display = "none"; clearTimeout(AK.jobT);
+  try{
+    if(AK.view==="health"){ const r = await act("ark.cluster",{server_id:id}); if(id!==CUR) return; renderArkHealth(r); }
+    else if(AK.view==="creatures"){ const [c, r] = await Promise.all([akCat(), act("ark.spawns",akW({server_id:id}))]); if(id!==CUR) return; AK.data = r; renderArkCreatures(); }
+    else if(AK.view==="loot"){ const [c, r] = await Promise.all([akCat(), act("ark.loot",akW({server_id:id}))]); if(id!==CUR) return; AK.data = r; renderArkLoot(); }
+    else { const r = await act("ark.rules",akW({server_id:id})); if(id!==CUR) return; AK.data = r; renderArkRules(); }
+  }catch(e){ body.textContent = "Couldn't load: "+e.message; }
+}
+function akScope(name, shared, d){
+  if(d && d.can_split){ $("ak-where").style.display = ""; $("ak-where").value = d.where||"all"; }
+  $("ak-scope").textContent = d && d.where==="this" ? `${name} - spawns, loot and rules for this map; transfer settings still go to every map`
+    : shared ? `${name} - changes apply to every map in the cluster` : (name||""); }
+function renderArkHealth(r){
+  const admin = ROLE==="admin", body = $("ak-body"); body.className = "";
+  akScope(r.name, r.maps.length>1);
+  const FIX = {sync_maps:"Sync all maps", cluster_dir:"Share one cluster folder", copy_settings:"Copy settings", long_uploads:"Keep uploads 30 days", update_all:"Update all maps"};
+  const iss = r.issues.length ? r.issues.map((i,n)=>`<div class="ak-iss ${esc(i.level)}"><span class="dot"></span><div style="flex:1"><div class="t">${esc(i.title)}</div><div class="f">${esc(i.fix)}</div></div>${admin&&i.action&&FIX[i.action]?`<button class="small" data-fix="${esc(i.action)}">${FIX[i.action]}</button>`:""}</div>`).join("")
+    : `<div class="pt-ok">✓ Every map matches - mods, cluster ID and save folders are in order.</div>`;
+  const maps = r.maps.map(m=>`<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${m.running?"var(--ok)":"var(--off)"};margin-right:6px"></span><b>${esc(m.name)}</b></td><td class="note">${esc(m.map)}</td><td class="note">${m.mods.length} mod${m.mods.length===1?"":"s"}</td><td class="note">${esc(m.save_dir||"")}</td><td class="note">${m.own_install?"own install folder":""}${m.job&&m.job.state==="copying"?" copying… "+Math.round(m.job.pct||0)+"%":""}</td></tr>`).join("");
+  const me = r.maps.find(m=>m.id===CUR), job = me&&me.job;
+  const sep = !r.cluster||!me ? "" : me.own_install ? `<p class="note">${esc(me.name)} has its own install folder, so it can have its own creatures, loot and rules - pick <b>This map only</b> above those tabs.</p>`
+    : `<div class="ak-iss tip" style="margin-top:12px"><span class="dot"></span><div style="flex:1"><div class="t">Different creatures, loot or rules on ${esc(me.name)}?</div><div class="f">ARK keeps one set of settings per install folder, and this map shares its folder with other maps. BaoBun can copy the install so ${esc(me.name)} gets its own (same game, mods and world), and points every map at one shared cluster folder so uploads keep working both ways. The map has to be stopped; the copy takes a while and needs as much free disk space as the install.</div></div>${admin?`<button class="small" id="ak-sep" ${job&&job.state==="copying"?"disabled":""}>Give it its own folder…</button>`:""}</div>`;
+  const jobtxt = !job ? "" : job.state==="copying" ? `<p class="note">Copying the install for ${esc(me.name)}… ${Math.round(job.pct||0)}%</p>` : job.state==="failed" ? `<p class="note" style="color:var(--bad)">Copy failed: ${esc(job.error||"")}</p>` : job.note ? `<p class="note">${esc(job.note)}</p>` : "";
+  body.innerHTML = `${iss}<h3 style="font-size:13px;color:var(--muted);margin:16px 0 6px">${r.cluster?"MAPS IN CLUSTER "+esc(r.cluster):"SERVER"}</h3>
+    <table class="ak-maps" style="width:100%;border-collapse:collapse"><tbody>${maps}</tbody></table>
+    ${r.cluster?`<p class="note">Cluster mods: ${r.mods&&r.mods.length?esc(r.mods.join(", ")):"none"} - change them in the Mods tab (it updates every map). Before a map starts BaoBun puts this list back on it, so a creature can't vanish because one map is missing a mod.</p>`:""}
+    ${r.installs.length>1?`<p class="note">Install folders: ${r.installs.map(esc).join(" · ")}</p>`:""}${sep}${jobtxt}`;
+  if(job&&job.state==="copying") AK.jobT = setTimeout(()=>{ if(AK.view==="health") loadArk(); }, 2500);
+  const sb = $("ak-sep"); if(sb) sb.onclick = async()=>{ let p;
+    try{ p = await act("ark.separate_plan",{server_id:CUR}); }catch(e){ toast("Failed: "+e.message, 8000); return; }
+    const target = prompt(`Copy ${(p.bytes/1073741824).toFixed(1)} GB from\n${p.source}\nto this new folder (${p.free!=null?(p.free/1073741824).toFixed(0)+" GB free there":""}):`, p.target);
+    if(!target) return;
+    try{ await act("ark.separate",{server_id:CUR, target}); toast("Copying the install - this page shows the progress", 6000); }catch(e){ toast("Failed: "+e.message, 8000); }
+    loadArk(); };
+  body.querySelectorAll("[data-fix]").forEach(b=>b.onclick=async()=>{ b.disabled=true;
+    try{ const x = await act("ark.fix",{server_id:CUR, action:b.dataset.fix}); toast("Saved - "+x.note, 8000); }catch(e){ toast("Failed: "+e.message, 7000); }
+    loadArk(); });
+}
+/* creatures */
+function renderArkCreatures(){
+  const admin = ROLE==="admin", body = $("ak-body"), cat = AK.cat; body.className = "";
+  akScope(AK.data.scope, AK.data.shared, AK.data);
+  const rules = {}; (AK.data.rules||[]).forEach(r=>rules[r.from]=r.to);
+  AK.rules = rules;
+  const known = new Set(cat.creatures.map(c=>c.cls));
+  const extra = Object.keys(rules).filter(k=>!known.has(k)).map(k=>({name:k.replace(/_Character_BP_C$|_C$/,"").replace(/_/g," "), cls:k, group:"Other / mods"}));
+  const all = cat.creatures.concat(extra), groups = [...new Set(all.map(c=>c.group))];
+  const opts = cls => `<option value="__on">Spawns</option><option value="">Never spawns</option><optgroup label="Replace with">${cat.creatures.filter(c=>c.cls!==cls).map(c=>`<option value="${esc(c.cls)}">${esc(c.name)}</option>`).join("")}</optgroup>`;
+  body.innerHTML = `<div class="afbar"><input id="ak-q" placeholder="Find a creature…" style="max-width:260px"><span class="note grow" id="ak-cnt"></span>
+      ${admin?`<input id="ak-add" placeholder="Mod creature class (e.g. MyDino_Character_BP_C)" style="max-width:300px"><button class="ghost small" id="ak-addb">Add</button>
+      <button class="ghost small" id="ak-wipe">Wipe wild creatures…</button><button class="primary" id="ak-save" disabled>Save</button>`:""}</div>
+    <p class="note">Turned-off creatures stop spawning on every map that uses these settings (ARK keeps one creature list per install folder). Tamed ones are never touched. Existing wild ones stay until they die - or wipe them once the maps restart.</p>
+    ${groups.map(g=>{ const list = all.filter(c=>c.group===g);
+      return `<details class="afg" ${g==="Other / mods"||list.some(c=>c.cls in rules)?"open":""} data-g="${esc(g)}"><summary>${esc(g)} <span class="n">${list.length}</span></summary><div class="ak-cre">${list.map(c=>
+        `<div class="ak-c" data-cls="${esc(c.cls)}" data-name="${esc(c.name.toLowerCase())}"><div class="n">${esc(c.name)}<small>${esc(c.cls)}</small></div><select ${admin?"":"disabled"}>${opts(c.cls)}</select></div>`).join("")}</div></details>`; }).join("")}`;
+  body.querySelectorAll(".ak-c").forEach(row=>{ const sel = row.querySelector("select"), cls = row.dataset.cls;
+    sel.value = cls in rules ? rules[cls] : "__on"; akMark(row, sel.value);
+    sel.onchange = ()=>{ if(sel.value==="__on") delete AK.rules[cls]; else AK.rules[cls] = sel.value; akMark(row, sel.value); akDirty(); }; });
+  akCount();
+  $("ak-q").oninput = ()=>{ const q = $("ak-q").value.trim().toLowerCase();
+    body.querySelectorAll(".ak-c").forEach(r=>r.hidden = !!q && !r.dataset.name.includes(q) && !r.dataset.cls.toLowerCase().includes(q));
+    body.querySelectorAll("details.afg").forEach(d=>{ if(q) d.open = [...d.querySelectorAll(".ak-c")].some(r=>!r.hidden); }); };
+  if(!admin) return;
+  $("ak-save").onclick = saveArkCreatures;
+  $("ak-addb").onclick = ()=>{ const v = $("ak-add").value.trim(); if(!/^[\w\-.]+$/.test(v)){ toast("Failed: type a class name like MyDino_Character_BP_C"); return; }
+    AK.rules[v] = ""; AK.data.rules = Object.entries(AK.rules).map(([f,t])=>({from:f,to:t})); renderArkCreatures(); akDirty(); };
+  $("ak-wipe").onclick = async()=>{ if(!confirm("Kill every WILD creature on the running maps now? Tamed creatures are safe. New ones spawn using the current rules (restart the maps first if you just changed them).")) return;
+    try{ const r = await act("ark.wipe_wild",akW({server_id:CUR})); toast("Saved - "+r.note, 8000); }catch(e){ toast("Failed: "+e.message, 7000); } };
+}
+function akMark(row, v){ row.classList.toggle("off", v===""); row.classList.toggle("rep", v!=="" && v!=="__on"); }
+function akCount(){ const n = Object.keys(AK.rules||{}).length; const c=$("ak-cnt"); if(c) c.textContent = n ? n+" creature"+(n>1?"s":"")+" turned off or replaced" : "Everything spawns normally"; }
+function akDirty(){ AK.dirty = true; const s=$("ak-save"); if(s) s.disabled = false; akCount(); }
+async function saveArkCreatures(){
+  const rules = Object.entries(AK.rules).map(([from,to])=>({from, to}));
+  try{ const r = await act("ark.spawns_save",akW({server_id:CUR, rules})); AK.dirty = false; $("ak-save").disabled = true; toast("Saved - "+r.note, 8000); }
+  catch(e){ toast("Failed: "+e.message, 7000); }
+}
+/* loot */
+function akQualityOpts(v){ return AK.cat.quality.map(q=>`<option value="${q.value}" ${Math.abs(q.value-(+v||0))<0.01?"selected":""}>${esc(q.name)}</option>`).join("") + (AK.cat.quality.some(q=>Math.abs(q.value-(+v||0))<0.01)?"":`<option value="${+v||0}" selected>Custom (${+v||0})</option>`); }
+function renderArkLoot(){
+  const admin = ROLE==="admin", body = $("ak-body"), cat = AK.cat; body.className = "";
+  akScope(AK.data.scope, AK.data.shared, AK.data);
+  const loot = AK.data.loot || [];
+  const crateOpts = [...new Set(cat.crates.map(c=>c.group))].map(g=>`<optgroup label="${esc(g)}">${cat.crates.filter(c=>c.group===g).map(c=>`<option value="${esc(c.cls)}">${esc(c.name)}</option>`).join("")}</optgroup>`).join("");
+  body.innerHTML = `<datalist id="ak-items">${cat.items.map(i=>`<option value="${esc(i.name)}">${esc(i.group)}</option>`).join("")}</datalist>
+    <div class="afbar">${admin?`<select id="ak-crate" style="max-width:280px"><option value="">Change what a drop or crate gives…</option>${crateOpts}<option value="__custom">Other crate (type its class name)…</option></select>
+      <span class="grow"></span><button class="primary" id="ak-save" disabled>Save</button>`:`<span class="note">Only admins can change loot.</span>`}</div>
+    <p class="note">Supply drops, cave crates and boss/alpha drops. <b>Add</b> mixes your items into what the crate normally gives; <b>Replace</b> means it only gives your items. Quality runs from Primitive to Ascendant. Changes are used after the maps restart.</p>
+    <div id="ak-crates">${loot.length?"":`<p class="note">No changes yet - every drop gives ARK's normal loot.</p>`}</div>`;
+  const box = $("ak-crates");
+  loot.forEach((r,n)=>box.appendChild(akCrateCard(r, admin)));
+  if(!admin) return;
+  $("ak-crate").onchange = ()=>{ let v = $("ak-crate").value; $("ak-crate").value = "";
+    if(!v) return; if(v==="__custom"){ v = (prompt("Class name of the crate or creature drop (e.g. SupplyCrate_Level03_C):")||"").trim(); if(!/^[\w\-.]+$/.test(v)) return; }
+    if(AK.data.loot.some(r=>r.crate===v)){ toast("That one is already in the list"); return; }
+    const r = {crate:v, crate_name:(cat.crates.find(c=>c.cls===v)||{}).name||v, mode:"add", picks_min:1, picks_max:1, items:[{cls:"", qty_min:1, qty_max:1, quality_min:0, quality_max:1.25, blueprint:0, weight:1}]};
+    AK.data.loot.push(r); if(box.querySelector("p.note")) box.innerHTML = ""; box.appendChild(akCrateCard(r, true)); akDirty(); };
+  $("ak-save").onclick = saveArkLoot;
+}
+function akItemCls(text){ const t = (text||"").trim(); const hit = AK.cat.items.find(i=>i.name.toLowerCase()===t.toLowerCase()); return hit ? hit.cls : t; }
+function akItemName(cls){ const hit = AK.cat.items.find(i=>i.cls===cls); return hit ? hit.name : (cls||""); }
+function akCrateCard(r, admin){
+  const d = document.createElement("div"); d.className = "ak-crate";
+  if(r.advanced){
+    d.innerHTML = `<div class="hd"><b>${esc(r.crate_name||r.crate)}</b><span class="pill">hand-written</span>${admin?`<button class="ghost small" data-del>Remove</button>`:""}</div><p class="note">This one has a custom layout BaoBun can't show as a list. It's kept exactly as it is.</p><code style="font-size:11px;word-break:break-all;color:var(--muted)">${esc((r.raw||"").slice(0,400))}${(r.raw||"").length>400?"…":""}</code>`;
+  } else {
+    const dis = admin ? "" : "disabled";
+    d.innerHTML = `<div class="hd"><b>${esc(r.crate_name||r.crate)}</b>
+      <select data-k="mode" style="width:auto" ${dis}><option value="add">Add to its normal loot</option><option value="replace">Replace its loot</option></select>
+      <span class="note">gives</span><input data-k="picks_min" type="number" min="1" max="20" class="num" style="width:64px" value="${r.picks_min}" ${dis}><span class="note">to</span><input data-k="picks_max" type="number" min="1" max="20" style="width:64px" value="${r.picks_max}" ${dis}><span class="note">of these</span>
+      ${admin?`<button class="ghost small" data-del>Remove</button>`:""}</div>
+      <table class="ak-items"><thead><tr><th>Item</th><th>Amount from</th><th>up to</th><th>Quality from</th><th>to</th><th>Blueprint %</th><th>How likely</th><th></th></tr></thead><tbody></tbody></table>
+      ${admin?`<button class="ghost small" data-addi style="margin-top:6px">+ Item</button>`:""}`;
+    d.querySelector("[data-k=mode]").value = r.mode;
+    d.querySelectorAll("[data-k]").forEach(el=>el.onchange = ()=>{ r[el.dataset.k] = el.dataset.k==="mode" ? el.value : Math.max(1, parseInt(el.value,10)||1); akDirty(); });
+    const tb = d.querySelector("tbody");
+    const addRow = it => { const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="it"><input list="ak-items" placeholder="Item name or class" value="${esc(akItemName(it.cls))}" ${dis}></td>
+        <td data-l="Amount from"><input type="number" class="num" min="1" data-f="qty_min" value="${it.qty_min}" ${dis}></td><td data-l="up to"><input type="number" class="num" min="1" data-f="qty_max" value="${it.qty_max}" ${dis}></td>
+        <td data-l="Quality from"><select data-f="quality_min" ${dis}>${akQualityOpts(it.quality_min)}</select></td><td data-l="to"><select data-f="quality_max" ${dis}>${akQualityOpts(it.quality_max)}</select></td>
+        <td data-l="Blueprint %"><input type="number" class="num" min="0" max="100" data-f="blueprint" value="${Math.round((it.blueprint||0)*100)}" ${dis}></td>
+        <td data-l="How likely"><input type="number" class="num" min="0.1" step="0.1" data-f="weight" value="${it.weight||1}" ${dis}></td>
+        <td>${admin?`<button class="ghost small" data-x>✕</button>`:""}</td>`;
+      tr.querySelector("[list]").onchange = e=>{ it.cls = akItemCls(e.target.value); akDirty(); };
+      tr.querySelectorAll("[data-f]").forEach(el=>el.onchange = ()=>{ const f = el.dataset.f; let v = parseFloat(el.value)||0; if(f==="blueprint") v = Math.min(100,Math.max(0,v))/100; it[f] = v; akDirty(); });
+      const x = tr.querySelector("[data-x]"); if(x) x.onclick = ()=>{ r.items.splice(r.items.indexOf(it),1); tr.remove(); akDirty(); };
+      tb.appendChild(tr); };
+    r.items.forEach(addRow);
+    const ai = d.querySelector("[data-addi]"); if(ai) ai.onclick = ()=>{ const it = {cls:"", qty_min:1, qty_max:1, quality_min:0, quality_max:1.25, blueprint:0, weight:1}; r.items.push(it); addRow(it); akDirty(); };
+  }
+  const del = d.querySelector("[data-del]"); if(del) del.onclick = ()=>{ AK.data.loot.splice(AK.data.loot.indexOf(r),1); d.remove(); akDirty(); };
+  return d;
+}
+async function saveArkLoot(){
+  const loot = AK.data.loot.map(r=>r.advanced ? {crate:r.crate, advanced:true, raw:r.raw}
+    : {crate:r.crate, mode:r.mode, picks_min:r.picks_min, picks_max:r.picks_max, items:r.items.filter(i=>i.cls).map(i=>({cls:i.cls, qty_min:i.qty_min, qty_max:i.qty_max, quality_min:i.quality_min, quality_max:i.quality_max, blueprint:i.blueprint, weight:i.weight}))});
+  const empty = loot.find(r=>!r.advanced && !r.items.length); if(empty){ toast("Failed: add an item to "+((AK.cat.crates.find(c=>c.cls===empty.crate)||{}).name||empty.crate)+" or remove it", 7000); return; }
+  try{ const r = await act("ark.loot_save",akW({server_id:CUR, loot})); AK.dirty = false; $("ak-save").disabled = true; toast("Saved - "+r.note, 8000); }
+  catch(e){ toast("Failed: "+e.message, 7000); }
+}
+/* rules */
+function renderArkRules(){
+  const admin = ROLE==="admin", body = $("ak-body"), rules = AK.data.rules; body.className = "";
+  akScope(AK.data.scope, AK.data.shared, AK.data);
+  const groups = [...new Set(rules.map(r=>r.group))]; AK.vals = {};
+  const field = r => { const dis = admin?"":"disabled", v = r.value;
+    const input = r.kind==="bool" ? `<select data-k="${esc(r.key)}" ${dis}><option value="">Game default</option><option value="True">On</option><option value="False">Off</option></select>`
+      : `<input data-k="${esc(r.key)}" type="number" step="${r.kind==="int"?1:0.1}" min="0" placeholder="game default" value="${esc(v??"")}" ${dis}>`;
+    return `<div class="aff"><label>${esc(r.label)}<span class="k">${esc(r.key)}</span></label>${input}${r.help?`<div class="h">${esc(r.help)}</div>`:""}</div>`; };
+  body.innerHTML = `<div class="afbar"><span class="note grow">Saved into GameUserSettings.ini / Game.ini - ${AK.data.rules.length} settings. Blank = ARK's default.</span>${admin?`<button class="primary" id="ak-save" disabled>Save</button>`:""}</div>
+    ${groups.map(g=>`<details class="afg" open><summary>${esc(g)}</summary><div class="afgrid">${rules.filter(r=>r.group===g).map(field).join("")}</div></details>`).join("")}`;
+  body.querySelectorAll("select[data-k]").forEach(s=>{ const r = rules.find(x=>x.key===s.dataset.k); s.value = r.value==null ? "" : (/^(true|1)$/i.test(r.value)?"True":"False"); });
+  body.querySelectorAll("[data-k]").forEach(el=>el.onchange = ()=>{ AK.vals[el.dataset.k] = el.value; el.closest(".aff").classList.add("changed"); akDirty(); });
+  if(admin) $("ak-save").onclick = async()=>{ try{ const r = await act("ark.rules_save",akW({server_id:CUR, values:AK.vals})); AK.dirty=false; $("ak-save").disabled = true; toast("Saved - "+r.note, 8000); loadArk(); }catch(e){ toast("Failed: "+e.message, 7000); } };
+}
+
+/* ---------- manage ---------- */
+function openModal(id){ $(id).classList.add("open"); }
+function closeModal(id){ $(id).classList.remove("open"); }
+function openManage(id){ CUR = id; LOGOFF = -1; LOGLINES = []; $("console").innerHTML = ""; $("tab-ark").hidden = !isArk(S.servers[id]); AK.view = "health"; showTab("console"); renderManageHead(); openModal("m-manage"); pollLogs(); loadQuick(id); }
+let QUICK = [];
+async function loadQuick(id){
+  const sel = $("c-quick"); sel.hidden = true; QUICK = [];
+  try{ QUICK = (await act("server.quick_commands",{server_id:id})).commands || []; }catch(e){ return; }
+  if(id!==CUR || !QUICK.length) return;
+  sel.innerHTML = `<option value="">Quick commands…</option>` + QUICK.map((q,i)=>`<option value="${i}">${esc(q.label)}</option>`).join("");
+  sel.hidden = false;
+}
+$("c-quick").onchange = () => {
+  const q = QUICK[parseInt($("c-quick").value)]; $("c-quick").value = ""; if(!q) return;
+  let cmd = q.command;
+  if(q.player){ const st=S.statuses.find(s=>s.id===CUR)||{}; const names=(st.players||[]).map(p=>p.name);
+    const who = prompt("Which player?"+(names.length?" Online now: "+names.join(", "):""), names[0]||""); if(!who) return;
+    cmd = cmd.replace("{player}", who.replace(/"/g,"").trim()); }
+  if(q.text){ const t = prompt(q.label+":", ""); if(t===null) return; cmd = cmd.replace("{text}", t.replace(/"/g,"'").trim()); }
+  $("c-cmd").value = cmd; $("c-cmd").focus();
+};
+function closeManage(){ CUR = null; closeModal("m-manage"); }
+function renderManageHead(){
+  const st = S.statuses.find(s=>s.id===CUR); if(!st) return closeManage();
+  const srv = S.servers[CUR]||{}, game = gameOf(srv), s = stateOf(st);
+  $("mg-title").textContent = st.name; const b=$("mg-badge"); b.textContent=initials(game!=="Custom server"?game:st.name); b.style.background=COLORS[hash(game)%COLORS.length];
+  $("mg-pill").textContent = STATE[s]||s; $("mg-pill").style.color = pillColor(s);
+  const t = $("mg-toggle"); t.textContent = st.isRunning?"Stop":"Start"; t.className = st.isRunning?"stop":"go"; t.disabled = BUSY.includes(s);
+  t.onclick = () => toggle(CUR); $("mg-restart").disabled = !st.isRunning || BUSY.includes(s);
+  const hb = $("mg-help"), hl = (s==="crashed"||s==="restarting") ? (st.crashHelp||[]) : [];
+  hb.hidden = !hl.length;
+  const key = JSON.stringify(hl); if(hb.dataset.k !== key){ hb.dataset.k = key;
+    hb.innerHTML = hl.map(h=>`<b>${esc(h.title)}</b><p>${esc(h.fix||"")}${h.link?` <a href="${esc(h.link)}" target="_blank" rel="noopener">Download</a>`:""}</p>${h.line?`<code>${esc(h.line)}</code>`:""}`).join(""); }
+  const pl = st.players || [];
+  $("mg-players").innerHTML = !st.isRunning ? "" : st.playerCount==null ? "This game doesn't report who's online."
+    : !pl.length ? (st.playerCount ? `${st.playerCount} player(s) online` : "Nobody online right now.")
+    : "Online now: " + pl.map(p=>`<b style="color:var(--text)">${esc(p.name)}</b> <span>(${up(Date.now()/1000-(p.since||Date.now()/1000))})</span>`).join(" · ");
+  $("c-cmd").disabled = $("c-send").disabled = !st.consoleAvailable;
+  $("c-note").textContent = st.isRunning && !st.consoleAvailable ? (st.consoleHint || "The console isn't available for this server right now (restart it from BaoBun to get it back).") : st.consoleVia==="rcon" ? "Commands go over RCON." : "";
+}
+$("mg-restart").onclick = async () => { const st=S.statuses.find(s=>s.id===CUR); if(!st||!confirm(`Restart ${st.name}?`)) return;
+  toast("Restarting "+st.name+"…"); try{ await act("server.restart",{server_id:CUR}); toast("Restarted "+st.name); }catch(e){ toast("Failed: "+e.message,6000); } refresh(); };
+document.querySelectorAll("#mg-tabs button").forEach(b => b.onclick = () => showTab(b.dataset.t));
+function showTab(t){
+  document.querySelectorAll("#mg-tabs button").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  document.querySelectorAll("#m-manage section").forEach(s=>s.hidden = s.dataset.p!==t);
+  ({game:()=>{ loadGame(); AF=null; loadAllSettings(); }, connect:loadConnect, history:loadHistory, mods:()=>loadMods(false), backups:loadBackups, players:loadPlayers, schedules:loadSchedules, settings:loadSettings, config:loadConfigList, ark:loadArk})[t]?.();
+}
+
+/* console */
+const ERR = /\b(error|exception|fatal|crash(ed)?|failed)\b/i, WARN = /\bwarn(ing)?\b/i;
+function matches(l){ if($("c-err").checked && !(ERR.test(l)||WARN.test(l))) return false;
+  const f=$("c-filter").value.trim(); if(!f) return true; try{ return new RegExp(f,"i").test(l); }catch(e){ return l.toLowerCase().includes(f.toLowerCase()); } }
+function lineHtml(l){ const cls = l.startsWith("> ")?"c":ERR.test(l)?"e":WARN.test(l)?"w":""; return cls?`<span class="${cls}">${esc(l)}</span>\n`:esc(l)+"\n"; }
+function renderConsole(){ $("console").innerHTML = LOGLINES.filter(matches).map(lineHtml).join(""); if($("c-follow").checked) $("console").scrollTop = 1e9; }
+$("c-filter").oninput = renderConsole; $("c-err").onchange = renderConsole;
+async function pollLogs(){
+  if(!CUR) return; const id = CUR;
+  try{ const r = await api(`/api/logs?server_id=${encodeURIComponent(id)}&offset=${LOGOFF}`);
+    if(id!==CUR) return;
+    if(r.reset) LOGLINES = []; LOGOFF = r.offset ?? LOGOFF;
+    if(r.lines && r.lines.length){ LOGLINES.push(...r.lines); if(LOGLINES.length>5000) LOGLINES = LOGLINES.slice(-5000);
+      const c=$("console"); if(r.reset) renderConsole(); else { c.insertAdjacentHTML("beforeend", r.lines.filter(matches).map(lineHtml).join("")); if($("c-follow").checked) c.scrollTop = 1e9; } }
+  }catch(e){}
+  setTimeout(pollLogs, 1000);
+}
+const hist = []; let hpos = 0;
+async function sendCmd(){ const v=$("c-cmd").value.trim(); if(!v||!CUR) return; hist.push(v); hpos=hist.length; $("c-cmd").value="";
+  LOGLINES.push("> "+v); $("console").insertAdjacentHTML("beforeend", lineHtml("> "+v));
+  try{ const r = await act("console.send",{server_id:CUR, command:v}); if(r.via==="rcon" && !r.echoed) toast(r.reply ? r.reply.slice(0,300) : "Sent over RCON", 6000); }catch(e){ toast("Console: "+e.message,6000); } }
+$("c-send").onclick = sendCmd;
+$("c-cmd").onkeydown = e => { if(e.key==="Enter") sendCmd();
+  else if(e.key==="ArrowUp"&&hist.length){ hpos=Math.max(0,hpos-1); $("c-cmd").value=hist[hpos]; e.preventDefault(); }
+  else if(e.key==="ArrowDown"&&hist.length){ hpos=Math.min(hist.length,hpos+1); $("c-cmd").value=hist[hpos]||""; e.preventDefault(); } };
+
+/* players: allow list, bans, admins */
+let PA = {tab:"allow"};
+async function loadPlayers(){
+  const box = $("pa-body"), id = CUR; let r;
+  try{ r = await act("players.access",{server_id:id}); }catch(e){ box.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
+  if(id!==CUR) return;
+  if(!r.supported){ box.innerHTML = `<p class="note">${esc(r.why)}</p>`; return; }
+  if(!r.lists.includes(PA.tab)) PA.tab = r.lists[0];
+  const rows = r.data[PA.tab]||[], locked = r.needs_running.includes(PA.tab), byName = r.id_kind==="name";
+  const st = S.statuses.find(s=>s.id===id)||{};
+  const online = byName ? (st.players||[]).map(p=>typeof p==="object"?p.name:p).filter(Boolean).slice(0,12) : [];
+  box.innerHTML = `<div class="row wrap" style="gap:6px">${r.lists.map(k=>`<button class="${k===PA.tab?"primary":"ghost"} small" data-pt="${k}">${esc(r.labels[k])} (${(r.data[k]||[]).length})</button>`).join("")}</div>
+    ${PA.tab==="allow"&&r.allow_toggle?`<label class="check" style="margin-top:10px"><input type="checkbox" id="pa-on" ${r.allow_on?"checked":""}> Only players on this list can join</label>`:""}
+    ${PA.tab==="allow"&&!r.allow_toggle&&r.allow_on!=null?`<p class="note">The list is ${r.allow_on?"on - only these players can join":"empty, so anyone can join"}.</p>`:""}
+    ${locked?`<p class="note" style="color:var(--warn)">Start the server to change this list - ${esc(r.game)} changes it through its console.</p>`:""}
+    <table style="margin-top:8px"><tbody>${rows.length?rows.map(x=>{ const who = byName?x.name:x.id;
+      return `<tr><td>${esc(x.name||x.id||"?")}${x.name&&x.id&&!byName?` <span class="note">${esc(x.id)}</span>`:""}${x.reason?` <span class="note">· ${esc(x.reason)}</span>`:""}</td><td style="text-align:right">${who&&!locked?`<button class="ghost small" data-rm="${esc(who)}">Remove</button>`:""}</td></tr>`; }).join(""):`<tr><td class="note">Nobody yet.</td></tr>`}</tbody></table>
+    <div class="row wrap" style="gap:8px;margin-top:10px"><input id="pa-who" class="grow" placeholder="${esc(r.id_hint)}" ${locked?"disabled":""}>${PA.tab==="ban"?`<input id="pa-why" placeholder="reason" style="width:160px" ${locked?"disabled":""}>`:""}<button class="primary" id="pa-add" ${locked?"disabled":""}>${{allow:"Allow",ban:"Ban",admin:"Make admin"}[PA.tab]}</button></div>
+    <label class="check"><input type="checkbox" id="pa-all"> Do it on all my ${esc(r.game)} servers</label>
+    ${online.length?`<p class="note">Online now: ${online.map(n=>`<button class="ghost small" data-on="${esc(n)}">${esc(n)}</button>`).join(" ")}</p>`:""}
+    <p class="note" id="pa-msg"></p>
+    ${(r.notes||[]).map(n=>`<p class="note">${esc(n)}</p>`).join("")}
+    ${r.history&&r.history.length?`<details style="margin-top:8px"><summary class="note">Recent changes</summary>${r.history.map(h=>`<div class="note">${new Date(h.at*1000).toLocaleString()} · ${esc(h.by||"")} · ${esc(h.action)} ${esc(h.list)} · ${esc(h.who||"")}</div>`).join("")}</details>`:""}`;
+  box.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{ PA.tab=b.dataset.pt; loadPlayers(); });
+  box.querySelectorAll("[data-on]").forEach(b=>b.onclick=()=>{ $("pa-who").value=b.dataset.on; });
+  const go = async (action, who) => {
+    const msg = $("pa-msg"); msg.textContent = "Working…";
+    try{ const res = await act("players.access_change",{server_id:id, list:PA.tab, action, who, reason:($("pa-why")||{}).value||"", everywhere:$("pa-all").checked});
+      toast("✓ "+(res.text||"Done"), 5000); setTimeout(loadPlayers, 900); }
+    catch(e){ msg.textContent = "⚠ "+e.message; } };
+  box.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ if(confirm("Remove "+b.dataset.rm+"?")) go("remove", b.dataset.rm); });
+  $("pa-add").onclick = ()=>{ const w=$("pa-who").value.trim(); if(w) go("add", w); };
+  if($("pa-on")) $("pa-on").onchange = async e => { try{ const res = await act("players.allow_on",{server_id:id, on:e.target.checked}); toast(res.restart_needed?"Saved - restart the server to apply":"Saved"); }catch(err){ toast(err.message,6000); } setTimeout(loadPlayers, 900); };
+}
+
+/* backups */
+async function loadBackups(){
+  $("b-list").innerHTML = "<tr><td colspan=3 class=note>Loading…</td></tr>";
+  try{ const res = await act("backup.list",{server_id:CUR}), list = res.backups || [];
+    $("b-check").textContent = res.check ? (res.check.ok?"\u2705 ":"\u26A0 ")+res.check.text : "";
+    $("b-check").style.color = res.check && !res.check.ok ? "var(--warn)" : "";
+    $("b-list").innerHTML = list.length ? list.map(b=>`<tr><td>${esc(b.name)}${b.location==="copy"?' <span class="note">(copy on the other PC)</span>':""}</td><td>${mb(b.size/1048576)}</td>
+      <td style="text-align:right;white-space:nowrap">${ROLE==="admin"?`${CUR.startsWith("@")?"":`<a class="ghost btnlink" href="/api/backup_download?server_id=${encodeURIComponent(CUR)}&name=${encodeURIComponent(b.name)}">Download</a>`} <button data-p="${esc(b.path)}" class="ghost rst">Restore</button>`:""}</td></tr>`).join("") : "<tr><td colspan=3 class=note>No backups yet.</td></tr>";
+    const total = list.reduce((a,b)=>a+(b.size||0),0);
+    if(!/^(Done|Failed|Backing)/.test($("b-note").textContent)) $("b-note").textContent = list.length ? `${list.length} backup(s), ${mb(total/1048576)} in total` : "";
+    document.querySelectorAll(".rst").forEach(x=>x.onclick=()=>restore(x.dataset.p));
+  }catch(e){ $("b-list").innerHTML = `<tr><td colspan=3>${esc(e.message)}</td></tr>`; }
+}
+$("b-now").onclick = async () => { $("b-note").textContent = "Backing up…"; $("b-now").disabled = true;
+  try{ const r = await act("backup.create",{server_id:CUR}); $("b-note").textContent = `Done: ${r.files} files, ${mb(r.bytes/1048576)}`+(r.warning?" - "+r.warning:""); }
+  catch(e){ $("b-note").textContent = "Failed: "+e.message; } $("b-now").disabled=false; loadBackups(); loadActivity(); };
+async function restore(path){ const st=S.statuses.find(s=>s.id===CUR);
+  if(st&&st.isRunning){ toast("Stop the server before restoring a backup.",5000); return; }
+  if(!confirm("Restore this backup? The current world is saved as a safety backup first.")) return;
+  try{ const r = await act("backup.restore",{server_id:CUR, backup_path:path}); toast(`Restored ${r.restored} files`); }catch(e){ toast("Failed: "+e.message,6000); } loadBackups(); }
+
+/* schedules */
+const KINDS = {restart:"Restarts", backup:"Backups", update:"Game updates", message:"Announcements (in-game message)"};
+async function loadSchedules(){
+  const f=$("s-forms"); f.innerHTML="<p class=note>Loading…</p>";
+  let sc={}; try{ sc = (await act("schedules.get",{server_id:CUR})).schedules || {}; }catch(e){}
+  f.innerHTML = Object.entries(KINDS).map(([k,label])=>{ const c=sc[k]||{};
+    return `<div class="panel" style="margin-bottom:12px"><h3>${label}</h3>
+      <label class="check"><input type="checkbox" id="s-${k}-on" ${c.enabled?"checked":""}> Enabled</label>
+      <div class="two"><div><label>When</label><select id="s-${k}-mode"><option value="daily" ${c.mode!=="interval"?"selected":""}>Daily at…</option><option value="interval" ${c.mode==="interval"?"selected":""}>Every N hours</option></select></div>
+      <div><label>Times (HH:MM, comma separated) / hours</label><input id="s-${k}-val" value="${esc(c.mode==="interval"?(c.hours||24):(c.times||[]).join(", "))}" placeholder="04:00"></div>
+      ${k==="message"?`<div style="grid-column:1/-1"><label>Message</label><input id="s-${k}-text" value="${esc(c.text||"")}" placeholder="e.g. Join our Discord: discord.gg/..."></div>`:""}
+      ${k!=="backup"&&k!=="message"?`<div><label>Warn players (minutes before)</label><input id="s-${k}-warn" value="${esc((c.warn_minutes||[10,5,1]).join(", "))}"></div>
+      <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="s-${k}-skip" ${c.skip_if_players?"checked":""}> Wait while players are online</label></div>`:""}</div>
+      <div class="row" style="margin-top:10px"><button class="primary" onclick="saveSchedule('${k}')">Save</button></div></div>`; }).join("")
+    + `<p class="note">Schedules run in BaoBun\'s Watchdog on the server PC.</p>`;
+}
+async function saveSchedule(k){
+  const mode=$(`s-${k}-mode`).value, val=$(`s-${k}-val`).value;
+  const cfg={enabled:$(`s-${k}-on`).checked, mode, hours: mode==="interval"?parseFloat(val)||24:24,
+    times: mode==="daily"? val.split(",").map(s=>s.trim()).filter(Boolean):[]};
+  if(k!=="backup"&&k!=="message"){ cfg.warn_minutes=$(`s-${k}-warn`).value.split(",").map(s=>parseInt(s)).filter(n=>n>0); cfg.skip_if_players=$(`s-${k}-skip`).checked; }
+  if(k==="message") cfg.text = $(`s-${k}-text`).value;
+  try{ await act("schedules.set",{server_id:CUR, kind:k, config:cfg}); toast(KINDS[k]+" schedule saved"); refresh(); }catch(e){ toast("Failed: "+e.message,6000); }
+}
+
+/* settings */
+const FIELDS = [["name","Server name","text"],["port","Game port","number"],["queryPort","Query port (for player counts)","number"],
+  ["launchArgs","Launch arguments","text"],["stopCommand","Stop command (blank = game default)","text"],["stopTimeout","Seconds to wait for a clean stop","number"],
+  ["idleStopMinutes","Auto-stop after N minutes with no players (blank = never)","number"],["cpuAffinity","CPU cores (e.g. 0-15, blank = all)","text"],
+  ["priority","Priority","select:normal,above_normal,high,below_normal"],["ramAlertMB","Discord alert when RAM use passes (MB, blank = off)","number"],["memLimitMB","Restart cleanly when RAM stays above (MB for 3 min, blank = off)","number"],["javaMemoryMB","Minecraft memory (MB, default 4096)","number"],["workshopAppId","Workshop App ID for mods (blank = same as the server)","text"],["maxRestarts","Crash restarts before giving up","number"],
+  ["manualStart","Manual start only (never auto-start at boot)","check"],["autoRestart","Restart automatically after a crash","check"],
+  ["updateBeforeStart","Check for a game update before each start","check"],["autoUpdateWhenEmpty","Update the game automatically when nobody is online","check"],["discordVisible","Show on the Discord panel","check"]];
+function loadSettings(){
+  const srv = S.servers[CUR]||{};
+  $("st-form").innerHTML = FIELDS.map(([k,l,t])=>{ const v = srv[k];
+    if(t==="check") return `<div><label>&nbsp;</label><label class="check"><input type="checkbox" data-k="${k}" ${(k==="discordVisible"?v!==false:!!v)?"checked":""}> ${esc(l)}</label></div>`;
+    if(t.startsWith("select:")) return `<div><label>${esc(l)}</label><select data-k="${k}">${t.slice(7).split(",").map(o=>`<option ${o===(v||"normal")?"selected":""}>${o}</option>`).join("")}</select></div>`;
+    return `<div><label>${esc(l)}</label><input data-k="${k}" type="${t}" value="${esc(v??"")}"></div>`; }).join("");
+  $("st-install").hidden = $("st-check").hidden = $("st-update").hidden = !srv.appId;
+  const mcRow = document.querySelector('#st-form [data-k="javaMemoryMB"]');
+  if(mcRow) mcRow.closest("div").hidden = srv.kind!=="minecraft";
+  act("server.install_options",{server_id:CUR}).then(o=>{ if(!o.kind || o.kind==="steam") return;
+    $("st-install").hidden = false; $("st-install").textContent = o.kind==="minecraft" ? "Install / change Minecraft" : "Install / update game";
+    $("st-check").hidden = $("st-update").hidden = !(o.kind==="vintage-story" && o.state==="vanilla"); }).catch(()=>{});
+}
+$("st-save").onclick = async () => { const ch={};
+  document.querySelectorAll("#st-form [data-k]").forEach(el=>{ ch[el.dataset.k] = el.type==="checkbox" ? el.checked : el.value; });
+  ["port","queryPort","stopTimeout","idleStopMinutes","maxRestarts","ramAlertMB","memLimitMB","javaMemoryMB"].forEach(k=>{ if(ch[k]!=="" && ch[k]!=null) ch[k]=parseInt(ch[k]); });
+  const jm = document.querySelector('#st-form [data-k="javaMemoryMB"]'); if(jm && jm.closest("div").hidden) delete ch.javaMemoryMB;
+  try{ await act("server.update_settings",{server_id:CUR, changes:ch}); toast("Settings saved"); refresh(); }catch(e){ toast("Failed: "+e.message,6000); } };
+$("st-check").onclick = async () => { $("st-note").textContent="Checking…";
+  try{ const r = await act("server.check_update",{server_id:CUR});
+    $("st-note").textContent = r.update_available===true?`Update available (installed ${r.installed||"none"}, latest ${r.latest})`:r.update_available===false?`Up to date (${r.installed})`:"Couldn't tell right now - try again later."; }
+  catch(e){ $("st-note").textContent="Failed: "+e.message; } };
+$("st-update").onclick = async () => { if(!confirm("Update now? Running servers sharing this install - and every map of an ARK cluster - get a warning, stop, update and restart.")) return;
+  $("st-note").textContent="Updating… this can take a while."; try{ const r = await act("server.update",{server_id:CUR}); $("st-note").textContent = r.status==="up_to_date"?"Already up to date.":"Updated."; }
+  catch(e){ $("st-note").textContent="Failed: "+e.message; } refresh(); };
+$("st-install").onclick = async () => { const srv=S.servers[CUR]||{}; if(!srv.appId){ openInstall(CUR); return; } try{ await act("server.install",{server_id:CUR}); toast("Downloading game files… the card shows Updating until it's done."); }catch(e){ toast("Failed: "+e.message,6000); } refresh(); };
+$("st-remove").onclick = async () => { const st=S.statuses.find(s=>s.id===CUR);
+  if(!st || !confirm(`Remove ${st.name} from BaoBun? Its files on disk are NOT deleted.`)) return;
+  try{ await act("server.remove",{server_id:CUR}); toast("Removed "+st.name); closeManage(); refresh(); }catch(e){ toast("Failed: "+e.message,6000); } };
+
+/* config files */
+async function loadConfigList(){
+  const sel=$("cf-file"); sel.innerHTML="<option>Loading…</option>";
+  try{ const files=(await act("config.list",{server_id:CUR})).config_files||[];
+    sel.innerHTML = files.length ? files.map(f=>`<option>${esc(f.relative)}</option>`).join("") : "<option value=''>No config files found</option>"; }
+  catch(e){ sel.innerHTML = `<option value=''>${esc(e.message)}</option>`; }
+  $("cf-text").value="";
+}
+$("cf-load").onclick = async () => { const f=$("cf-file").value; if(!f) return;
+  try{ const r = await act("config.read",{server_id:CUR, file:f}); $("cf-text").value = r.raw_text ?? r.text ?? JSON.stringify(r.data ?? r, null, 2); $("cf-text").dataset.file=f; }
+  catch(e){ toast("Failed: "+e.message,6000); } };
+$("cf-save").onclick = async () => { const f=$("cf-text").dataset.file; if(!f){ toast("Open a file first"); return; }
+  if(!confirm("Save "+f+"? Most servers need a restart to pick up changes.")) return;
+  try{ await act("config.write",{server_id:CUR, file:f, payload:{raw_text:$("cf-text").value}}); toast("Saved "+f); }catch(e){ toast("Failed: "+e.message,6000); } };
+
+/* mods */
+let MODS = null;
+function fmtSize(b){ return mb((b||0)/1048576); }
+async function loadMods(check){
+  const id = CUR; $("md-status").textContent = check ? "Checking for updates…" : "Loading…"; $("md-results").innerHTML = "";
+  try{ const d = await act(check?"mods.check":"mods.list",{server_id:id}); if(id!==CUR) return; MODS = d; renderMods(check); }
+  catch(e){ $("md-status").textContent = "Couldn't read mods: "+e.message; $("md-list").innerHTML=""; }
+}
+function renderMods(checked){
+  const d = MODS, c = d.caps || {}, admin = ROLE==="admin", fields = c.fields || [];
+  $("md-title").textContent = (d.label || "Mods") + (d.game_version ? " · "+(d.loader?d.loader+" ":"")+d.game_version : "");
+  $("md-add").placeholder = c.add_hint || "";
+  $("md-addrow").style.display = c.add && admin ? "" : "none";
+  if(MB.sid!==CUR){ MB = {results:[], tag:null, sid:CUR}; $("mb").hidden = true; $("mb-q").value = ""; $("mb-grid").innerHTML = ""; }
+  $("md-search").hidden = !c.search || !$("mb").hidden;
+  if(!$("mb").hidden && MB.results.length) renderBrowse();
+  $("md-check").hidden = !c.update; $("md-upall").hidden = !c.update || ROLE!=="admin";
+  const missing = [...new Set(d.mods.filter(m=>m.enabled).flatMap(m=>m.missing_deps||[]))].sort();
+  const dups = [...new Set(d.mods.filter(m=>m.duplicate).map(m=>m.name))];
+  const notes = [];
+  if(d.restart_needed) notes.push("Mods changed while the server is running - restart it to load them.");
+  if(missing.length) notes.push("Missing required mods: "+missing.map(esc).join(", ")+(admin&&c.deps?` <button class="ghost" id="md-deps">Install them</button>`:""));
+  if(dups.length) notes.push("Two copies enabled (the server may refuse to start): "+dups.map(esc).join(", "));
+  if(d.hint) notes.push(esc(d.hint));
+  $("md-banner").innerHTML = notes.join("<br>");
+  $("md-info").innerHTML = [d.note?esc(d.note):"", d.where?"Saved to: "+esc(d.where):""].filter(Boolean).join("<br>");
+  $("md-setup").innerHTML = (d.setup||[]).map(x=>`<button class="primary" data-setup="${esc(x.action)}" style="margin-top:8px">${esc(x.label)}</button>`).join(" ");
+  document.querySelectorAll("[data-setup]").forEach(b=>b.onclick=()=>modAct("mods.setup",{setup_action:b.dataset.setup},"Working…"));
+  if($("md-deps")) $("md-deps").onclick = () => modAct("mods.install_deps",{}, "Installing missing mods…");
+  const ups = d.mods.filter(m=>m.update_available).length;
+  $("md-upall").textContent = ups ? `Update all (${ups})` : "Update all";
+  $("md-status").textContent = d.mods.length ? `${d.mods.length} mod(s), ${d.mods.filter(m=>m.enabled).length} on`
+    + (ups?`, ${ups} update(s) available`:checked?", all up to date":"") : (c.add ? "No mods yet." : "");
+  const list = c.reorder ? d.mods.slice() : d.mods.slice().sort((a,b)=>(b.enabled-a.enabled)||a.name.localeCompare(b.name));
+  $("md-list").innerHTML = list.map(m=>{
+    const bits=[]; if(m.pinned) bits.push("🔒 kept at this version"); if(m.update_available) bits.push("update: "+(m.latest||"newer version available")); if((m.missing_deps||[]).length) bits.push("needs "+m.missing_deps.join(", "));
+    if(m.duplicate) bits.push("duplicate"); if(m.missing) bits.push("not downloaded yet"); if(!m.enabled) bits.push("off"); if(m.server_only) bits.push("server-only");
+    if(fields.includes("mod_ids") && m.mod_ids!==undefined) bits.push("Mod IDs: "+((m.mod_ids||[]).join(", ")||"not known yet"));
+    if(m.size) bits.push(fmtSize(m.size)); if(m.id && m.id!==m.name) bits.push(m.id);
+    const k = esc(m.key);
+    const ctl = !admin ? "" : [
+      c.reorder ? `<button class="ghost" data-mv="${k}" data-d="-1" title="Load earlier">↑</button><button class="ghost" data-mv="${k}" data-d="1" title="Load later">↓</button>` : "",
+      fields.includes("server_only") ? `<label class="check" style="display:inline-flex"><input type="checkbox" data-so="${k}" ${m.server_only?"checked":""}> Server only</label>` : "",
+      fields.includes("mod_ids") ? `<button class="ghost" data-fld="mod_ids" data-k="${k}">Mod IDs</button>` : "",
+      fields.includes("name") ? `<button class="ghost" data-fld="name" data-k="${k}">Name</button>` : "",
+      m.update_available && c.update ? `<button class="primary" data-up="${k}">Update</button>` : "",
+      c.update ? `<label class="check" style="display:inline-flex" title="Update all and automatic updates skip it"><input type="checkbox" data-pin="${k}" ${m.pinned?"checked":""}> Keep version</label>` : "",
+      c.toggle ? `<label class="check" style="display:inline-flex"><input type="checkbox" data-on="${k}" ${m.enabled?"checked":""}> On</label>` : "",
+      `<button class="ghost" data-rm="${k}">Remove</button>`].join(" ");
+    return `<tr><td><b style="${m.enabled?"":"color:var(--muted)"}">${c.reorder&&m.order?m.order+". ":""}${esc(m.name)}</b> <span class="note">${esc(m.version||"")}</span>
+      ${m.url?` <a class="note" href="${esc(m.url)}" target="_blank" rel="noopener">page</a>`:""}<br><span class="note" style="${(m.missing_deps||[]).length||m.duplicate||m.missing?"color:var(--warn)":""}">${esc(bits.join(" · "))}</span></td>
+      <td style="text-align:right;white-space:nowrap">${ctl}</td></tr>`; }).join("");
+  document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>modAct("mods.update",{mods:[b.dataset.up]},"Updating…"));
+  document.querySelectorAll("[data-on]").forEach(b=>b.onchange=()=>modAct("mods.set_enabled",{mod:b.dataset.on, enabled:b.checked}, b.checked?"Turning on…":"Turning off…"));
+  document.querySelectorAll("[data-pin]").forEach(b=>b.onchange=()=>modAct("mods.pin",{mod:b.dataset.pin, pinned:b.checked}, b.checked?"Keeping it at this version…":"Letting it update…"));
+  renderModAuto(d, c);
+  document.querySelectorAll("[data-so]").forEach(b=>b.onchange=()=>modAct("mods.set_field",{mod:b.dataset.so, field:"server_only", value:b.checked}, "Saving…"));
+  document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>modAct("mods.move",{mod:b.dataset.mv, delta:parseInt(b.dataset.d)}, "Moving…"));
+  document.querySelectorAll("[data-fld]").forEach(b=>b.onclick=()=>{ const m=d.mods.find(x=>x.key===b.dataset.k); const f=b.dataset.fld;
+    const cur = f==="mod_ids" ? (m.mod_ids||[]).join(", ") : (m.name||""); const v = prompt(f==="mod_ids"?"Mod IDs for "+m.name+" (comma separated):":"Name for "+m.id+":", cur);
+    if(v!==null) modAct("mods.set_field",{mod:m.key, field:f, value:v}, "Saving…"); });
+  document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ const srv = S.servers[CUR]||{};
+    const msg = isArk(srv) ? "Remove this mod?\n\nARK deletes every creature, item and building from a mod when the map starts without it - "+(srv.clusterId?"on every map in the cluster":"on this server")+". Uploaded creatures and items from it are lost too."
+      : "Remove this mod? Nothing is deleted - files go to BaoBun's backups folder.";
+    if(confirm(msg)) modAct("mods.remove",{mod:b.dataset.rm},"Removing…"); });
+  renderModOptions(d.options||[]);
+}
+function renderModOptions(opts){
+  const box = $("md-opts"); if(!opts.length || ROLE!=="admin"){ box.innerHTML=""; return; }
+  box.innerHTML = `<div class="panel"><h3>Mod options</h3><div class="two">` + opts.filter(o=>o.type!=="secret").map((o,i)=>{
+    const input = o.type==="select" ? `<select data-opt="${esc(o.key)}">${o.choices.map(c=>`<option value="${esc(c[0])}" ${c[0]===(o.value||"")?"selected":""}>${esc(c[1])}</option>`).join("")}</select>`
+      : `<div class="row"><input class="grow" data-opt="${esc(o.key)}" value="${esc(o.value||"")}" placeholder="${esc(o.placeholder||"")}"><button data-optsave="${esc(o.key)}">Save</button></div>`;
+    return `<div><label>${esc(o.label)}</label>${input}</div>`; }).join("") + `</div>`
+    + (opts.some(o=>o.type==="secret") ? `<p class="note">API keys can only be set in BaoBun on the server PC.</p>` : "") + `</div>`;
+  box.querySelectorAll("select[data-opt]").forEach(el=>el.onchange=()=>modAct("mods.set_option",{key:el.dataset.opt, value:el.value},"Saving…"));
+  box.querySelectorAll("[data-optsave]").forEach(b=>b.onclick=()=>{ const el=box.querySelector(`input[data-opt="${b.dataset.optsave}"]`); modAct("mods.set_option",{key:b.dataset.optsave, value:el.value},"Saving…"); });
+}
+async function modAct(action, params, label){
+  const id = CUR; $("md-status").textContent = label || "Working…";
+  const btns = document.querySelectorAll("#m-manage section[data-p=mods] button"); btns.forEach(b=>b.disabled=true);
+  try{ const r = await act(action, Object.assign({server_id:id}, params)); const msg = modReport(r); if(msg) toast(msg, 7000); }
+  catch(e){ toast("Failed: "+e.message, 7000); }
+  btns.forEach(b=>b.disabled=false);
+  if(id===CUR) loadMods(false); loadActivity();
+}
+function modReport(r){ const out=[]; if(r&&(r.pinned_skipped||[]).length) out.push("Kept at their version: "+r.pinned_skipped.join(", "));
+  if(typeof r.installed==="string") out.push("Installed "+r.installed); else if(r.installed&&r.installed.length) out.push("Installed "+r.installed.join(", "));
+  if(r.updated&&r.updated.length) out.push("Updated "+r.updated.map(u=>u.mod).join(", "));
+  if(r.removed) out.push("Removed "+r.removed); if(r.message) out.push(r.message);
+  (r.failed||[]).forEach(f=>out.push("Failed: "+f.mod+" ("+f.error+")")); if(r.note) out.push(r.note); if(r.backup) out.push(r.backup);
+  if(r.restart_needed && out.length) out.push("Restart the server to load it."); return out.join(" · "); }
+$("md-check").onclick = () => loadMods(true);
+function renderModAuto(d, c){
+  const box = $("md-auto"); const au = d.auto_update||{};
+  if(!c.update || ROLE!=="admin"){ box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="row" style="gap:10px;align-items:center;flex-wrap:wrap"><b style="font-size:13px">Mod updates (all servers)</b>
+    <select id="md-amode" style="max-width:220px"><option value="off">Off</option><option value="notify">Tell me on Discord</option><option value="auto">Update automatically</option></select>
+    <label class="check" style="display:inline-flex"><input type="checkbox" id="md-ainc" ${au.included!==false?"checked":""}> Include this server</label></div>
+    <p class="note">Checked every few hours. <i>Update automatically</i> updates during the nightly restart (worlds backed up first, old mods kept) and puts the old mods back if the server crashes afterwards. Mods set to <i>Keep version</i> are never updated automatically or by Update all.</p>`;
+  $("md-amode").value = au.mode || "notify";
+  $("md-amode").onchange = async()=>{ try{ await act("host.settings_save",{values:{mod_updates:$("md-amode").value}}); toast("Saved - mod updates: "+$("md-amode").selectedOptions[0].textContent); }catch(e){ toast("Failed: "+e.message,6000); } };
+  $("md-ainc").onchange = ()=>modAct("mods.auto_update",{included:$("md-ainc").checked}, "Saving…");
+}
+$("md-upall").onclick = () => { if(confirm("Update every mod that has an update? The world is backed up first.")) modAct("mods.update",{}, "Updating mods…"); };
+$("md-install").onclick = () => { const v=$("md-add").value.trim(); if(!v) return; $("md-add").value=""; modAct("mods.install",{mod:v},"Installing "+v+"…"); };
+$("md-add").onkeydown = e => { if(e.key==="Enter") $("md-install").click(); };
+/* visual mod browser */
+let MB = {results:[], tag:null};
+function compact(n){ n=Number(n||0); return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+"M":n>=1e3?(n/1e3).toFixed(n>=1e4?0:1)+"k":String(n); }
+function installedIds(){ const s=new Set(); (MODS&&MODS.mods||[]).forEach(m=>{ [m.id,m.key,m.name].forEach(v=>{ if(v!=null) s.add(String(v).toLowerCase()); }); }); return s; }
+function isInstalled(m){ const ids=installedIds(); return (m.match_ids||[String(m.id)]).some(x=>ids.has(String(x).toLowerCase())); }
+function iconHtml(m, cls){ return m.icon ? `<img class="${cls||"micon"}" src="${esc(m.icon)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'micon',textContent:'${esc(initials(m.name||"?"))}'}))">` : `<div class="${cls||"micon"}">${esc(initials(m.name||"?"))}</div>`; }
+$("md-search").onclick = () => { $("mb").hidden = false; $("md-search").hidden = true; if(!MB.results.length) runBrowse(); setTimeout(()=>$("mb-q").focus(),50); };
+$("mb-close").onclick = () => { $("mb").hidden = true; $("md-search").hidden = !(MODS&&MODS.caps&&MODS.caps.search); };
+let MBT = null;
+$("mb-q").oninput = () => { clearTimeout(MBT); MBT = setTimeout(runBrowse, 450); };
+$("mb-q").onkeydown = e => { if(e.key==="Enter"){ clearTimeout(MBT); runBrowse(); } };
+$("mb-sort").onchange = runBrowse;
+async function runBrowse(){
+  const id = CUR, grid = $("mb-grid"); grid.innerHTML = "<p class=note>Loading mods…</p>"; MB.tag = null;
+  try{ const r = await act("mods.search",{server_id:id, text:$("mb-q").value.trim(), sort:$("mb-sort").value}); if(id!==CUR) return; MB.results = r.results||[]; }
+  catch(e){ grid.innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  renderBrowse(); }
+function renderBrowse(){
+  const counts = {}; MB.results.forEach(m=>(m.tags||[]).forEach(t=>counts[t]=(counts[t]||0)+1));
+  const tags = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,14);
+  $("mb-tags").innerHTML = tags.map(t=>`<span class="chip ${MB.tag===t?"on":""}" data-tag="${esc(t)}">${esc(t)}</span>`).join("");
+  $("mb-tags").querySelectorAll("[data-tag]").forEach(c=>c.onclick=()=>{ MB.tag = MB.tag===c.dataset.tag?null:c.dataset.tag; renderBrowse(); });
+  const list = MB.results.filter(m=>!MB.tag || (m.tags||[]).includes(MB.tag));
+  const admin = ROLE==="admin";
+  $("mb-grid").innerHTML = list.length ? list.map((m,i)=>{ const inst = isInstalled(m);
+    return `<div class="mcard" data-i="${MB.results.indexOf(m)}"><div class="top">${iconHtml(m)}<div style="min-width:0"><div class="nm">${esc(m.name||m.id)}</div><div class="by">${m.author?"by "+esc(m.author):""}</div></div></div>
+      <div class="sm">${esc(m.summary||"")}</div>
+      <div class="ft"><span class="stat">⬇ ${compact(m.downloads)}${m.follows?" · ♥ "+compact(m.follows):""}</span><span class="grow"></span>
+        ${inst?`<span class="badge-ok">✓ Installed</span>`:admin?`<button class="go" data-mbi="${MB.results.indexOf(m)}">Install</button>`:""}</div></div>`; }).join("")
+    : "<p class=note>No mods found.</p>";
+  $("mb-grid").querySelectorAll(".mcard").forEach(c=>c.onclick=e=>{ if(e.target.closest("button")) return; openModDetails(MB.results[+c.dataset.i]); });
+  $("mb-grid").querySelectorAll("[data-mbi]").forEach(b=>b.onclick=()=>browseInstall(MB.results[+b.dataset.mbi]));
+}
+async function browseInstall(m){ await modAct("mods.install",{mod:String(m.id)},"Installing "+(m.name||m.id)+"…"); setTimeout(()=>{ if(!$("mb").hidden) renderBrowse(); }, 400); }
+async function openModDetails(m){
+  $("mm-head").innerHTML = `${iconHtml(m)}<div style="min-width:0"><h2>${esc(m.name||m.id)}</h2><div class="by">${m.author?"by "+esc(m.author)+" · ":""}⬇ ${compact(m.downloads)} downloads</div></div>`;
+  $("mm-body").innerHTML = "<p class=note>Loading…</p>"; openModal("m-mod");
+  let d; try{ d = await act("mods.details",{server_id:CUR, mod:String(m.id)}); }catch(e){ $("mm-body").innerHTML = `<p class=note>${esc(e.message)}</p><p class=note>${esc(m.summary||"")}</p>`; return; }
+  const inst = isInstalled(Object.assign({}, m, {match_ids:(d.match_ids||[]).concat(m.match_ids||[])})), admin = ROLE==="admin";
+  $("mm-head").innerHTML = `${iconHtml(Object.assign({}, m, d))}<div style="min-width:0"><h2>${esc(d.name||m.name)}</h2><div class="by">${d.author?"by "+esc(d.author)+" · ":""}⬇ ${compact(d.downloads)}${d.follows?" · ♥ "+compact(d.follows):""}${d.updated?" · updated "+esc(String(d.updated).slice(0,10)):""}</div></div>`;
+  const r = d.release; let compat = "";
+  if(r){ const ok = r.match==="exact" || r.match==="minor", unknown = r.match==="unknown_version"||r.match==="unknown";
+    compat = `<div class="compat ${ok?"ok":unknown?"":"warn"}">${ok?"✓ Works with your server"+(d.game_version?" ("+esc(d.game_version)+")":""):unknown?"Couldn't tell which game version your server runs.":"⚠ No release for your server's version"+(d.game_version?" ("+esc(d.game_version)+")":"")+" - the newest one may not load."}${r.version?" · BaoBun would install version "+esc(r.version):""}${(r.for||[]).length?" · made for "+r.for.slice(0,4).map(esc).join(", "):""}</div>`; }
+  const side = d.side==="server"?"Server only":d.side==="client"?"Client only (players install it)":d.side==="both"?"Server and players (players get it automatically when they join)":"";
+  const shots = (d.images||[]).length ? `<div class="mshots">${d.images.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" data-full="${esc(u)}">`).join("")}</div>` : "";
+  const shotSet = new Set(d.images||[]);
+  const desc = (d.blocks||[]).filter(b=>!(b.t==="img" && shotSet.has(b.src))).map(b=> b.t==="h"?`<h4>${esc(b.text)}</h4>`:b.t==="li"?`<li>${esc(b.text)}</li>`:b.t==="img"?`<img src="${esc(b.src)}" alt="" loading="lazy" data-full="${esc(b.src)}">`:`<p>${esc(b.text)}</p>`).join("");
+  $("mm-body").innerHTML = `<div class="row wrap">${inst?`<span class="badge-ok">✓ Installed on this server</span>`:admin?`<button class="go" id="mm-inst">Install on this server</button>`:""}
+      <span class="grow"></span>${(d.links||[]).map(l=>`<a class="note" href="${esc(l[1])}" target="_blank" rel="noopener">${esc(l[0])}</a>`).join(" · ")}${d.url?` · <a class="note" href="${esc(d.url)}" target="_blank" rel="noopener">Mod page</a>`:""}</div>
+    ${compat}${side?`<div class="note">${esc(side)}</div>`:""}${d.cluster_note?`<div class="note">${esc(d.cluster_note)}</div>`:""}
+    ${(d.tags||[]).length?`<div class="row wrap" style="gap:6px;margin-top:8px">${d.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</div>`:""}
+    ${shots}<div class="mdesc">${desc || `<p>${esc(d.summary||m.summary||"")}</p>`}</div>`;
+  $("mm-body").querySelectorAll("img[data-full]").forEach(i=>i.onclick=()=>{ $("lb-img").src = i.dataset.full; $("lightbox").hidden = false; });
+  if($("mm-inst")) $("mm-inst").onclick = async () => { closeModal("m-mod"); await browseInstall(Object.assign({}, m, {id:d.id||m.id})); };
+}
+/* game settings */
+async function loadGame(){
+  const id = CUR, box = $("gs-body"); box.innerHTML = "<p class=note>Loading…</p>";
+  let d; try{ d = await act("server.game_settings",{server_id:id}); }catch(e){ box.innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  if(id!==CUR) return;
+  if(!d.supported){ box.innerHTML = `<p class="note">${esc(d.note)}</p>`; return; }
+  const admin = ROLE==="admin";
+  box.innerHTML = `<p class="note">${esc(d.note||"")} Changes apply the next time the server starts.</p><div class="two">` + d.fields.map(f=>{
+    let input;
+    if(f.type==="select") input = `<select data-gs="${esc(f.key)}">${f.choices.map(c=>`<option value="${esc(c[0])}" ${String(c[0])===String(f.value)?"selected":""}>${esc(c[1])}</option>`).join("")}</select>`;
+    else if(f.type==="bool") input = `<select data-gs="${esc(f.key)}"><option value="true" ${f.value==="true"?"selected":""}>Yes</option><option value="false" ${f.value!=="true"?"selected":""}>No</option></select>`;
+    else input = `<input data-gs="${esc(f.key)}" type="${f.type==="password"?"password":f.type==="int"?"number":"text"}" value="${esc(f.value)}" ${f.type==="password"?`placeholder="${f.has_value?"set - type a new one to change it":"none"}" autocomplete="new-password"`:""}>`;
+    return `<div><label>${esc(f.label)}${f.error?` <span style="color:var(--warn)">(${esc(f.error)})</span>`:""}</label>${input}</div>`; }).join("")
+    + `</div><div class="row" style="margin-top:14px">${admin?`<button class="primary" id="gs-save">Save game settings</button>`:""}<span class="note grow" id="gs-note"></span></div>`;
+  if(!admin) box.querySelectorAll("[data-gs]").forEach(el=>el.disabled=true);
+  if($("gs-save")) $("gs-save").onclick = async () => {
+    const values = {}; box.querySelectorAll("[data-gs]").forEach(el=>{ values[el.dataset.gs] = el.value; });
+    $("gs-note").textContent = "Saving…";
+    try{ const r = await act("server.save_game_settings",{server_id:id, values}); $("gs-note").textContent = r.saved.length ? "Saved to "+r.where.join(", ")+"."+(r.restart_needed?" Restart the server to use them.":"") : "Nothing changed."; loadActivity(); if(r.saved.length && AF) openSettingsFile(AF.file); }
+    catch(e){ $("gs-note").textContent = "Not saved: "+e.message; }
+  };
+}
+
+/* all settings (full editor) */
+let AF = null;
+async function loadAllSettings(){
+  if(ROLE!=="admin"){ $("af").hidden = true; return; }
+  $("af").hidden = false;
+  const id = CUR; $("af-body").innerHTML = "<p class=note>Loading…</p>"; $("af-note").textContent = "";
+  let files; try{ files = (await act("config.form_files",{server_id:id})).files || []; }catch(e){ $("af-body").innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  if(id!==CUR) return;
+  if(!files.length){ $("af-file").innerHTML = ""; $("af-body").innerHTML = "<p class=note>BaoBun didn't find any settings files for this server yet. Most games write them on their first start.</p>"; return; }
+  $("af-file").innerHTML = files.map(f=>`<option value="${esc(f.id)}">${esc(f.known?f.label+" ("+f.path.split("/").pop()+")":f.path)}${f.exists?"":" - not created yet"}</option>`).join("");
+  $("af-file").onchange = () => openSettingsFile($("af-file").value);
+  openSettingsFile(files[0].id);
+}
+async function openSettingsFile(fid){
+  if(AF && AF.dirty() && !confirm("Discard your unsaved changes?")){ $("af-file").value = AF.file; return; }
+  const id = CUR; $("af-body").innerHTML = "<p class=note>Loading…</p>";
+  let d; try{ d = await act("config.form",{server_id:id, file:fid}); }catch(e){ $("af-body").innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  if(id!==CUR) return;
+  const changes = {}, byId = {};
+  AF = {file:fid, changes, dirty:()=>Object.keys(changes).length>0};
+  const all = [...d.groups.flatMap(g=>g.fields), ...d.suggestions]; all.forEach(f=>byId[f.id]=f);
+  $("af-note").textContent = (d.note ? d.note+" " : "") + "File: "+d.path+(d.running?" · the server is running, so changes apply after a restart":"")+" · a .bak copy is kept on every save.";
+  const ctl = f => {
+    const dis = f.readonly ? "disabled" : "", data = `data-af="${esc(f.id)}"`;
+    if(f.type==="bool") return `<div class="swrow"><label class="sw"><input type="checkbox" ${data} ${f.value?"checked":""} ${dis}><span></span></label><span class="note" data-swl>${f.value?"On":"Off"}</span></div>`;
+    if(f.type==="select"){ const opts = (f.options||[]).map(o=>Array.isArray(o)?o:[o,o]); const cur = String(f.value);
+      return `<select ${data} ${dis}>${opts.some(o=>String(o[0])===cur)?"":`<option value="${esc(cur)}" selected>${esc(cur)}</option>`}${opts.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===cur?"selected":""}>${esc(o[1])}</option>`).join("")}</select>`; }
+    if(f.type==="password") return `<input type="password" ${data} autocomplete="new-password" placeholder="${f.set?"set - type a new one to change it":"not set"}" ${dis}>`;
+    if(f.type==="int"||f.type==="float") return `<input type="number" ${data} value="${esc(f.value)}" ${f.min!=null?`min="${f.min}"`:""} ${f.max!=null?`max="${f.max}"`:""} step="${f.step||(f.type==="int"?1:"any")}" ${dis}>`;
+    return `<input ${data} value="${esc(f.value??"")}" ${f.type==="list"?'placeholder="comma-separated"':""} ${dis}>`; };
+  const fieldHtml = f => `<div class="aff" data-wrap="${esc(f.id)}" data-q="${esc((f.label+" "+f.key+" "+(f.help||"")).toLowerCase())}">
+      <label>${esc(f.label)}${f.label.replace(/\s/g,"").toLowerCase()!==f.key.replace(/[^a-z0-9]/gi,"").toLowerCase()?`<span class="k">${esc(f.key)}</span>`:""}${f.default!=null&&!f.readonly&&!f.missing&&!(f.type==="bool"?!!f.default===!!f.value:Number.isFinite(Number(f.default))&&f.value!==""?Number(f.default)===Number(f.value):String(f.default)===String(f.value))?`<span class="reset" data-reset="${esc(f.id)}" title="Set back to ${esc(f.default)}">reset</span>`:""}</label>
+      ${ctl(f)}${f.help||f.readonly?`<div class="h">${esc(f.help||"")}${f.readonly&&!f.help?"Edit this one in the Config files tab.":""}</div>`:""}</div>`;
+  let html = d.groups.map((g,i)=>`<details class="afg" ${i<2?"open":""}><summary>${esc(g.name)} <span class="n">${g.fields.length}</span></summary><div class="afgrid">${g.fields.map(fieldHtml).join("")}</div></details>`).join("");
+  if(d.suggestions.length) html += `<details class="afg afmiss"><summary>More settings this game understands <span class="n">${d.suggestions.length} not in the file yet - change one to add it</span></summary><div class="afgrid">${d.suggestions.map(fieldHtml).join("")}</div></details>`;
+  if(!d.exists && !d.suggestions.length) html = "";
+  $("af-body").innerHTML = html || `<p class=note>${esc(d.note||"No settings found in this file.")}</p>`;
+  const valOf = el => el.type==="checkbox" ? el.checked : el.value;
+  const same = (f,v) => f.type==="bool" ? !!v===!!f.value : f.type==="password" ? v==="" : (f.type==="int"||f.type==="float") ? (v!=="" && Number(v)===Number(f.value)) : String(v)===String(f.value??"");
+  const update = () => { const n = Object.keys(changes).length; $("af-count").textContent = n ? n+" unsaved change"+(n>1?"s":"") : ""; $("af-save").disabled = !n; $("af-discard").hidden = !n; };
+  $("af-body").querySelectorAll("[data-af]").forEach(el => { const f = byId[el.dataset.af];
+    const on = () => { const v = valOf(el); if(el.type==="checkbox") el.closest(".swrow").querySelector("[data-swl]").textContent = v?"On":"Off";
+      if(same(f,v) && !(f.missing && v!=="" && el.type!=="checkbox" && false)) delete changes[f.id]; else changes[f.id] = v;
+      el.closest(".aff").classList.toggle("changed", f.id in changes); update(); };
+    el.addEventListener(el.type==="checkbox"||el.tagName==="SELECT" ? "change" : "input", on); });
+  $("af-body").querySelectorAll("[data-reset]").forEach(r => r.onclick = () => { const f = byId[r.dataset.reset], el = $("af-body").querySelector(`[data-af="${CSS.escape(f.id)}"]`);
+    if(!el) return; if(el.type==="checkbox") el.checked = !!f.default; else el.value = f.default; el.dispatchEvent(new Event(el.type==="checkbox"||el.tagName==="SELECT"?"change":"input")); });
+  $("af-search").value = ""; update();
+  $("af-discard").onclick = () => openSettingsFile(fid).then(()=>{});
+  $("af-save").onclick = async () => { $("af-save").disabled = true; $("af-count").textContent = "Saving…";
+    try{ const r = await act("config.form_save",{server_id:id, file:fid, changes});
+      for(const k in changes) delete changes[k];
+      toast(r.saved.length ? "Saved "+r.saved.length+" setting"+(r.saved.length>1?"s":"")+(r.restart_needed?" - restart the server to use them":"") : "Nothing changed");
+      loadActivity(); openSettingsFile(fid); }
+    catch(e){ $("af-count").textContent = ""; toast("Not saved: "+e.message, 7000); update(); } };
+}
+$("af-search").oninput = () => { const q = $("af-search").value.trim().toLowerCase();
+  document.querySelectorAll("#af-body details.afg").forEach(g => { let n = 0;
+    g.querySelectorAll(".aff").forEach(w => { const hit = !q || w.dataset.q.includes(q); w.hidden = !hit; if(hit) n++; });
+    g.hidden = !n; if(q && n) g.open = true; }); };
+
+/* connect */
+async function loadConnect(){
+  const id = CUR, box = $("cn-body"); box.innerHTML = "<p class=note>Checking addresses and ports…</p>";
+  let d; try{ d = await act("server.connect_info",{server_id:id}); }catch(e){ box.innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
+  if(id!==CUR) return;
+  const row = (label, val, hint) => val ? `<div class="crow"><div><div class="note">${esc(label)}</div><code class="addr">${esc(val)}</code>${hint?`<div class="note">${esc(hint)}</div>`:""}</div><button class="ghost" data-copy="${esc(val)}">Copy</button></div>` : "";
+  const ports = d.ports.map(p=>`<tr><td>${p.port}</td><td>${esc(p.proto)}</td><td>${esc(p.label)}</td><td>${p.listening===true?'<span style="color:var(--ok)">listening</span>':p.listening===false?'<span style="color:var(--warn)">not listening</span>':`<span class="note">${d.running?"couldn't check":"server offline"}</span>`}</td></tr>`).join("");
+  box.innerHTML = `<div class="two">
+      <div class="panel"><h3>Addresses</h3>
+        ${row("From the internet (friends)", d.addresses.internet, "Needs the ports forwarded on your router.")}
+        ${row("Same home network", d.addresses.lan, "")}
+        ${row("Over Tailscale", d.addresses.tailscale, "For people on your tailnet.")}
+        ${!d.addresses.internet&&!d.addresses.lan?'<p class="note">No address found yet.</p>':""}</div>
+      <div class="panel"><h3>Checklist</h3>
+        <div class="act">${d.firewall===true?"✅ Windows Firewall allows this server":d.firewall===false?"⚠️ No Windows Firewall rule yet - use Open Firewall in the desktop app":"Windows Firewall: couldn't check"}</div>
+        <div class="act">${!d.running?"⏸ Start the server to check its ports":d.ports.length&&d.ports[0].listening?"✅ The server is listening on its game port":d.ports.length&&d.ports[0].listening===false?"⚠️ Not listening on the game port yet":"Port check not available"}</div>
+        ${d.tips.map(t=>`<div class="act note">${esc(t)}</div>`).join("")}</div></div>
+    <div class="panel" style="margin-top:12px"><h3>Ports to forward on your router</h3>
+      <table><thead><tr><th>Port</th><th>Protocol</th><th>Used for</th><th>Status</th></tr></thead><tbody>${ports||'<tr><td colspan=4 class=note>Unknown - set the game port in Settings.</td></tr>'}</tbody></table>
+      <div class="row mgr-only" style="margin-top:10px"><button class="primary" id="cn-upnp">Forward automatically (UPnP)</button><button class="ghost" id="cn-unupnp">Remove forwarding</button>
+        <span class="note grow">Works if your router has UPnP turned on. Otherwise add these ports in the router's settings, pointing at ${esc(d.lan_ips[0]||"this PC")}.</span></div></div>`;
+  box.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{ try{ await navigator.clipboard.writeText(b.dataset.copy); toast("Copied "+b.dataset.copy); }catch(e){ toast(b.dataset.copy); } });
+  const fw = async remove => { if(!confirm(remove?"Remove these port forwards from the router?":"Ask your router to forward these ports to the server PC? Anyone on the internet can then reach these ports.")) return;
+    toast("Talking to the router…"); try{ const r = await act("server.upnp",{server_id:id, remove}); toast(r.ok?(remove?"Forwarding removed: ":"Forwarded: ")+r.done.join(", "):(r.error||"Some ports failed: "+(r.failed||[]).map(f=>f.port).join(", ")), 8000); }catch(e){ toast("Failed: "+e.message, 7000); } };
+  if($("cn-upnp")) $("cn-upnp").onclick = () => fw(false);
+  if($("cn-unupnp")) $("cn-unupnp").onclick = () => fw(true);
+}
+
+/* history */
+const LINE = "#c98500";
+let SPARKS = {}, HRANGE = "24h";
+let _rz; window.addEventListener("resize", ()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ const h=document.querySelector("#m-manage section[data-p=history]"); if(CUR && h && !h.hidden) loadHistory(); }, 300); });
+async function loadSparks(){ try{ SPARKS = (await act("metrics.sparklines",{})).sparklines || {}; renderGrid(); }catch(e){} }
+function pathFor(vals, w, h, vmax, pad){ let d="", pen=false; const n=vals.length, step=(w-2*pad)/Math.max(n-1,1);
+  vals.forEach((v,i)=>{ if(v==null){ pen=false; return; } const x=pad+i*step, y=h-pad-(Math.min(v,vmax)/vmax)*(h-2*pad-8);
+    d += (pen?"L":"M")+x.toFixed(1)+" "+y.toFixed(1); pen=true; }); return d; }
+function drawSpark(svg, d){
+  if(!svg) return; d = d || {}; const pl = d.players, vals = pl || d.cpu || [];
+  const nums = vals.filter(v=>v!=null), peak = Math.max(1, ...nums);
+  const vmax = pl ? peak : 100, cap = !nums.length ? "" : pl ? `players, 6h (peak ${Math.max(0,...nums)})` : "CPU, 6h";
+  const key = JSON.stringify(vals)+cap; if(svg.dataset.k===key) return; svg.dataset.k = key;
+  svg.innerHTML = `<line x1="0" y1="29.5" x2="300" y2="29.5" stroke="var(--border2)" stroke-dasharray="1 3"/>`
+    + (nums.length?`<path d="${pathFor(vals,300,30,vmax,3)}" fill="none" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`:"");
+  svg.setAttribute("aria-label", cap);
+  let t = svg.parentElement.querySelector(".sparkcap"); if(!t){ t=document.createElement("div"); t.className="sparkcap note"; t.style.cssText="font-size:11px;text-align:right;margin-top:-4px"; svg.after(t); } t.textContent = cap;
+}
+document.querySelectorAll("#h-range button").forEach(b=>b.onclick=()=>{ HRANGE=b.dataset.r; document.querySelectorAll("#h-range button").forEach(x=>x.classList.toggle("on",x===b)); loadHistory(); });
+const fmtMB = v => v>=1024 ? (v/1024).toFixed(1)+" GB" : Math.round(v)+" MB";
+function nice(v){ if(v<=0) return 1; const e=Math.pow(10,Math.floor(Math.log10(v))); for(const m of [1,2,2.5,5,10]) if(v<=m*e) return m*e; return 10*e; }
+async function loadHistory(){
+  const id = CUR, box = $("h-charts"); box.style.opacity = .5;
+  let d; try{ d = await act("metrics.series",{server_id:id, range:HRANGE}); }catch(e){ box.innerHTML=`<p class=note>${esc(e.message)}</p>`; box.style.opacity=1; return; }
+  if(id!==CUR) return; box.style.opacity = 1;
+  const st=[]; if(d.avg_cpu!=null) st.push("avg CPU "+d.avg_cpu+"%"); if(d.peak_ram) st.push("peak RAM "+fmtMB(d.peak_ram)); if(d.ram_trend) st.push(d.ram_trend); if(d.peak_players!=null) st.push("peak "+d.peak_players+" players");
+  $("h-stats").textContent = st.join(" · ");
+  box.innerHTML = "";
+  chart(box, "CPU", d, p=>p.cpu, v=>Math.round(v)+"%", "No data yet - BaoBun records usage once a minute while the server runs.");
+  chart(box, "RAM", d, p=>p.ram, fmtMB, "");
+  chart(box, "Players", d, p=>p.players, v=>String(Math.round(v)), "This game doesn't report players (or the server wasn't running).");
+}
+function chart(box, title, d, get, fmt, empty){
+  const W=Math.max(320, Math.round(box.clientWidth-26)), H=150, L=56, R=8, T=10, B=22, wrap=document.createElement("div"); wrap.className="chart";
+  const h4=document.createElement("h4"); h4.textContent=title; wrap.appendChild(h4);
+  const tip=document.createElement("div"); tip.className="tip"; wrap.appendChild(tip);
+  const pts = d.points.map(p=>[p.ts, get(p)]), vals = pts.filter(p=>p[1]!=null);
+  const top = nice(Math.max(...vals.map(p=>p[1]), 0)*1.1 || 1), span = Math.max(d.until-d.since,1);
+  const X = ts => L+(ts-d.since)/span*(W-L-R), Y = v => (H-B)-(v/top)*(H-B-T);
+  const tf = ts => new Date(ts*1000).toLocaleString([], span>86400?{weekday:"short",hour:"2-digit",minute:"2-digit"}:{hour:"2-digit",minute:"2-digit"});
+  let g = "";
+  [0,.5,1].forEach(f=>{ const y=(H-B)-f*(H-B-T); g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--border)"/><text x="${L-8}" y="${y+4}" text-anchor="end" fill="var(--muted)" font-size="11">${esc(fmt(top*f))}</text>`; });
+  [[0,"start"],[.5,"middle"],[1,"end"]].forEach(([f,a])=>{ g+=`<text x="${L+f*(W-L-R)}" y="${H-4}" text-anchor="${a}" fill="var(--muted)" font-size="11">${esc(tf(d.since+f*span))}</text>`; });
+  let path="", pen=false, last=null;
+  pts.forEach(([ts,v])=>{ if(v==null || (last!=null && ts-last>d.bucket*2.5)) pen=false; if(v==null) return; path+=(pen?"L":"M")+X(ts).toFixed(1)+" "+Y(v).toFixed(1); pen=true; last=ts; });
+  g += vals.length ? `<path d="${path}" fill="none" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--muted)" font-size="13">${esc(empty||"No data yet")}</text>`;
+  g += `<line class="xh" y1="${T}" y2="${H-B}" stroke="var(--muted)" visibility="hidden"/><circle class="dot" r="4" fill="${LINE}" stroke="var(--card)" stroke-width="2" visibility="hidden"/>`;
+  g += `<rect x="${L}" y="0" width="${W-L-R}" height="${H}" fill="transparent" class="hit"/>`;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.setAttribute("role","img"); svg.setAttribute("aria-label", title+" over the last "+HRANGE);
+  svg.innerHTML = g; wrap.appendChild(svg); box.appendChild(wrap);
+  const xh=svg.querySelector(".xh"), dot=svg.querySelector(".dot");
+  const move = e => { if(!vals.length) return; const r=svg.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*W;
+    const ts = d.since+(x-L)/(W-L-R)*span; const p = vals.reduce((a,b)=>Math.abs(b[0]-ts)<Math.abs(a[0]-ts)?b:a);
+    if(Math.abs(p[0]-ts)>d.bucket*3){ hide(); return; }
+    xh.setAttribute("x1",X(p[0])); xh.setAttribute("x2",X(p[0])); xh.setAttribute("visibility","visible");
+    dot.setAttribute("cx",X(p[0])); dot.setAttribute("cy",Y(p[1])); dot.setAttribute("visibility","visible");
+    tip.textContent=""; const b=document.createElement("b"); b.textContent=fmt(p[1]); tip.append(b, "  "+tf(p[0])); };
+  const hide = () => { xh.setAttribute("visibility","hidden"); dot.setAttribute("visibility","hidden"); tip.textContent=""; };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerleave", hide);
+}
+
+/* add server */
+let PICK = null;
+function openAdd(){ PICK=null; $("a-details").hidden=true; $("a-search").value=""; renderGames(); openModal("m-add"); setTimeout(()=>$("a-search").focus(),50); }
+let ACAT = "popular";
+const GCATS = [["popular","Popular"],["survival","Survival & crafting"],["shooter","Shooters & PvP"],["sandbox","Sandbox & building"],["other","Everything else"],["all","All"]];
+function renderGames(){ const q=$("a-search").value.trim().toLowerCase();
+  $("a-cats").innerHTML = GCATS.map(c=>`<span class="chip ${ACAT===c[0]&&!q?"on":""}" data-cat="${c[0]}">${esc(c[1])}</span>`).join("");
+  $("a-cats").querySelectorAll("[data-cat]").forEach(c=>c.onclick=()=>{ ACAT=c.dataset.cat; $("a-search").value=""; renderGames(); });
+  const inCat = g => q || ACAT==="all" || (ACAT==="popular" ? g.popular : (g.category||"other")===ACAT);
+  const list = GAMES.filter(g=>g.name!=="Custom / Other" && inCat(g) && (!q||g.name.toLowerCase().includes(q)||(g.description||"").toLowerCase().includes(q))).sort((a,b)=>{ const r=g=>!q?0:g.name.toLowerCase().startsWith(q)?0:g.name.toLowerCase().split(/\W+/).some(w=>w.startsWith(q))?1:2; return r(a)-r(b) || a.name.localeCompare(b.name); }).slice(0,200);
+  $("a-games").innerHTML = list.map(g=>`<button class="gamebtn ${PICK===g.name?"sel":""}" data-n="${esc(g.name)}">${esc(g.name)}<small>${g.appId?"Steam download"+(g.anonymous_login===false?" · needs Steam account":""):g.download?"one-click download":g.manual?"files from the game's own site":"copy files in by hand"}${g.support==="basic"?' · <span title="BaoBun installs and runs it, but its settings are found by searching the server folder - some may need setting by hand.">basic support</span>':""}</small></button>`).join("") || "<p class=note>No match.</p>";
+  document.querySelectorAll(".gamebtn").forEach(b=>b.onclick=()=>pick(b.dataset.n)); }
+$("a-search").oninput = renderGames;
+// Restore on another PC: servers set up again here from the backup-copy folder
+let BRJOB = null;
+async function openBring(){
+  closeModal("m-add"); openModal("m-bring");
+  const box = $("br-body"); box.innerHTML = '<p class="note">Looking in the backup-copy folder…</p>';
+  let r; try{ r = await act("servers.bring_scan",{}); }catch(e){ box.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
+  const intro = `<p class="note" style="margin-top:0">Set servers up again on this PC from their backup copies. BaoBun installs each game and puts the newest world back, into ${esc(r.base)}.</p>`;
+  if(r.error){ box.innerHTML = intro+`<p class="note">${esc(r.error)}</p><p class="note">It looks in the "Also copy backups to" folder (Server PC settings). On a new PC, set it to the folder the old PC copied its backups to.</p>`; return; }
+  if(!r.servers.length){ box.innerHTML = intro+`<p class="note">No server backups in ${esc(r.folder)}.</p>`; return; }
+  box.innerHTML = intro + r.servers.map(e=>`<label class="check" style="align-items:flex-start;margin-top:8px"><input type="checkbox" data-key="${esc(e.key)}" ${e.can_bring&&!e.here?"checked":""} ${e.can_bring?"":"disabled"}> <span><b>${esc(e.name)}</b> <span class="note">${e.can_bring?esc(e.game||"")+" · newest backup "+new Date(e.newest_time*1000).toLocaleString()+(e.here?" · already on this PC":""):esc(e.why_not)}</span></span></label>`).join("")
+    + `<p class="note" style="color:var(--warn,#e0a040)">⚠ ${esc(r.note)}</p><div class="row"><button class="primary" id="br-go">Bring here</button></div><p class="note" id="br-prog"></p>`;
+  $("br-go").onclick = async ()=>{
+    const picks = [...box.querySelectorAll("input[data-key]:checked")].map(c=>({key:c.dataset.key}));
+    if(!picks.length){ $("br-prog").textContent = "Tick at least one server."; return; }
+    if(!confirm(r.note+"\n\nGo ahead?")) return;
+    try{ BRJOB = (await act("servers.bring",{picks})).job; }catch(e){ $("br-prog").textContent = e.message; return; }
+    $("br-go").disabled = true; bringPoll();
+  };
+}
+async function bringPoll(){
+  let j; try{ j = (await act("servers.bring_job",{job:BRJOB})).job; }catch(e){ return; }
+  const out = $("br-prog"); if(!j||!out) return;
+  if(j.state==="working"){ out.textContent = `${j.done.length+j.failed.length} of ${j.total} done · ${j.step||""}`; setTimeout(bringPoll, 1500); return; }
+  out.innerHTML = j.done.map(d=>`✅ <b>${esc(d.name)}</b> - ${esc(d.notes.join(" "))}${d.warnings.map(w=>"<br>⚠ "+esc(w)).join("")}`).concat(j.failed.map(f=>`❌ <b>${esc(f.name)}</b> - ${esc(f.error)}`)).join("<br>");
+  $("br-go").disabled = false;
+  if(typeof refresh === "function") refresh();
+}
+$("a-bring").onclick = openBring;
+function pick(n){ PICK=n; const g=GAMES.find(x=>x.name===n); renderGames(); $("a-details").hidden=false; $("a-name").value=n; $("a-port").value=g.port||"";
+  $("a-install").parentElement.style.display = g.download ? "" : "none";
+  $("a-install-l").textContent = g.download==="minecraft" ? "Then choose a Minecraft type and download it" : "Download it now";
+  const man = g.manual||null;
+  $("a-note").innerHTML = g.appId ? esc(g.anonymous_login===false?"This game needs a Steam account that owns it - the owner must set one in the desktop app first.":"")
+    : g.download ? "" : man ? `${esc(man.how)} <a href="${esc(man.url)}" target="_blank" rel="noopener">Download page</a>` : "After creating it, copy the game's server files into its folder on the server PC."; }
+$("a-create").onclick = async () => { if(!PICK) return; $("a-create").disabled=true;
+  try{ const r = await act("server.add_preset",{game:PICK, name:$("a-name").value.trim(), port:$("a-port").value?parseInt($("a-port").value):null, auto_start:$("a-auto").checked});
+    const g=GAMES.find(x=>x.name===PICK);
+    closeModal("m-add");
+    if(g&&g.download&&$("a-install").checked){
+      if(g.download==="steam"){ await act("server.install",{server_id:r.server.id}); toast("Created "+r.server.name+" - downloading now"); }
+      else { toast("Created "+r.server.name); await refresh(); openInstall(r.server.id); }
+    } else toast("Created "+r.server.name);
+    refresh(); loadActivity(); }
+  catch(e){ toast("Failed: "+e.message,6000); }
+  $("a-create").disabled=false; };
+/* install Vintage Story / Minecraft */
+let INST = null;
+async function openInstall(sid){
+  const srv = S.servers[sid]||{}; let o;
+  try{ o = await act("server.install_options",{server_id:sid}); }catch(e){ toast("Failed: "+e.message,6000); return; }
+  if(!o.kind || o.kind==="steam") return;
+  INST = {sid, kind:o.kind, polling:null};
+  $("i-title").textContent = ({minecraft:"Minecraft server",hytale:"Hytale server"}[o.kind]||"Vintage Story server")+" - "+(srv.name||"");
+  $("i-version-wrap").hidden = o.kind==="hytale"; $("i-signin").style.display="none";
+  $("i-hy").style.display = o.kind==="hytale" ? "" : "none";
+  $("i-info").textContent = o.kind==="hytale"
+    ? "BaoBun gets Java 25 and runs Hytale's own downloader. The first time, a sign-in link and code show up here - open it, sign in with your Hytale account and enter the code (BaoBun never sees your password). Settings, worlds and mods in the folder are kept on updates."+(o.signedIn?"":" After it's installed, start the server and use 'Sign the server in' once.")
+    : o.kind==="minecraft"
+    ? "BaoBun downloads the server and the right Java for it. Switching type or version keeps your world, but back it up first - worlds don't go back to older versions."
+    : (o.state==="vanilla" ? `Installed: ${o.installedVersion||"unknown"}. Installing again updates the game files; worlds, mods and settings are kept.` : o.state==="custom" ? "This server runs a custom build - BaoBun won't overwrite it." : "Downloads the official server from vintagestory.at.");
+  $("i-flavor-wrap").hidden = o.kind!=="minecraft";
+  $("i-eula-wrap").hidden = !(o.kind==="minecraft" && o.needsEula); $("i-eula").checked = false;
+  if(o.kind==="minecraft") $("i-flavor").innerHTML = (o.flavors||MCFLAVORS).map(f=>`<option value="${esc(f.id)}" ${f.id===o.flavor?"selected":""}>${esc(f.label)}</option>`).join("");
+  $("i-bar").hidden = true; $("i-prog").textContent = ""; $("i-go").disabled = o.state==="custom" || o.running; $("i-go").textContent = "Install";
+  if(o.running) $("i-prog").textContent = o.kind==="hytale" ? "Stop the server to install or update - signing it in works while it runs." : "Stop the server first.";
+  openModal("m-inst"); if(o.kind!=="hytale") loadInstVersions();
+}
+function showSignin(si){ const box=$("i-signin"); if(!si||!/^https:\/\//.test(si.url||"")){ return; }
+  box.style.display=""; $("i-signin-a").href=si.url; $("i-signin-a").textContent=si.url; $("i-signin-c").textContent=si.code||""; }
+$("i-hy").onclick = async () => { const b=$("i-hy"); b.disabled=true; $("i-prog").textContent="Asking the server for a sign-in link… (it has to be running)";
+  try{ const r = await act("server.hytale_signin",{server_id:INST.sid});
+    if(r.url){ showSignin(r); $("i-prog").textContent="Open the link, sign in with your Hytale account and enter the code. The sign-in is remembered."; }
+    else $("i-prog").textContent="Sent /auth login device - the link and code are in the server's console."; }
+  catch(e){ $("i-prog").textContent="Failed: "+e.message; }
+  b.disabled=false; };
+async function loadInstVersions(){
+  const sel = $("i-version"); sel.innerHTML = `<option value="">Newest</option>`;
+  try{ const r = await act("server.install_versions",{kind:INST.kind, flavor:INST.kind==="minecraft"?$("i-flavor").value:"vanilla"});
+    sel.innerHTML += (r.versions||[]).map(v=>`<option>${esc(v)}</option>`).join("");
+    if(r.versions&&r.versions.length) sel.options[0].textContent = "Newest ("+r.versions[0]+")"; }
+  catch(e){ $("i-prog").textContent = "Couldn't load the version list: "+e.message; }
+}
+$("i-flavor").onchange = loadInstVersions;
+$("i-close").onclick = () => { closeModal("m-inst"); if(INST&&INST.polling) clearTimeout(INST.polling); };
+$("i-go").onclick = async () => {
+  if(INST.kind==="minecraft" && !$("i-eula-wrap").hidden && !$("i-eula").checked){ $("i-prog").textContent = "Tick the EULA box first - Minecraft servers won't run without it."; return; }
+  const p = {server_id:INST.sid, accept_eula:$("i-eula").checked}; if($("i-version").value) p.version = $("i-version").value;
+  if(INST.kind==="minecraft") p.flavor = $("i-flavor").value;
+  $("i-go").disabled = true; $("i-bar").hidden = false; $("i-bar").firstElementChild.style.width = "0%"; $("i-prog").textContent = "Starting…";
+  try{ await act("server.install", p); }catch(e){ $("i-prog").textContent = "Failed: "+e.message; $("i-go").disabled=false; return; }
+  const started = Date.now()/1000;
+  const poll = async () => { let r; try{ r = await act("server.install_status",{server_id:INST.sid}); }catch(e){ INST.polling=setTimeout(poll,2000); return; }
+    if(r.signin) showSignin(r.signin);
+    if(r.percent!=null){ $("i-bar").firstElementChild.style.width = r.percent+"%"; $("i-prog").textContent = (r.phase||"working").replace(/^./,c=>c.toUpperCase())+"… "+Math.round(r.percent)+"%"; }
+    const res = r.result; if(!r.running && res && res.at >= started-5){
+      if(res.ok){ $("i-bar").firstElementChild.style.width="100%"; $("i-prog").textContent = "Installed "+(res.version||"")+"."+((res.notes||[]).length?" "+res.notes.join(" "):""); toast("Installed "+(res.version||"")); refresh(); }
+      else { $("i-prog").textContent = "Install failed: "+(res.error||"unknown error"); }
+      $("i-go").disabled = false; $("i-go").textContent = "Install again"; return; }
+    INST.polling = setTimeout(poll, 1200); };
+  INST.polling = setTimeout(poll, 800);
+};
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){
+  if(!$("lightbox").hidden){ $("lightbox").hidden = true; return; }
+  if($("m-mod").classList.contains("open")){ closeModal("m-mod"); return; }
+  closeModal("m-add"); closeModal("m-inst"); if(CUR) closeManage(); } });
+boot();
+</script>
+</body>
+</html>
