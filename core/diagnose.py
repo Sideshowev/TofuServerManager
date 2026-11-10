@@ -101,8 +101,8 @@ PATTERNS = [
     ("needs_steam_client",
      r"(steam client is not running)",
      "This game needs Steam running on the PC",
-     "This game's server only works while the Steam app is open and signed in on this PC. Start Steam, then start the server again.",
-     None),
+     "This game's server only works while the Steam app is open and signed in on this PC. Start Steam, "
+     "then start the server again.", None),
     ("steam_init",
      r"(steamapi_init\(\) failed|steam_appid\.txt|steamgameserver_init failed|failed to initialize steam)",
      "Steam couldn't start inside the server",
@@ -117,8 +117,8 @@ PATTERNS = [
     ("source_game_folder",
      r"unable to find gameinfo\.txt",
      "The server wasn't told which game folder to use",
-     "This is a Source engine game. In Edit Server, add -game followed by the name of the folder that has gameinfo.txt in it to the launch options (for example -game cstrike), then start it again.",
-     None),
+     "This is a Source engine game. In Edit Server, add -game followed by the name of the folder that has "
+     "gameinfo.txt in it to the launch options (for example -game cstrike), then start it again.", None),
     ("mod_error",
      r"(failed (loading|to load) mod|exception (while|when) loading mod|mod .* (failed|threw|crashed)|"
      r"missing dependency|requires mod|incompatible mod|modloader.*error|\[mod\].*error)",
