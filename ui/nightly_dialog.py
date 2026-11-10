@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 
 import customtkinter as ctk
+from ui.app_common import later
 
 
 def _when(ts):
@@ -118,7 +119,7 @@ def open_nightly_dialog(app, theme):
             from core import boot_task
             ok = boot_task.installed()
             mode = boot_task.mode() if ok else None
-            app.after(0, lambda: show_boot(mode, ok))
+            later(app, lambda: show_boot(mode, ok))
         threading.Thread(target=work, daemon=True).start()
 
     def setup(network):
@@ -165,7 +166,7 @@ def open_nightly_dialog(app, theme):
                 res = (nightly.preview(mgr), None)
             except Exception as e:
                 res = (None, str(e))
-            app.after(0, lambda: show_preview(*res))
+            later(app, lambda: show_preview(*res))
         threading.Thread(target=work, daemon=True).start()
 
     def save():
