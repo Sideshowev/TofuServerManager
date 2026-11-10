@@ -586,6 +586,10 @@ class CrashHelpAndAlertTests(unittest.TestCase):
         self.assertEqual(explain(0, ["all fine"], uptime=3)[0]["key"], "quick_exit")
         self.assertEqual(explain(7, ["all fine"], uptime=600)[0]["key"], "unknown")
         self.assertEqual(explain(0, ["all fine"], uptime=600), [])
+        f = explain(1, ['src\\public\\tier1\\interface.h (273) : Assertion Failed: Failed to load "SDL3.dll"'])
+        self.assertEqual(f[0]["key"], "game_library")
+        self.assertEqual(explain(1, ["Could not load library steam_api64.dll"])[0]["key"], "game_library")
+        self.assertEqual(explain(1, ["Failed to load vcruntime140.dll"])[0]["key"], "vcredist_missing")
         for line in ("LogBRAuthSubsystem: Error: Authentication failed on dedicated server. Exiting now.",
                      '[00:00:04]: [200] Account Failed (6): "E_INVALID_TOKEN"',
                      "[00:00:04]: No auth token could be found."):

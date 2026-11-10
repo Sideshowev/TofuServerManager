@@ -73,6 +73,11 @@ PATTERNS = [
      r"(vcruntime1\d\d(_1)?\.dll|msvcp1\d\d\.dll|msvcr\d+\.dll|ucrtbase\.dll|api-ms-win-crt)",
      "The Microsoft Visual C++ Redistributable is missing",
      "Install the latest Visual C++ Redistributable (x64) from Microsoft, then start again.", VCREDIST_URL),
+    ("game_library",
+     r"(failed|could not) (to )?load",
+     "One of the game's own files couldn't be loaded",
+     "Use Install / repair to re-check the game files. If it keeps happening, this server may need to be started from a different folder or program - check the game's server guide.",
+     None),
     ("out_of_memory",
      r"(outofmemoryexception|out of memory|std::bad_alloc|insufficient memory|"
      r"not enough memory|cannot allocate memory|malloc.*failed|java\.lang\.outofmemoryerror)",
