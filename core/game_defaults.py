@@ -113,6 +113,13 @@ def required(srv: dict) -> Tuple[str, List[str]]:
             notes.append("start map KF-BioticsLab")
         if "-port=" not in args.lower():
             args = (args + " -Port=%s" % (srv.get("port") or 7777)).strip()
+    elif app in ("380870", "108600"):                     # Project Zomboid asks for an admin password on
+        # its first start and waits for someone to type it; -adminpassword answers it. It goes first
+        # because the game's StartServer64.bat may only pass its first two options on.
+        if not _either(args, "-adminpassword") and not _zomboid_has_admin(args):
+            args = ("-adminpassword %s %s" % (make_password(), args)).strip()
+            notes.append("an admin password (Project Zomboid asks for one the first time it starts - it's "
+                         "shown in the Settings tab; log in as \"admin\" with it)")
     elif app in PREFIX:                                   # start options checked against WindowsGSM
         port = str(srv.get("port") or "")
         lead, rules = PREFIX[app]
@@ -146,6 +153,36 @@ PREFIX = {
 
 
 SOURCE = {"730": ("", "de_dust2"), "232250": ("tf", "ctf_2fort"), "222860": ("left4dead2", "c1m1_hotel")}
+
+# Games that only find their own files when started from the folder their program is in.
+# Don't Starve Together looks for ..\data from there ("Could not load lua file scripts/main.lua").
+STARTS_IN_OWN_FOLDER = {"343050"}
+
+
+def working_dir(srv: dict, exe: str, directory: str) -> str:
+    """The folder to start a game in: its install folder, except for the few games
+    that have to be started from the folder their program is in."""
+    import os
+    if str(srv.get("appId") or "") in STARTS_IN_OWN_FOLDER:
+        own = os.path.dirname(exe or "")
+        if own and os.path.isdir(own):
+            return own
+    return directory
+
+
+def _either(args: str, flag: str) -> str:
+    """Value of "-flag value" or "-flag=value"."""
+    m = re.search(r'(?i)(?:^|\s)%s(?:=|\s+)("([^"]*)"|(\S+))' % re.escape(flag), args or "")
+    return (m.group(2) if m.group(2) is not None else m.group(3)) if m else ""
+
+
+def _zomboid_has_admin(args: str) -> bool:
+    """True once Project Zomboid has made its accounts file (so the admin already has a password)."""
+    import os
+    home = os.environ.get("USERPROFILE") or os.path.expanduser("~")
+    cache = _either(args, "-cachedir") or os.path.join(home, "Zomboid")
+    name = _either(args, "-servername") or "servertest"
+    return os.path.isfile(os.path.join(cache, "db", name + ".db"))
 
 
 def _is_srcds(srv: dict) -> bool:

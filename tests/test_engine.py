@@ -3895,6 +3895,56 @@ class BroadFolderTests(unittest.TestCase):
 
 
 class GameDefaultsTests(unittest.TestCase):
+    def test_zomboid_gets_an_admin_password_once(self):
+        from core import game_defaults as G
+        home = tempfile.mkdtemp()
+        with mock.patch.dict(os.environ, {"USERPROFILE": home}):
+            args, notes = G.required({"appId": "380870", "launchArgs": "-port 16261"})
+            self.assertTrue(args.startswith("-adminpassword "), "should add admin password")
+            self.assertIn("-port 16261", args, "original args preserved")
+            pw = G._either(args, "-adminpassword")
+            self.assertGreaterEqual(len(pw), 5, "password length >= 5")
+            self.assertEqual(len(notes), 1, "one note generated")
+            self.assertNotIn(pw, notes[0], "password not in note text")
+
+            args2, notes2 = G.required({"appId": "380870", "launchArgs": args})
+            self.assertEqual((args2, notes2), (args, []), "nothing added twice")
+
+            args3, _ = G.required({"appId": "108600", "launchArgs": ""})
+            self.assertIn("-adminpassword", args3, "other appId also gets password")
+
+            db_path = Path(home) / "Zomboid" / "db" / "servertest.db"
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            db_path.touch()
+            args4, notes4 = G.required({"appId": "380870", "launchArgs": ""})
+            self.assertEqual((args4, notes4), ("", []), "no password when admin exists")
+
+            args5, _ = G.required({"appId": "380870", "launchArgs": "-servername other"})
+            self.assertIn("-adminpassword", args5, "other server gets password")
+
+            cache = tempfile.mkdtemp()
+            (Path(cache) / "db" / "servertest.db").parent.mkdir(parents=True, exist_ok=True)
+            (Path(cache) / "db" / "servertest.db").touch()
+            args6 = "-cachedir=" + cache
+            args7, notes7 = G.required({"appId": "380870", "launchArgs": args6})
+            self.assertEqual((args7, notes7), (args6, []), "unchanged with cachedir")
+
+    def test_dont_starve_starts_in_its_program_folder(self):
+        from core import game_defaults as G
+        d = Path(tempfile.mkdtemp())
+        bin_dir = d / "bin64"
+        bin_dir.mkdir()
+        exe = str(d / "bin64" / "server.exe")
+
+        self.assertEqual(G.working_dir({"appId": "343050"}, exe, str(d)), str(bin_dir),
+                         "Don't Starve starts in program folder")
+        self.assertEqual(G.working_dir({"appId": "896660"}, exe, str(d)), str(d),
+                         "other games start in install folder")
+        self.assertEqual(G.working_dir({"appId": "343050"}, str(d / "missing" / "server.exe"), str(d)),
+                         str(d), "fallback when folder doesn't exist")
+        self.assertEqual(G.working_dir({"appId": "343050"}, "", str(d)), str(d),
+                         "fallback with empty exe path")
+
     def test_valheim_gets_what_it_needs(self):
         from core import game_defaults as G
         args, notes = G.required({"appId": "896660", "name": "Viking Fun", "port": 2470, "launchArgs": ""})

@@ -1205,8 +1205,10 @@ class ServerManager:
             # Hidden console (not DETACHED) so console-based servers behave normally;
             # own process group so a GUI Ctrl+C never reaches the game.
             creation_flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+        from core import game_defaults as _gd
+        start_in = _gd.working_dir(srv_def, exe, directory)
         def popen(env):
-            return subprocess.Popen(cmd, cwd=directory, stdin=subprocess.PIPE, stdout=log_file,
+            return subprocess.Popen(cmd, cwd=start_in, stdin=subprocess.PIPE, stdout=log_file,
                                     stderr=subprocess.STDOUT, env=env, creationflags=creation_flags)
         try:
             try:
@@ -1575,6 +1577,10 @@ class ServerManager:
             mc_line = None
         if mc_line and os.path.basename(exe).lower() == "run.bat":
             return os.path.join(directory, "run.bat")   # Forge/NeoForge ship their own launcher
+        from core import game_defaults as _gd
+        start_in = _gd.working_dir(srv_def, exe, directory)
+        if start_in != directory:
+            lines.append('cd /d "' + start_in + '"')
         lines.append(mc_line or ('"' + exe + '" ' + (srv_def.get("launchArgs") or "")))
         lines.append("if errorlevel 1 pause")
 
