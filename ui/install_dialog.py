@@ -10,6 +10,7 @@ import os
 import threading
 
 import customtkinter as ctk
+from ui.app_common import later
 
 
 def open_install_dialog(app, theme, server_id, on_finished=None):
@@ -95,7 +96,7 @@ def open_install_dialog(app, theme, server_id, on_finished=None):
                     version_var.set("Newest")
                 ver_note.configure(text=("Newest is %s." % vs[0]) if vs else ("Couldn't load versions: %s" % err
                                                                               if err else ""))
-            app.after(0, show)
+            later(app, show)
         threading.Thread(target=work, daemon=True).start()
 
     def go():
