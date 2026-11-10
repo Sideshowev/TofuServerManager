@@ -1,7 +1,9 @@
-"""Add Server wizard: pick a game -> name & folder -> review & install.
+"""Add Server wizard: pick a game -> name & folder -> (in-game settings) -> review & install.
 
-Three screens, sensible defaults everywhere (folder, free ports), and a live
-SteamCMD progress bar. The old full form stays available via "Advanced form".
+Sensible defaults everywhere (folder, free ports) and a live SteamCMD progress
+bar. Games whose server name, password and max players BaoBun can set for sure
+(core/first_settings.py) get one more screen asking for them. The old full form
+stays available via "Advanced form".
 """
 
 from __future__ import annotations
@@ -37,6 +39,9 @@ class AddServerWizard(ctk.CTkToplevel):
         self.game: Optional[str] = None
         self.server_id: Optional[str] = None
         self._installing = False
+        self._ask = []            # in-game settings to ask for the picked game
+        self._ask_vars = {}
+        self._first = {}          # the checked answers
 
         self.header = ctk.CTkLabel(self, text="", anchor="w", text_color=theme["text_light"],
                                    font=("Bahnschrift SemiBold", 20, "bold"))
@@ -55,7 +60,8 @@ class AddServerWizard(ctk.CTkToplevel):
         for w in list(self.body.winfo_children()) + list(self.footer.winfo_children()):
             w.destroy()
         self.header.configure(text=title)
-        names = ["1  Choose a game", "2  Name & folder", "3  Review & install"]
+        names = ["Choose a game", "Name & folder"] + (["In the game"] if self._ask else []) + ["Review & install"]
+        names = ["%d  %s" % (i, n) for i, n in enumerate(names, 1)]
         self.steps_lbl.configure(text="     ".join(("● " if i == step else "○ ") + n
                                                   for i, n in enumerate(names, 1)))
 
@@ -140,8 +146,15 @@ class AddServerWizard(ctk.CTkToplevel):
 
     # -- step 2 ---------------------------------------------------------------------
     def show_details(self, game: str):
+        if game != self.game:
+            self._ask_vars, self._first = {}, {}
         self.game = game
         p = self.presets.get(game, {})
+        try:
+            from core import first_settings
+            self._ask = first_settings.fields(p) if game != "Custom / Other" else []
+        except Exception:
+            self._ask = []
         self._reset(game, 2)
         t = self.theme
         port = None
@@ -210,7 +223,7 @@ class AddServerWizard(ctk.CTkToplevel):
                          justify="left", anchor="w", text_color=t["warning"]).pack(fill="x", padx=16, pady=(12, 0))
         self.err_lbl = ctk.CTkLabel(self.body, text="", anchor="w", text_color=t["danger"])
         self.err_lbl.pack(fill="x", padx=16, pady=(8, 0))
-        self._btn("Next ›", self.show_review, primary=True)
+        self._btn("Next ›", self._details_next, primary=True)
         self._btn("‹ Back", self.show_pick, side="left")
 
     def _browse(self):
@@ -228,8 +241,7 @@ class AddServerWizard(ctk.CTkToplevel):
         except Exception:
             pass
 
-    # -- step 3 -------------------------------------------------------------------
-    def show_review(self):
+    def _details_next(self):
         name = self.name_var.get().strip()
         if not name:
             self.err_lbl.configure(text="Give the server a name.")
@@ -250,14 +262,74 @@ class AddServerWizard(ctk.CTkToplevel):
                 return
         self._pending = {"name": name, "dir": self._target_dir(), "port": port,
                          "auto": bool(self.auto_var.get()), "restart": bool(self.restart_var.get())}
+        if self._ask:
+            self.show_game_settings()
+        else:
+            self._first = {}
+            self.show_review()
+
+    # -- step 3 (only for games whose settings BaoBun can set for sure) ---------------
+    def show_game_settings(self):
+        t = self.theme
+        self._reset(self.game + " - in the game", 3)
+        ctk.CTkLabel(self.body, text="What players see when they look for your server. BaoBun writes these into "
+                                     "%s's own settings - you can change them later in the server's Settings "
+                                     "tab." % self.game, anchor="w", justify="left", wraplength=600,
+                     text_color=t["text_muted"]).pack(fill="x", padx=16, pady=(14, 0))
+        for f in self._ask:
+            var = self._ask_vars.get(f["key"])
+            if var is None:
+                start = self._pending["name"] if f["kind"] == "name" else (f.get("value") or "")
+                var = self._ask_vars[f["key"]] = ctk.StringVar(value=start)
+            ctk.CTkLabel(self.body, text=f["label"] + ("  (needed)" if f.get("required") else ""),
+                         anchor="w", text_color=t["text_light"]).pack(fill="x", padx=16, pady=(14, 0))
+            ctk.CTkEntry(self.body, textvariable=var, height=34,
+                         width=140 if f["kind"] == "players" else 380).pack(anchor="w", padx=16)
+            if f.get("help"):
+                ctk.CTkLabel(self.body, text=f["help"], anchor="w", justify="left", wraplength=600,
+                             text_color=t["text_muted"], font=("Segoe UI", 10)).pack(fill="x", padx=16)
+        self.ask_err = ctk.CTkLabel(self.body, text="", anchor="w", justify="left", wraplength=600,
+                                    text_color=t["danger"])
+        self.ask_err.pack(fill="x", padx=16, pady=(10, 0))
+        self._btn("Next ›", self._game_settings_next, primary=True)
+        self._btn("‹ Back", lambda: self.show_details(self.game), side="left")
+
+    def _game_settings_next(self):
+        from core import first_settings
+        try:
+            self._first = first_settings.check(self.presets.get(self.game, {}),
+                                               {k: v.get() for k, v in self._ask_vars.items()})
+        except ValueError as e:
+            self.ask_err.configure(text=str(e))
+            return
+        self.show_review()
+
+    def _first_text(self) -> str:
+        """The in-game choices in a few words (the password itself is not shown)."""
+        parts = []
+        for f in self._ask:
+            v = self._first.get(f["key"])
+            if f["kind"] == "name" and v:
+                parts.append('name "%s"' % v)
+            elif f["kind"] == "password":
+                parts.append("password set" if v else "no password")
+            elif f["kind"] == "players":
+                parts.append("%s players" % v if v else "the game's own player limit")
+        return ", ".join(parts)
+
+    # -- last step ------------------------------------------------------------------
+    def show_review(self):
+        name, port = self._pending["name"], self._pending["port"]
         p = self.presets.get(self.game, {})
-        self._reset("Ready to create " + name, 3)
+        self._reset("Ready to create " + name, 4 if self._ask else 3)
         t = self.theme
         lines = [("Game", self.game), ("Folder", self._pending["dir"]),
                  ("Port", str(port) if port else "game default"),
-                 ("Starts at boot", "yes" if self._pending["auto"] else "no (start it when you need it)"),
-                 ("Download", "SteamCMD, App %s" % p["appId"] if p.get("appId")
-                  else self._download_text(p))]
+                 ("Starts at boot", "yes" if self._pending["auto"] else "no (start it when you need it)")]
+        if self._ask:
+            lines.append(("In the game", self._first_text()))
+        lines += [("Download", "SteamCMD, App %s" % p["appId"] if p.get("appId")
+                   else self._download_text(p))]
         for k, v in lines:
             r = ctk.CTkFrame(self.body, fg_color="transparent")
             r.pack(fill="x", padx=16, pady=(10 if k == "Game" else 4, 0))
@@ -271,7 +343,8 @@ class AddServerWizard(ctk.CTkToplevel):
         self.progress = ctk.CTkProgressBar(self.body, progress_color=t["accent_blue"])
         self.progress.set(0)
         self.prog_lbl = ctk.CTkLabel(self.body, text="", anchor="w", text_color=t["text_muted"])
-        self._btn_back = self._btn("‹ Back", lambda: self.show_details(self.game), side="left")
+        self._btn_back = self._btn("‹ Back", (self.show_game_settings if self._ask else
+                                               lambda: self.show_details(self.game)), side="left")
         if p.get("appId") or self._web_download(p):
             self._btn_go = self._btn("Create & install", self._create_and_install, primary=True)
         else:
@@ -337,6 +410,13 @@ class AddServerWizard(ctk.CTkToplevel):
             entry = self.mgr.get_server(entry["id"]) or entry
         except Exception:
             pass
+        if self._first:
+            try:      # written now where the game's settings exist, otherwise as soon as they do
+                from core import first_settings
+                first_settings.remember(self.mgr, entry["id"], self._first, user="desktop")
+                entry = self.mgr.get_server(entry["id"]) or entry
+            except Exception as e:
+                print("[WARN] first settings: %s" % e)
         self.app.refresh_servers()
         return entry
 
@@ -442,10 +522,13 @@ class AddServerWizard(ctk.CTkToplevel):
 
     def _finish(self, entry: dict, installed: bool):
         self._reset(entry["name"] + " is ready" if installed or not entry.get("appId")
-                    else entry["name"] + " was added", 3)
+                    else entry["name"] + " was added", 4 if self._ask else 3)
         t = self.theme
         if installed:
             msg = "The game is installed. Start it now, or later from its card."
+            if entry.get("firstSettings"):
+                msg += ("\n\n%s makes its settings file the first time it starts. BaoBun then restarts it once, "
+                        "when nobody is playing, to put in what you chose." % self.game)
         elif entry.get("appId"):
             msg = "Click Install / Update on the server when you're ready to download it."
         else:

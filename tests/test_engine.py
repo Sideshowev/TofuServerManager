@@ -4162,6 +4162,137 @@ class AutoSettingsTests(unittest.TestCase):
         self.assertEqual((data["ServerName"], data["MaxPlayers"], data["ServerPassword"]), ("Renamed", 12, "secret1"))
 
 
+class FirstSettingsTests(unittest.TestCase):
+    """Server name / password / max players asked for when a server is added."""
+
+    def test_what_is_asked_per_game(self):
+        from core import first_settings as F
+        pz = {"appId": "380870", "type": "steamcmd"}
+        fields = F.fields(pz)
+        self.assertEqual([f["kind"] for f in fields], ["name", "password", "players"])
+        self.assertEqual([f["key"] for f in fields], ["PublicName", "Password", "MaxPlayers"])
+        self.assertTrue(all(not f["required"] for f in fields))
+        rust = {"appId": "258550", "type": "steamcmd"}
+        self.assertEqual([f["kind"] for f in F.fields(rust)], ["name", "players"])
+        valheim = {"appId": "896660", "type": "steamcmd"}
+        vfields = F.fields(valheim)
+        self.assertEqual([f["kind"] for f in vfields], ["name", "password"])
+        pw_field = [f for f in vfields if f["kind"] == "password"][0]
+        self.assertTrue(pw_field["required"])
+        self.assertGreaterEqual(len(pw_field["value"]), 5)
+        ark = {"appId": "2430930", "type": "steamcmd"}
+        self.assertEqual(F.fields(ark), [])                 # not proven by the smoke test: not asked
+        self.assertEqual(F.fields({"appId": "999999", "type": "steamcmd"}), [])
+        self.assertEqual(F.fields({"type": "custom"}), [])
+
+    def test_answers_are_checked(self):
+        from core import first_settings as F
+        pz = {"appId": "380870", "type": "steamcmd"}
+        valheim = {"appId": "896660", "type": "steamcmd"}
+        result = F.check(pz, {"PublicName": " My Server ", "Password": "", "MaxPlayers": "16", "Other": "x"})
+        self.assertEqual(result, {"PublicName": "My Server", "MaxPlayers": "16"})
+        self.assertEqual(F.check(pz, {}), {})
+        for bad in ({"MaxPlayers": "lots"}, {"MaxPlayers": "0"}, {"MaxPlayers": "5000"},
+                    {"PublicName": 'bad "quote"'}, {"PublicName": "x" * 200}):
+            with self.assertRaises(ValueError, msg=str(bad)):
+                F.check(pz, bad)
+        for pw in ("", "abc", "vikings", "two words"):       # needed, too short, in the name, has a space
+            with self.assertRaises(ValueError, msg=pw):
+                F.check(valheim, {"name": "Vikings", "password": pw})
+        result = F.check(valheim, {"name": "Vikings", "password": "cedar-otter42"})
+        self.assertEqual(result, {"name": "Vikings", "password": "cedar-otter42"})
+
+    def test_written_now_or_when_the_game_has_made_its_file(self):
+        from core import first_settings as F
+        tmp = make_env([{"id": "e", "name": "E", "appId": "2278520"},          # Enshrouded: a file
+                        {"id": "v", "name": "V", "appId": "896660"}])         # Valheim: launch options
+        m = engine(tmp).manager
+        r = F.remember(m, "v", {"name": "Vikings", "password": "cedar-otter42"})
+        self.assertEqual(r, {"applied": ["server name", "password"], "waiting": []})
+        args = m.get_server("v")["launchArgs"]
+        self.assertIn("-name Vikings", args)
+        self.assertIn("-password cedar-otter42", args)
+        self.assertNotIn("firstSettings", m.get_server("v"))
+
+        r = F.remember(m, "e", {"name": "Our Place", "slotCount": "6"})
+        self.assertEqual(r, {"applied": [], "waiting": ["server name", "max players"]})
+        self.assertEqual(m.get_server("e")["firstSettings"], {"name": "Our Place", "slotCount": "6"})
+        self.assertFalse(F.files_ready(m.get_server("e")))
+        cfg = Path(m.get_server("e")["directory"]) / "enshrouded_server.json"
+        cfg.write_text(json.dumps({"name": "Enshrouded Server", "slotCount": 16, "gamePort": 15636}))
+        self.assertTrue(F.files_ready(m.get_server("e")))
+        self.assertEqual(F.apply(m, "e"), {"applied": ["server name", "max players"], "waiting": []})
+        data = json.loads(cfg.read_text())
+        self.assertEqual((data["name"], data["slotCount"], data["gamePort"]), ("Our Place", 6, 15636))
+        self.assertNotIn("firstSettings", m.get_server("e"))
+        self.assertEqual(F.apply(m, "e"), {"applied": [], "waiting": []})     # nothing left to do
+
+    def test_a_waiting_password_is_kept_encrypted(self):
+        from core import first_settings as F
+        home = tempfile.mkdtemp()
+        tmp = make_env([{"id": "z", "name": "Z", "appId": "380870"}])
+        m = engine(tmp).manager
+        with mock.patch.dict(os.environ, {"USERPROFILE": home}):
+            r = F.remember(m, "z", {"PublicName": "Zed", "Password": "hunter22"})
+            self.assertEqual(r["waiting"], ["server name", "password"])
+            stored = m.get_server("z")["firstSettings"]
+            self.assertNotIn("hunter22", json.dumps(stored))                  # not readable in servers.json
+            self.assertEqual(F._waiting(m.get_server("z"))["Password"], "hunter22")
+            ini = Path(home) / "Zomboid" / "Server" / "servertest.ini"
+            ini.parent.mkdir(parents=True)
+            ini.write_text("PublicName=My PZ Server\nPassword=\nMaxPlayers=32\n")
+            self.assertEqual(F.apply(m, "z")["applied"], ["server name", "password"])
+            text = ini.read_text()
+            self.assertIn("PublicName=Zed", text)
+            self.assertIn("Password=hunter22", text)
+            self.assertIn("MaxPlayers=32", text)                              # not asked: left alone
+
+    def test_restarts_once_when_the_file_appears_and_nobody_plays(self):
+        from core import first_settings as F
+        tmp = make_env([{"id": "e", "name": "E", "appId": "2278520"}])
+        m = engine(tmp).manager
+        self.assertFalse(F.watch_first_start(m, "e"))                         # nothing waiting: no watcher
+        F.remember(m, "e", {"name": "Our Place"})
+        cfg = Path(m.get_server("e")["directory"]) / "enshrouded_server.json"
+        players = {"n": 2}
+        statuses = lambda: [{"id": "e", "isRunning": True, "playerCount": players["n"]}]
+        with mock.patch.object(m, "is_running", return_value=True), \
+                mock.patch.object(m, "get_all_statuses", side_effect=statuses), \
+                mock.patch.object(m, "restart_server") as restart:
+            self.assertTrue(F.watch_first_start(m, "e", poll=0.05, settle=0.1))
+            time.sleep(0.4)
+            restart.assert_not_called()                                       # the game hasn't made its file
+            cfg.write_text(json.dumps({"name": "Enshrouded Server", "slotCount": 16}))
+            time.sleep(0.6)
+            restart.assert_not_called()                                       # people are playing: wait
+            players["n"] = 0
+            for _ in range(60):
+                if restart.called:
+                    break
+                time.sleep(0.05)
+            restart.assert_called_once()
+            self.assertEqual(restart.call_args[0][0], "e")
+
+    def test_adding_from_the_web_panel(self):
+        tmp = make_env([])
+        e = engine(tmp)
+        m, api = e.manager, e.api
+        m.set_setting("default_install_dir", str(tmp / "gs"))
+        bad = api.process("server.add_preset", {"game": "Valheim", "name": "V", "settings": {"password": "abc"}})
+        self.assertFalse(bad.success)
+        self.assertIn("5 characters", bad.error)
+        self.assertEqual(m.load_servers(), [])                                # nothing half-made
+        ok = api.process("server.add_preset", {"game": "Valheim", "name": "V",
+                                               "settings": {"name": "Vikings", "password": "cedar-otter42"}})
+        self.assertTrue(ok.success, ok.error)
+        self.assertIn("-password cedar-otter42", m.load_servers()[0]["launchArgs"])
+        games = {g["name"]: g for g in api.process("games.list", {}).data["games"]}
+        self.assertEqual([f["kind"] for f in games["Project Zomboid"]["first_settings"]],
+                         ["name", "password", "players"])
+        self.assertEqual([f["value"] for f in games["Valheim"]["first_settings"]], ["", ""])
+        self.assertEqual(games["ARK: Survival Ascended"]["first_settings"], [])
+
+
 class SettingsSafetyTests(unittest.TestCase):
     def test_verify_and_queue_while_running(self):
         from core import config_forms as cf

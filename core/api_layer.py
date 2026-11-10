@@ -776,6 +776,13 @@ class ApiLayer:
         servers = self.mgr.load_servers()
         if any(s.get("name") == name for s in servers):
             raise ApiError("duplicate", f"A server named '{name}' already exists")
+        first = params.get("settings") if isinstance(params.get("settings"), dict) else None
+        if first:      # name / password / max players for the game itself: check before anything is made
+            from core import first_settings
+            try:
+                first_settings.check(p, first)
+            except ValueError as e:
+                raise ApiError("bad_value", str(e))
         root = self.mgr.get_setting("default_install_dir", "") or str(
             Path(Path(self.mgr.config_path).anchor or "C:/") / "GameServers")
         safe = "".join(c if c.isalnum() or c in " -_." else "_" for c in name).strip() or "server"
@@ -794,6 +801,12 @@ class ApiLayer:
         self.mgr._audit("server_add", entry["id"], user=params.get("user", "api"), game=game)
         from core import port_plan
         port_plan.setup_new(self.mgr, entry["id"], pinned_game=int(params["port"]) if params.get("port") else None)
+        if first:
+            try:
+                from core import first_settings
+                first_settings.remember(self.mgr, entry["id"], first, user=params.get("user", "api"))
+            except Exception as e:
+                print(f"[WARN] first settings for {name}: {e}")
         return {"server": redact(self.mgr.get_server(entry["id"]) or entry)}
 
     def _handle_install(self, params):
@@ -1020,10 +1033,15 @@ class ApiLayer:
         from core.game_catalog import GAME_PRESETS
         from core import game_installers as gi
         from core import game_support
+        from core import first_settings
         out = []
         for k, v in GAME_PRESETS.items():
             kind = gi.kind({"type": v.get("type"), "appId": v.get("appId"), "executable": v.get("executable") or ""})
-            out.append(dict(v, name=k, download=kind if k != "Custom / Other" else None,
+            try:      # what the "add a server" form asks for this game (generated passwords are not sent)
+                ask = [dict(f, value="") for f in first_settings.fields(v)] if k != "Custom / Other" else []
+            except Exception:
+                ask = []
+            out.append(dict(v, name=k, download=kind if k != "Custom / Other" else None, first_settings=ask,
                             support=game_support.level(dict(v, name=k)) if k != "Custom / Other" else None))
         return {"games": out, "mcFlavors": gi.MC_FLAVORS}
 

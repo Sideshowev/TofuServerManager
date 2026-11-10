@@ -1125,6 +1125,14 @@ class ServerManager:
         if not directory or not Path(directory).exists():
             raise ValueError(f"Server directory does not exist: {directory}")
 
+        first = {"applied": [], "waiting": []}
+        if srv_def.get("firstSettings"):
+            try:      # name / password / max players chosen when the server was added
+                from core import first_settings
+                first = first_settings.apply(self, server_id, user=user)
+                srv_def = self.get_server(server_id) or srv_def
+            except Exception as e:
+                print(f"[WARN] first settings: {e}")
         filled = self._fill_required_args(srv_def)
         try:
             self._note_config_baseline(srv_def)
@@ -1188,6 +1196,13 @@ class ServerManager:
             if applied:
                 log_file.write(("==== BaoBun: applied settings changed while the server was running: "
                                 + "; ".join(applied) + " ====\n").encode("utf-8"))
+            if first["applied"]:
+                log_file.write(("==== BaoBun: set what you chose when adding the server: "
+                                + ", ".join(first["applied"]) + " ====\n").encode("utf-8"))
+            if first["waiting"]:
+                log_file.write(("==== BaoBun: the game makes its settings file on this first start. When it has, "
+                                "and nobody is playing, BaoBun restarts it once to set the "
+                                + ", ".join(first["waiting"]) + " you chose. ====\n").encode("utf-8"))
             if filled:
                 log_file.write(("==== BaoBun: this game won't start without some launch options, so BaoBun set "
                                 + ", ".join(filled) + ". Change them in the server's Settings tab. ====\n"
@@ -1241,6 +1256,12 @@ class ServerManager:
         self._start_monitor(server_id)
         self._schedule_cpu_settings(server_id, proc.pid)
         print(f"[INFO] Started '{info.name}' (PID {proc.pid}), logging to {log_path}")
+        if first["waiting"]:
+            try:
+                from core import first_settings
+                first_settings.watch_first_start(self, server_id)
+            except Exception as e:
+                print(f"[WARN] first settings watch: {e}")
         return {"status": "started", "pid": proc.pid, "log_file": log_path, "server_id": server_id}
 
     def cpu_settings(self, server_id: str):

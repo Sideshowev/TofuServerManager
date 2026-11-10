@@ -338,6 +338,7 @@ body.operator .mgr-only{display:none!important}
     <div id="a-details" hidden>
       <label>Server name</label><input id="a-name">
       <label>Game port (blank = game default)</label><input id="a-port" type="number" min="1" max="65535">
+      <div id="a-first"></div>
       <label class="check" style="margin-top:12px"><input type="checkbox" id="a-auto"> Start automatically when the PC boots</label>
       <label class="check"><input type="checkbox" id="a-install" checked> <span id="a-install-l">Download it now</span></label>
       <p class="note" id="a-note"></p>
@@ -1455,13 +1456,17 @@ async function bringPoll(){
 }
 $("a-bring").onclick = openBring;
 function pick(n){ PICK=n; const g=GAMES.find(x=>x.name===n); renderGames(); $("a-details").hidden=false; $("a-name").value=n; $("a-port").value=g.port||"";
+  const fs = g.first_settings||[];   // server name / password / max players, for games where BaoBun can set them for sure
+  $("a-first").innerHTML = !fs.length ? "" : `<p class="note" style="margin:14px 0 0">In the game - what players see. BaoBun writes these into the game's own settings; change them later under Game settings.</p>`
+    + fs.map(f=>`<label>${esc(f.label)}${f.required?" (needed)":""}</label><input data-first="${esc(f.key)}" ${f.kind==="players"?'type="number" min="1" max="1000"':'type="text"'} autocomplete="off" value="${f.kind==="name"?esc(n):""}">${f.help?`<p class="note" style="margin:2px 0 0">${esc(f.help)}</p>`:""}`).join("");
   $("a-install").parentElement.style.display = g.download ? "" : "none";
   $("a-install-l").textContent = g.download==="minecraft" ? "Then choose a Minecraft type and download it" : "Download it now";
   const man = g.manual||null;
   $("a-note").innerHTML = g.appId ? esc(g.anonymous_login===false?"This game needs a Steam account that owns it - the owner must set one in the desktop app first.":"")
     : g.download ? "" : man ? `${esc(man.how)} <a href="${esc(man.url)}" target="_blank" rel="noopener">Download page</a>` : "After creating it, copy the game's server files into its folder on the server PC."; }
 $("a-create").onclick = async () => { if(!PICK) return; $("a-create").disabled=true;
-  try{ const r = await act("server.add_preset",{game:PICK, name:$("a-name").value.trim(), port:$("a-port").value?parseInt($("a-port").value):null, auto_start:$("a-auto").checked});
+  try{ const first = Object.fromEntries([...document.querySelectorAll("#a-first [data-first]")].map(i=>[i.dataset.first, i.value.trim()]));
+    const r = await act("server.add_preset",{game:PICK, name:$("a-name").value.trim(), port:$("a-port").value?parseInt($("a-port").value):null, auto_start:$("a-auto").checked, settings:first});
     const g=GAMES.find(x=>x.name===PICK);
     closeModal("m-add");
     if(g&&g.download&&$("a-install").checked){

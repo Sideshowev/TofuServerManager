@@ -95,6 +95,48 @@ class DesktopSmokeTests(unittest.TestCase):
         self.app.update()
         return new
 
+    def test_add_server_wizard_asks_for_in_game_settings(self):
+        from ui.wizard import AddServerWizard
+        from core.game_catalog import GAME_PRESETS
+        self.mgr.set_setting("default_install_dir", str(self.tmp / "gs"))
+        w = AddServerWizard(self.app, self.theme, GAME_PRESETS, lambda sid: None, lambda: None)
+
+        def pump():
+            for _ in range(10):
+                self.app.update()
+        try:
+            pump()
+            w.show_details("Valheim")
+            pump()
+            self.assertEqual([f["kind"] for f in w._ask], ["name", "password"])
+            self.assertIn("3  In the game", w.steps_lbl.cget("text"))
+            self.assertIn("4  Review & install", w.steps_lbl.cget("text"))
+            w.name_var.set("Vikings")
+            w._details_next()
+            pump()
+            keys = {f["kind"]: f["key"] for f in w._ask}
+            self.assertEqual(w._ask_vars[keys["name"]].get(), "Vikings")          # starts as the server's name
+            self.assertGreaterEqual(len(w._ask_vars[keys["password"]].get()), 5)  # a password is suggested
+            w._ask_vars[keys["password"]].set("abc")
+            w._game_settings_next()
+            pump()
+            self.assertIn("5 characters", w.ask_err.cget("text"))                 # stays here, says why
+            w._ask_vars[keys["password"]].set("cedar-otter42")
+            w._game_settings_next()
+            pump()
+            self.assertIn("Ready to create", w.header.cget("text"))
+            self.assertEqual(w._first_text(), 'name "Vikings", password set')     # the password isn't shown
+            entry = w._save_entry()
+            self.assertIn("-password cedar-otter42", self.mgr.get_server(entry["id"])["launchArgs"])
+            w.show_details("ARK: Survival Ascended")                               # nothing proven: 3 steps
+            pump()
+            self.assertEqual(w._ask, [])
+            self.assertNotIn("In the game", w.steps_lbl.cget("text"))
+            self.assertIn("3  Review & install", w.steps_lbl.cget("text"))
+        finally:
+            w.destroy()
+            pump()
+
     def test_settings_style_windows(self):
         from ui.nightly_dialog import open_nightly_dialog
         from ui.watchdog_dialog import open_watchdog_dialog
