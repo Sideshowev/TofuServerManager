@@ -10,6 +10,7 @@ import webbrowser
 from datetime import datetime
 
 import customtkinter as ctk
+from ui.app_common import later
 
 try:
     from PIL import Image
@@ -160,7 +161,7 @@ class ModBrowser(ctk.CTkToplevel):
                 res, err = self.mods.search(self.sid, text, sort=sort), None
             except Exception as e:
                 res, err = None, str(e)
-            self.after(0, lambda: self._show_results(gen, res, err))
+            later(self, lambda: self._show_results(gen, res, err))
         threading.Thread(target=work, daemon=True).start()
 
     def _clear(self, frame):
@@ -258,7 +259,7 @@ class ModBrowser(ctk.CTkToplevel):
                 d, err = self.mods.details(self.sid, str(m.get("id"))), None
             except Exception as e:
                 d, err = None, str(e)
-            self.after(0, lambda: self._show_detail(gen, m, d, err))
+            later(self, lambda: self._show_detail(gen, m, d, err))
         threading.Thread(target=work, daemon=True).start()
 
     def _show_detail(self, gen, m, d, err):
