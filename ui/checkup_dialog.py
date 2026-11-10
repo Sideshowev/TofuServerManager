@@ -6,6 +6,7 @@ from __future__ import annotations
 import threading
 
 import customtkinter as ctk
+from ui.app_common import later
 
 DOT = {"problem": "danger", "warning": "warning", "tip": "text_muted"}
 BTN = {"install": "Install", "backup": "Back up now", "firewall": "Open firewall",
@@ -117,7 +118,7 @@ def open_checkup_dialog(app, theme):
                 res, err = checkup.run(app.manager, force=refresh), None
             except Exception as e:
                 res, err = None, str(e)
-            app.after(0, lambda: show(res, err))
+            later(app, lambda: show(res, err))
         threading.Thread(target=work, daemon=True).start()
 
     ctk.CTkButton(btns, text="Close", fg_color="transparent", border_width=1, border_color=t["border"],
