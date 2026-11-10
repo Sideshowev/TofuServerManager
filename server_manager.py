@@ -1191,6 +1191,9 @@ class ServerManager:
         except Exception:
             pass
 
+        from core import game_defaults as _gd
+        start_in = _gd.working_dir(srv_def, exe, directory)
+        exe = _gd.full_launcher(srv_def, exe)
         cmd = None
         from core import minecraft as _mc
         from core import hytale as _hy
@@ -1205,8 +1208,6 @@ class ServerManager:
             # Hidden console (not DETACHED) so console-based servers behave normally;
             # own process group so a GUI Ctrl+C never reaches the game.
             creation_flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
-        from core import game_defaults as _gd
-        start_in = _gd.working_dir(srv_def, exe, directory)
         def popen(env):
             return subprocess.Popen(cmd, cwd=start_in, stdin=subprocess.PIPE, stdout=log_file,
                                     stderr=subprocess.STDOUT, env=env, creationflags=creation_flags)

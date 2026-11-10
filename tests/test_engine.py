@@ -3914,9 +3914,21 @@ class GameDefaultsTests(unittest.TestCase):
             args3, _ = G.required({"appId": "108600", "launchArgs": ""})
             self.assertIn("-adminpassword", args3, "other appId also gets password")
 
+            def accounts(path, admin):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                con = sqlite3.connect(str(path))
+                con.execute("CREATE TABLE whitelist (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
+                if admin:
+                    con.execute("INSERT INTO whitelist (username, password) VALUES ('admin', 'x')")
+                con.commit()
+                con.close()
+
+            # the game makes the accounts file, empty, before it asks: still needs the password
             db_path = Path(home) / "Zomboid" / "db" / "servertest.db"
-            db_path.parent.mkdir(parents=True, exist_ok=True)
-            db_path.touch()
+            accounts(db_path, admin=False)
+            self.assertIn("-adminpassword", G.required({"appId": "380870", "launchArgs": ""})[0])
+            db_path.unlink()
+            accounts(db_path, admin=True)
             args4, notes4 = G.required({"appId": "380870", "launchArgs": ""})
             self.assertEqual((args4, notes4), ("", []), "no password when admin exists")
 
@@ -3924,11 +3936,46 @@ class GameDefaultsTests(unittest.TestCase):
             self.assertIn("-adminpassword", args5, "other server gets password")
 
             cache = tempfile.mkdtemp()
-            (Path(cache) / "db" / "servertest.db").parent.mkdir(parents=True, exist_ok=True)
-            (Path(cache) / "db" / "servertest.db").touch()
+            accounts(Path(cache) / "db" / "servertest.db", admin=True)
             args6 = "-cachedir=" + cache
             args7, notes7 = G.required({"appId": "380870", "launchArgs": args6})
             self.assertEqual((args7, notes7), (args6, []), "unchanged with cachedir")
+
+            odd = Path(home) / "Zomboid" / "db" / "odd.db"       # a file BaoBun can't read: left alone
+            odd.write_bytes(b"not a database at all" * 10)
+            self.assertEqual(G.required({"appId": "380870", "launchArgs": "-servername odd"})[1], [])
+
+    def test_zomboid_launcher_passes_every_option(self):
+        from core import game_defaults as G
+        BAT = ('@setlocal enableextensions\n@cd /d "%~dp0"\nSET PZ_CLASSPATH=java/;java/projectzomboid.jar\n'
+               '".\\jre64\\bin\\java.exe" -Xms16g -cp %PZ_CLASSPATH% zombie.network.GameServer -statistic 0 %1 %2\n'
+               'PAUSE\n')
+        d = Path(tempfile.mkdtemp())
+        bat = d / "StartServer64.bat"
+        bat.write_text(BAT)
+
+        out = G.full_launcher({"appId": "380870"}, str(bat))
+        self.assertEqual(out, str(d / "StartServer64-BaoBun.bat"))
+        self.assertTrue(Path(out).exists())
+
+        text = Path(out).read_text()
+        self.assertIn("GameServer -statistic 0 %*", text)
+        self.assertNotIn("%1", text)
+        self.assertNotIn("pause", text.lower())
+        self.assertIn("SET PZ_CLASSPATH", text)
+        self.assertIn("%1 %2", bat.read_text())            # the game's own file is untouched
+
+        before = Path(out).stat().st_mtime_ns
+        self.assertEqual(G.full_launcher({"appId": "380870"}, str(bat)), out)
+        self.assertEqual(Path(out).stat().st_mtime_ns, before)   # not rewritten when nothing changed
+
+        bat.write_text(BAT.replace("-Xms16g", "-Xms8g"))    # a game update changes its file
+        G.full_launcher({"appId": "380870"}, str(bat))
+        self.assertIn("-Xms8g", Path(out).read_text())
+
+        self.assertEqual(G.full_launcher({"appId": "896660"}, str(bat)), str(bat))
+        self.assertEqual(G.full_launcher({"appId": "380870"}, str(d / "x.exe")), str(d / "x.exe"))
+        self.assertEqual(G.full_launcher({"appId": "380870"}, str(d / "nope.bat")), str(d / "nope.bat"))
 
     def test_dont_starve_starts_in_its_program_folder(self):
         from core import game_defaults as G

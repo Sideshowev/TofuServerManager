@@ -177,12 +177,61 @@ def _either(args: str, flag: str) -> str:
 
 
 def _zomboid_has_admin(args: str) -> bool:
-    """True once Project Zomboid has made its accounts file (so the admin already has a password)."""
+    """True once Project Zomboid's accounts file has its "admin" account (which then has a password).
+    The file alone isn't enough: the game makes it, empty, before it asks for the password."""
     import os
     home = os.environ.get("USERPROFILE") or os.path.expanduser("~")
     cache = _either(args, "-cachedir") or os.path.join(home, "Zomboid")
     name = _either(args, "-servername") or "servertest"
-    return os.path.isfile(os.path.join(cache, "db", name + ".db"))
+    db = os.path.join(cache, "db", name + ".db")
+    if not os.path.isfile(db):
+        return False
+    try:
+        import sqlite3
+        from pathlib import Path
+        con = sqlite3.connect(Path(db).resolve().as_uri() + "?mode=ro", uri=True, timeout=2)
+        try:
+            return con.execute("SELECT 1 FROM whitelist WHERE username = 'admin' LIMIT 1").fetchone() is not None
+        finally:
+            con.close()
+    except Exception:
+        return True       # can't read it: leave a server that may already be set up alone
+
+
+def full_launcher(srv: dict, exe: str) -> str:
+    """The program to really start. Project Zomboid's StartServer64.bat hands only its first
+    two options to the game ("%1 %2") and then waits for a key press, so later options (port,
+    server name...) were lost and BaoBun couldn't see the server stop. This writes a copy next
+    to it that passes every option on and doesn't wait - redone whenever the game's own file
+    changes (game updates) - and returns it. Any other program is returned as it is."""
+    import os
+    if str(srv.get("appId") or "") not in ("380870", "108600") or not (exe or "").lower().endswith(".bat"):
+        return exe
+    try:
+        with open(exe, "r", encoding="utf-8", errors="replace") as f:
+            text = f.read()
+        if not re.search(r"(?i)zombie\.network\.GameServer", text):
+            return exe
+        lines = text.splitlines()
+        while lines and lines[-1].strip().lower() in ("", "pause"):
+            lines.pop()
+        new = "\r\n".join(re.sub(r"\s%1(?:\s+%[2-9])*\s*$", " %*", ln) if "GameServer" in ln else ln
+                          for ln in lines) + "\r\n"
+        if "%*" not in new:
+            return exe
+        base, ext = os.path.splitext(exe)
+        copy = base + "-BaoBun" + ext
+        try:
+            with open(copy, "r", encoding="utf-8", errors="replace", newline="") as f:
+                same = f.read() == new
+        except OSError:
+            same = False
+        if not same:
+            with open(copy, "w", encoding="utf-8", newline="") as f:
+                f.write(new)
+        return copy
+    except OSError:
+        return exe
 
 
 def _is_srcds(srv: dict) -> bool:
