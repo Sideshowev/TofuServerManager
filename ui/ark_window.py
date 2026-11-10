@@ -135,7 +135,7 @@ def open_ark_window(app, theme, server_id=None):
                 res, err = fn(), None
             except Exception as e:
                 res, err = None, str(e)
-            later(app, lambda: done(res, err))
+            later(app, lambda: done(res, err) if win.winfo_exists() else None)
         if label:
             app._show_status(label)
         threading.Thread(target=work, daemon=True).start()

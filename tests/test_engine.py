@@ -594,6 +594,10 @@ class CrashHelpAndAlertTests(unittest.TestCase):
                      '[00:00:04]: [200] Account Failed (6): "E_INVALID_TOKEN"',
                      "[00:00:04]: No auth token could be found."):
             self.assertEqual(explain(1, [line])[0]["key"], "needs_signin", line)
+        # reviewed: the new entries must not swallow the more specific ones further down the list
+        self.assertEqual(explain(1, ["Failed to load mod 'bettertrees': missing dependency"])[0]["key"], "mod_error")
+        self.assertEqual(explain(1, ["Failed to load world: savegame corrupt"])[0]["key"], "corrupt_save")
+        self.assertNotIn("needs_signin", [x["key"] for x in explain(1, ["RCON: authentication failed for 10.0.0.5"])])
 
     def test_crash_reason_reaches_status_and_alert(self):
         from core.alerts import AlertCenter

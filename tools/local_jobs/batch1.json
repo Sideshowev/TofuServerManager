@@ -17,7 +17,7 @@
     "path": "tests/test_engine.py",
     "around": "def test_explain_patterns_and_exit_codes",
     "before": 0,
-    "after": 16
+    "after": 34
    }
   ],
   "checks": [
@@ -65,7 +65,7 @@
     "path": "tests/test_engine.py",
     "around": "def test_explain_patterns_and_exit_codes",
     "before": 0,
-    "after": 16
+    "after": 34
    }
   ],
   "checks": [
@@ -113,7 +113,7 @@
     "path": "tests/test_engine.py",
     "around": "def test_explain_patterns_and_exit_codes",
     "before": 0,
-    "after": 16
+    "after": 34
    }
   ],
   "checks": [
@@ -161,7 +161,7 @@
     "path": "tests/test_engine.py",
     "around": "def test_explain_patterns_and_exit_codes",
     "before": 0,
-    "after": 16
+    "after": 34
    }
   ],
   "checks": [

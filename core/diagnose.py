@@ -50,7 +50,7 @@ NTSTATUS = {
 # (key, regex, title, fix, link) - checked against the last lines of output.
 PATTERNS = [
     ("needs_signin",
-     r"(authentication failed|e_invalid_token|no auth token)",
+     r"(authentication failed on dedicated server|e_invalid_token|no auth token could be found)",
      "The game's server has to be signed in first",
      "This game only runs a server that is linked to an account with the game's maker. Follow the "
      "game's own server guide to get a server token (or to sign the server in), then start it again.",
@@ -74,10 +74,10 @@ PATTERNS = [
      "The Microsoft Visual C++ Redistributable is missing",
      "Install the latest Visual C++ Redistributable (x64) from Microsoft, then start again.", VCREDIST_URL),
     ("game_library",
-     r"(failed|could not) (to )?load",
+     r"(failed to load|could not load|unable to load)( (library|module|dll))?\s*[\"']?[\w.\- \\/:]*\.dll",
      "One of the game's own files couldn't be loaded",
-     "Use Install / repair to re-check the game files. If it keeps happening, this server may need to be started from a different folder or program - check the game's server guide.",
-     None),
+     "Use Install / repair to re-check the game files. If it keeps happening, this server may need to be "
+     "started from a different folder or program - check the game's server guide.", None),
     ("out_of_memory",
      r"(outofmemoryexception|out of memory|std::bad_alloc|insufficient memory|"
      r"not enough memory|cannot allocate memory|malloc.*failed|java\.lang\.outofmemoryerror)",
