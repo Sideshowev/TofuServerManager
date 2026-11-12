@@ -123,7 +123,6 @@ with the shared theme and folders in `ui/app_common.py`. The engine is in `core/
 - **Auto-restart on crash** with crash-loop protection (backs off, up to 5 retries).
 - **Config editor** for JSON / YAML / TOML / INI / key=value / raw text (with a form
   mode for INI and key=value files, and automatic `.bak` backups on save).
-- **Batch file editor** for `.bat` launchers (exe + args + env vars).
 - **Console** tab to send commands to a running server's stdin.
 - **RCON** tab to send admin commands over TCP (ARK, Source engine games,
   Squad, Conan Exiles, and any server using Source RCON).

@@ -24,10 +24,7 @@ _EXPORTS = {
     "ProcessManager": "process_manager", "ProcessMetrics": "process_manager",
     "ApiLayer": "api_layer", "ApiRequest": "api_layer", "ApiResponse": "api_layer",
     "ApiError": "api_layer",
-    "FileManager": "file_management",
     "PresetEngine": "preset_engine", "Preset": "preset_engine", "PresetParameter": "preset_engine",
-    "ModPackManager": "mod_pack_manager", "ModInfo": "mod_pack_manager",
-    "ModInstallResult": "mod_pack_manager", "ModSource": "mod_pack_manager",
     "HealthCheck": "health_check",
     "Engine": "engine", "build_engine": "engine",
 }

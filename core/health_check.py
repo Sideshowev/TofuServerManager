@@ -96,19 +96,6 @@ class HealthCheck:
                        f"{free_gb:.1f} GB free" + ("" if ok else " - updates and backups may fail."),
                        free_gb=round(free_gb, 1))
 
-    def check_firewall(self) -> Dict[str, Any]:
-        if os.name != "nt":
-            return _result("firewall", True, "unknown", "Not Windows")
-        try:
-            out = subprocess.run(["netsh", "advfirewall", "show", "allprofiles", "state"],
-                                 capture_output=True, text=True, timeout=10, creationflags=_NO_WINDOW)
-            active = "on" in (out.stdout or "").lower()
-            return _result("firewall", True, "active" if active else "inactive",
-                           "Windows Firewall is on - make sure the server's ports are allowed."
-                           if active else "Windows Firewall is off.")
-        except Exception as e:
-            return _result("firewall", True, "unknown", str(e))
-
     # ------------------------------------------------------------------
     def check_server(self, server_id: str, *_legacy_args) -> Dict[str, Any]:
         srv = self.mgr.get_server(server_id) if self.mgr else None

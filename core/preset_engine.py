@@ -210,15 +210,6 @@ class PresetEngine:
     # Categories
     # ------------------------------------------------------------------
 
-    def get_categories(self) -> List[Dict[str, str]]:
-        return [
-            {"id": cat, "label": self.CATEGORY_LABELS.get(cat, cat.title())}
-            for cat in self.BUILTIN_CATEGORIES
-        ]
-
-    def get_builtin_categories(self) -> List[str]:
-        return list(self.BUILTIN_CATEGORIES)
-
     def _load_builtin_presets(self) -> None:
         """Load built-in presets for supported games."""
         for preset in self._builtin_preset_factory():

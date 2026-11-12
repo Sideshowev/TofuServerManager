@@ -94,11 +94,6 @@ def load_agent_state() -> dict:
         return {"schedules": {}, "last_runs": {}}
 
 
-def save_agent_state(state: dict):
-    from core.paths import atomic_write_json
-    atomic_write_json(AGENT_STATE_PATH, state)
-
-
 def load_schedule_runs(state: dict) -> dict:
     try:
         return json.loads(SCHEDULE_RUNS_PATH.read_text(encoding="utf-8"))

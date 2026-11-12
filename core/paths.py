@@ -83,28 +83,8 @@ def servers_path() -> Path:
     return base_dir() / "servers.json"
 
 
-def settings_path() -> Path:
-    return base_dir() / "settings.json"
-
-
-def runtime_dir() -> Path:
-    """Shared runtime state (process registry, agent endpoint)."""
-    p = base_dir() / "runtime"
-    p.mkdir(parents=True, exist_ok=True)
-    return p
-
-
 def db_path() -> Path:
     return base_dir() / "settings" / "baobun.db"
-
-
-def plugin_dirs() -> list[Path]:
-    """User plugins (next to the exe) first, then the ones bundled in the exe."""
-    dirs = []
-    for d in (base_dir() / "plugins", bundle_dir() / "plugins"):
-        if d.is_dir() and d not in dirs:
-            dirs.append(d)
-    return dirs
 
 
 def atomic_write_text(path, text: str, encoding: str = "utf-8") -> None:

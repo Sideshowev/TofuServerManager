@@ -258,11 +258,6 @@ class IdleTracker:
     def forget(self, server_id: str):
         self._empty_since.pop(server_id, None)
 
-    def empty_for(self, server_id: str, now: Optional[float] = None) -> Optional[float]:
-        since = self._empty_since.get(server_id)
-        return None if since is None else (time.time() if now is None else now) - since
-
-
 # --------------------------------------------------------------------------- #
 # Dashboard summary
 # --------------------------------------------------------------------------- #

@@ -683,75 +683,6 @@ class ServerManager:
             raise RuntimeError(resp.get("error") or "Watchdog error")
         return resp.get("data") or {}
 
-    def get_server_folders(self) -> list:
-        """Return the sorted, unique set of non-empty folder group names."""
-        names = set()
-        for s in self.load_servers():
-            f = (s.get("folder") or "").strip()
-            if f:
-                names.add(f)
-        return sorted(names)
-
-    def set_server_folder(self, server_id: str, folder: str) -> int:
-        """Assign a server to a named folder group. Returns 1 if changed, else 0."""
-        folder = (folder or "").strip()
-        servers = self.load_servers()
-        changed = 0
-        with self._lock:
-            for s in servers:
-                if s.get("id") == server_id:
-                    s["folder"] = folder
-                    changed = 1
-                    break
-            if changed:
-                self.save_servers(servers)
-        return changed
-
-    def backup_config(self, dest_dir=None):
-        """Zip all config JSON files into a timestamped backup. Returns the zip path."""
-        data_dir = self.config_path.parent
-        dest = Path(dest_dir) if dest_dir else (data_dir / "backups")
-        dest.mkdir(parents=True, exist_ok=True)
-        ts = time.strftime("%Y%m%d_%H%M%S")
-        zip_path = dest / ("baobun_backup_" + ts + ".zip")
-        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-            for fname in CONFIG_FILES:
-                fp = data_dir / fname
-                if fp.exists():
-                    z.write(fp, arcname=fname)
-        return str(zip_path)
-
-    def restore_config(self, zip_path):
-        """Restore config JSON files from a backup zip.
-
-        Saves a pre-restore backup first, then overwrites with the zip contents.
-        Returns {"pre_backup": path, "restored": count}.
-        """
-        data_dir = self.config_path.parent
-        zp = Path(zip_path)
-        if not zp.exists():
-            raise FileNotFoundError("Backup file not found: " + str(zp))
-
-        try:
-            with zipfile.ZipFile(zp, "r") as z:
-                names = set(z.namelist())
-        except Exception:
-            raise ValueError("Not a valid zip file: " + str(zp))
-
-        if "servers.json" not in names:
-            raise ValueError("Not a BaoBun backup (servers.json is missing).")
-
-        pre_zip = self.backup_config(data_dir / "backups")
-
-        restored = 0
-        with zipfile.ZipFile(zp, "r") as z:
-            for fname in CONFIG_FILES:
-                if fname in names:
-                    (data_dir / fname).write_bytes(z.read(fname))
-                    restored += 1
-
-        return {"pre_backup": pre_zip, "restored": restored}
-
     def setup_ark_cluster(self, directory, cluster_id, selected_maps, settings=None, custom_maps=None):
         """Create one server entry per selected ARK map, sharing a single install.
 
@@ -983,17 +914,6 @@ class ServerManager:
             for port in sorted(ports):
                 usage.setdefault(port, []).append(s.get("name", "unknown"))
         return [(port, names) for port, names in usage.items() if len(names) > 1]
-
-    def suggest_free_port(self, start=7777, end=65535):
-        """Return the first port in [start, end] not used by any server."""
-        used = set()
-        for s in self.load_servers():
-            for p in self.get_server_ports(s["id"]):
-                used.add(p["port"])
-        for port in range(start, end + 1):
-            if port not in used:
-                return port
-        return None
 
     def get_rcon_info(self, server_id):
         """RCON connection info (host, port, password): from the game's own config
@@ -2034,151 +1954,6 @@ class ServerManager:
 
     # ── Batch File Editor ─────────────────────────────────
 
-    def list_batch_files(self, server_id: str) -> list[dict]:
-        """Find .bat/.cmd launch scripts (recursive)."""
-        servers = self.load_servers()
-        srv_def = next((s for s in servers if s["id"] == server_id), None)
-        if not srv_def:
-            return []
-
-        directory = srv_def["directory"]
-        if not directory or not os.path.isdir(directory):
-            return []
-
-        found = []
-        exclude = {"logs", "log", "cache", ".git", "node_modules", "redist", "_commonredist", "steamapps"}
-        for root, rel_root, depth, files in walk_server_dir(directory, 3, exclude, self._other_server_dirs(server_id)):
-            for name in files:
-                if name.lower().endswith((".bat", ".cmd")):
-                    full = os.path.join(root, name)
-                    found.append({"relative": os.path.relpath(full, directory), "absolute": full})
-                if len(found) >= 200:
-                    return sorted(found, key=lambda b: b["relative"].lower())
-        return sorted(found, key=lambda b: b["relative"].lower())
-    def load_batch_file(self, server_id: str, file_rel: str) -> dict:
-        """Parse a .bat file into structured fields (executable + arguments)."""
-        servers = self.load_servers()
-        srv_def = next((s for s in servers if s["id"] == server_id), None)
-        if not srv_def:
-            raise ValueError("Server not found")
-
-        full_path = os.path.join(srv_def["directory"], file_rel)
-        text = Path(full_path).read_text(encoding="utf-8", errors="replace")
-
-        lines = text.splitlines()
-        executable = ""
-        args = []
-        env_vars = {}
-        other_lines = []
-
-        for line in lines:
-            stripped = line.strip()
-            if not stripped or stripped.startswith("::") or stripped.upper().startswith("REM"):
-                other_lines.append(line)
-                continue
-
-            if stripped.upper().startswith(("@ECHO", "SETLOCAL", "ECHO ", "PAUSE", "EXIT", "ENDLOCAL")):
-                other_lines.append(line)
-                continue
-
-            m = re.match(r'^set\s+([A-Z_][A-Z0-9_]*)=(.*)$', stripped, re.IGNORECASE)
-            if m:
-                env_vars[m.group(1)] = m.group(2).strip()
-                continue
-
-            m = re.match(r'^start\s+(?:"[^"]*"\s+)?(?:/wait\s+)?(?:/high\s+)?(?:/realtime\s+)?(?:/affinity\s+\S+\s+)?(.*)$', stripped, re.IGNORECASE)
-            if m:
-                rest = m.group(1).strip()
-                parts = rest.split()
-                if parts:
-                    executable = parts[0].strip('"')
-                    args = parts[1:]
-                continue
-
-            if not executable:
-                parts = stripped.split()
-                executable = parts[0].strip('"')
-                args = parts[1:]
-            else:
-                other_lines.append(line)
-
-        return {
-            "path": full_path,
-            "format": "batch",
-            "executable": executable,
-            "args": args,
-            "env_vars": env_vars,
-            "other_lines": other_lines,
-            "raw_text": text
-        }
-
-    def save_batch_file(self, server_id: str, file_rel: str, payload: dict) -> None:
-        """Save a .bat file.
-
-        If payload provides 'raw_text', write it verbatim so the original file is
-        preserved exactly. Otherwise reconstruct a simple launcher from fields.
-        """
-        servers = self.load_servers()
-        srv_def = next((s for s in servers if s["id"] == server_id), None)
-        if not srv_def:
-            raise ValueError("Server not found")
-
-        full_path = os.path.join(srv_def["directory"], file_rel)
-        ts = time.strftime("%Y%m%d_%H%M%S")
-        if os.path.isfile(full_path):
-            shutil.copy2(full_path, f"{full_path}.bak.{ts}")
-
-        raw = payload.get("raw_text")
-        if raw is not None:
-            Path(full_path).write_text(raw, encoding="utf-8")
-            return
-
-        executable = payload.get("executable", "")
-        args = payload.get("args", [])
-        env_vars = payload.get("env_vars", {})
-
-        out_lines = ["@echo off", "setlocal"]
-        for k, v in env_vars.items():
-            out_lines.append(f"set {k}={v}")
-        out_lines.append("")
-        arg_str = " ".join(args)
-        out_lines.append(f'start "" /wait "{executable}" {arg_str}')
-        out_lines.append("")
-        out_lines.append("endlocal")
-        out_lines.append("pause")
-
-        Path(full_path).write_text("\n".join(out_lines) + "\n", encoding="utf-8")
-
-    def create_batch_file(self, server_id: str, filename: str, executable: str, args: list, env_vars: dict) -> str:
-        """Create a NEW launcher .bat from structured fields. Returns full path."""
-        servers = self.load_servers()
-        srv_def = next((s for s in servers if s["id"] == server_id), None)
-        if not srv_def:
-            raise ValueError("Server not found")
-        directory = srv_def["directory"]
-        if not directory:
-            raise ValueError("Server has no directory configured")
-        if not filename.lower().endswith((".bat", ".cmd")):
-            filename += ".bat"
-        full = os.path.join(directory, filename)
-        if os.path.isfile(full):
-            raise FileExistsError(f"'{filename}' already exists in the server directory")
-        env_vars = env_vars or {}
-        lines = ["@echo off", "setlocal"]
-        for k, v in env_vars.items():
-            lines.append(f"set {k}={v}")
-        lines.append("")
-        arg_str = " ".join(args or [])
-        lines.append(f'start "" /wait "{executable}" {arg_str}')
-        lines.append("")
-        lines.append("endlocal")
-        lines.append("pause")
-        Path(full).write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return full
-    def ensure_steamcmd(self) -> str:
-        """Guarantee SteamCMD is available, downloading it if needed. Returns path to steamcmd.exe."""
-        return self._steamcmd_path()
-
     def _settings_path(self) -> Path:
         """Path to the machine-local settings file (next to servers.json / the exe)."""
         return self.config_path.parent / "settings.json"
@@ -2455,25 +2230,6 @@ class ServerManager:
             "executable": exe,
             "app_id": app_id
         }
-
-    def _steam_login_args(self, requires_account: bool) -> list:
-        """Build SteamCMD +login args for a download/validate step.
-
-        Anonymous-capable games (most dedicated servers) use `+login anonymous`.
-        Games that require a Steam purchase use a real account from Settings
-        (steam_username / steam_password); this raises a clear error when those
-        are not configured.
-        """
-        if requires_account:
-            username = self.get_setting("steam_username", "") or ""
-            password = self.get_setting("steam_password", "") or ""
-            if username and password:
-                return ["+login", username, password]
-            raise ValueError(
-                "This game requires a Steam account login (it cannot be "
-                "downloaded anonymously). Add your Steam username and password "
-                "in Settings (gear icon), then retry.")
-        return ["+login", "anonymous"]
 
     STEAMCMD_ERROR_HINTS = {
         2: "SteamCMD failed to start or invalid arguments.",
@@ -3349,17 +3105,6 @@ class ServerManager:
         }
 
         meta_path.write_text(json.dumps(installs, indent=2), encoding="utf-8")
-
-    def get_install_info(self, server_id: str) -> dict | None:
-        """Get install metadata for a server."""
-        meta_path = Path(str(self.config_path).replace(".json", "_installs.json"))
-        if not meta_path.exists():
-            return None
-        try:
-            installs = json.loads(meta_path.read_text(encoding="utf-8"))
-            return installs.get(server_id)
-        except Exception:
-            return None
 
     # ── Logs ──────────────────────────────────────────────
 

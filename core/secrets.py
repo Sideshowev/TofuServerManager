@@ -48,10 +48,6 @@ def _dpapi(data: bytes, encrypt: bool) -> bytes:
         kernel32.LocalFree(out.pbData)
 
 
-def is_protected(value) -> bool:
-    return isinstance(value, str) and value.startswith((_PREFIX_DPAPI, _PREFIX_B64))
-
-
 def protect(plaintext: str) -> str:
     if not plaintext:
         return ""

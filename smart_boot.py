@@ -52,44 +52,6 @@ class SmartBootManager:
                 print(f"[WARN] Failed to load smart boot config: {e}")
 
 
-    def should_auto_start_server(self, server_id: str) -> bool:
-        """Determine if a server should be automatically started based on activity history."""
-        
-        # Check force-start list first (always start these servers regardless of history)  
-        if self._is_in_list(server_id, "force_start_list"):
-            return True
-
-        # Never auto-start servers explicitly marked as manual-only  
-        if self._is_in_list(server_id, "never_auto_start"):
-            return False
-
-        # If smart boot is disabled globally or activity tracking unavailable → default to starting
-        if not self.boot_config.get("enabled", True):
-            return True
-            
-        if not self.activity_tracker:
-            print(f"[INFO] Activity tracker not available. Defaulting to auto-start for {server_id}")  
-            return True
-
-        # Check recent activity history via tracker module  
-        try:
-            threshold = self.boot_config.get("inactive_days_threshold", 2)
-            is_inactive_too_long = self.activity_tracker.check_consecutive_inactive_days(
-                server_id=server_id, 
-                threshold=threshold
-            )
-
-            if is_inactive_too_long:
-                print(f"[INFO] Server {server_id} inactive for >= {threshold} days. Skipping auto-start.")
-                return False  
-                
-        except Exception as e:
-            print(f"[WARN] Error checking activity history for {server_id}: {e}")
-
-        # Default: if we got here without skipping, allow auto-start  
-        return True
-
-
     def decide(self, srv: dict, was_running: bool = False) -> tuple:
         """Boot decision for one server dict: (start: bool, reason: str).
 
@@ -124,65 +86,6 @@ class SmartBootManager:
         return server_id in self.boot_config.get(list_name, [])
 
 
-    def get_boot_summary(self) -> dict:
-        """Get summary of smart boot decisions for logging/debugging."""
-        servers = []
-
-        # Load current server definitions to check against  
-        if Path(self.config_path).exists():
-            try:
-                raw_servers = json.loads(Path(self.config_path).read_text(encoding="utf-8"))
-                
-                for srv in raw_servers:
-                    sid = srv.get("id", "unknown")
-                    name = srv.get("name", "Unnamed Server")
-
-                    should_start = self.should_auto_start_server(sid)
-                    
-                    servers.append({
-                        "id": sid,  
-                        "name": name,
-                        "will_auto_start": should_start,
-                        "reason": self._get_decision_reason(sid)
-                    })
-
-            except Exception as e:
-                print(f"[WARN] Could not generate boot summary: {e}")
-
-        return {
-            "smart_boot_enabled": self.boot_config.get("enabled", True),
-            "inactive_threshold_days": self.boot_config.get("inactive_days_threshold", 2),  
-            "servers": servers
-        }
-
-
-    def _get_decision_reason(self, server_id: str) -> str:
-        """Get human-readable reason for a boot decision."""
-        if self._is_in_list(server_id, "force_start_list"):
-            return "Force-start list (always start)"
-            
-        if self._is_in_list(server_id, "never_auto_start"):  
-            return "Manual-only server"
-
-        if not self.boot_config.get("enabled", True):
-            return "Smart boot disabled globally"
-
-        if not self.activity_tracker:
-            return "Activity tracking unavailable → defaulting to start"
-
-        try:
-            threshold = self.boot_config.get("inactive_days_threshold", 2)  
-            is_inactive = self.activity_tracker.check_consecutive_inactive_days(server_id, threshold)
-
-            if is_inactive:
-                return f"Inactive >= {threshold} days (skip auto-start)"
-                
-            return "Recent activity detected → will auto-start"  
-
-        except Exception:
-            return "Unknown status → defaulting to start"
-
-
     def save_config(self):
         """Persist current boot configuration settings."""
         config_file = Path(str(self.config_path).replace(".json", "_boot.json"))
@@ -201,34 +104,3 @@ class SmartBootManager:
         self.boot_config["enabled"] = enabled
         self.save_config()
 
-
-    def add_to_force_start(self, server_id: str):
-        """Add a server to the force-start list (always auto-start regardless of history)."""  
-        if server_id not in self.boot_config["force_start_list"]:
-            self.boot_config["force_start_list"].append(server_id)
-            self.save_config()
-
-
-    def remove_from_force_start(self, server_id: str):
-        """Remove a server from the force-start list."""
-        try:  
-            self.boot_config["force_start_list"].remove(server_id)
-            self.save_config()
-        except ValueError:
-            pass  # Not in list, nothing to do
-
-
-    def add_to_never_start(self, server_id: str):
-        """Mark a server as manual-start only (never auto-start)."""
-        if server_id not in self.boot_config["never_auto_start"]:
-            self.boot_config["never_auto_start"].append(server_id)  
-            self.save_config()
-
-
-    def remove_from_never_start(self, server_id: str):
-        """Remove manual-only restriction from a server."""
-        try:
-            self.boot_config["never_auto_start"].remove(server_id)  
-            self.save_config()
-        except ValueError:
-            pass

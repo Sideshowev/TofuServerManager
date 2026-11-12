@@ -1227,16 +1227,6 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
     def show_add_dialog(self):
         self._open_server_form("Add New Server", None, "Add Server")
 
-    def show_edit_dialog(self):
-        if not self.selected_server_id:
-            messagebox.showwarning("No server selected", "Select a server from sidebar first.")
-            return
-        servers = self.manager.load_servers()
-        srv = next((s for s in servers if s["id"] == self.selected_server_id), None)
-        if not srv:
-            return
-        self._open_server_form("Edit Server", srv, "Save Changes")
-
     # ------------------------------------------------------------------ #
     # Bulk operations
     # ------------------------------------------------------------------ #

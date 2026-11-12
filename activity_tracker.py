@@ -187,14 +187,6 @@ class ActivityTracker:
             self._save_activity_data()
             return changed
 
-    # Backwards-compatible name used by older code.
-    def record_daily_activity(self, server_id: str):
-        srv = next((s for s in self._load_servers_config() if s.get("id") == server_id), None)
-        if srv:
-            with self._lock:
-                self.scan_server(srv)
-                self._save_activity_data()
-
     def start_polling(self, interval: int = 60):
         self._poll_interval = max(15, min(int(interval), 3600))
         if self._running:

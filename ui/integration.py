@@ -28,13 +28,6 @@ class UIIntegration:
     def call(self, action: str, **params) -> ApiResponse:
         return self.api_layer.process(action, params, user_id=params.get("user", "gui"))
 
-    # Convenience wrappers ---------------------------------------------------
-    def list_servers(self) -> List[Dict[str, Any]]:
-        return self.manager.load_servers()
-
-    def get_server_status(self, server_id: str) -> Dict[str, Any]:
-        return next((s for s in self.manager.get_all_statuses() if s["id"] == server_id), {})
-
     def start_server(self, server_id: str) -> Dict[str, Any]:
         return self.manager.start_server(server_id, user="gui")
 
