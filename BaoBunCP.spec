@@ -25,7 +25,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=["numpy"],          # Pillow can use it but BaoBun never does: 28 MB unpacked at every start
     noarchive=False,
     optimize=0,
 )
