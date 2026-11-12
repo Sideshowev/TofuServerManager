@@ -15,7 +15,7 @@ import os
 import shutil
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 ORDER = {"problem": 0, "warning": 1, "tip": 2}
 _cache: Dict[str, tuple] = {}

@@ -26,7 +26,7 @@ import subprocess
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional
 
 DEFAULT_TIME = "05:00"
 WINDOW_HOURS = 2          # a PC that was off at 05:00 doesn't reboot at lunch time

@@ -7,7 +7,6 @@ import json
 import os
 import re
 import shlex
-import signal
 import socket
 import subprocess
 import threading
@@ -16,10 +15,9 @@ import shutil
 import zipfile
 import urllib.request
 from pathlib import Path
-from typing import Optional
 import yaml
 
-from core.paths import atomic_write_json, atomic_write_text
+from core.paths import atomic_write_json
 from core.process_manager import MetricsSampler, kill_tree, pid_alive, process_create_time
 
 
@@ -34,7 +32,6 @@ CONFIG_FILES = [
     "servers_boot.json",
     "ark_clusters.json",
 ]
-
 
 
 def broad_folder(path: str) -> str | None:
@@ -465,7 +462,6 @@ ARK_GAMEPLAY_SETTINGS = [
 ]
 
 
-
 ARK_MANAGED_FLAGS = ("port", "queryport", "rconport", "clusterid", "altsavedirectoryname", "mods", "mapmodid")
 ARK_MANAGED_URL = ("listen", "sessionname", "serverpassword", "serveradminpassword")
 
@@ -536,7 +532,6 @@ def build_ark_launch_args(map_id, friendly_name, cluster_id, index, server_passw
     if reforge_mod:
         args = args + " -MapModID=" + reforge_mod
     return args
-
 
 
 def _local_appdata() -> Path:

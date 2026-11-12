@@ -19,7 +19,6 @@ so they are never opened in the firewall or forwarded.
 
 from __future__ import annotations
 
-import os
 import re
 from typing import Dict, List, Optional
 

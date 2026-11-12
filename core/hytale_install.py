@@ -23,7 +23,7 @@ import re
 import subprocess
 import time
 import zipfile
-from typing import Callable, Optional
+from typing import Optional
 
 DOWNLOADER_URL = "https://downloader.hytale.com/hytale-downloader.zip"
 MANUAL_URL = "https://support.hytale.com/hc/en-us/articles/45326769420827"

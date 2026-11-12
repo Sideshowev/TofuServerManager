@@ -33,7 +33,7 @@ import re
 import threading
 import time
 import uuid as uuidlib
-from typing import Callable, Dict, List, Optional
+from typing import Dict, List, Optional
 
 LISTS = ("allow", "ban", "admin")
 LIST_LABEL = {"allow": "Allowed to join", "ban": "Banned", "admin": "Admins"}

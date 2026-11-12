@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 # essential -> (label, accepted key spellings after lowercasing and removing _ - . and spaces)
 ESSENTIALS = [

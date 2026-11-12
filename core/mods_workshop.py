@@ -14,7 +14,7 @@ from __future__ import annotations
 import glob
 import os
 import shutil
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from core.mods_common import (ModError, ini_set, is_link, link_dir, move_to, parse_vdf, safe_name, set_arg,
                               size_of, unlink_dir, workshop_id, _write_lines)

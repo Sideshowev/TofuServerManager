@@ -1,8 +1,6 @@
 """Things the desktop app's modules share: data folders, the colour theme and the
 image loader. (Split out of app.py so its windows can live in their own files.)"""
 
-import sys
-from pathlib import Path
 
 import customtkinter as ctk
 

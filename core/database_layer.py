@@ -14,7 +14,6 @@ All access is thread-safe and uses WAL mode for concurrent reads.
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 import threading
 import time

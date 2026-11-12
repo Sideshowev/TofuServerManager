@@ -17,7 +17,6 @@ should be automatically started when the BaoBun Control Panel launches.
 
 import json
 from pathlib import Path
-from typing import Optional
 
 
 class SmartBootManager:

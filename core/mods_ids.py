@@ -8,9 +8,7 @@ import os
 import re
 from typing import Dict, List, Optional
 
-from core.mods_common import (ModError, add_flag, appdata, ci, dedupe, documents_dir, first_existing,
-                              get_arg, http_json, ini_get, ini_set, lenient_json, rel_or_abs, set_arg,
-                              steam_details, user_home, workshop_id, _read_lines, _write_lines)
+from core.mods_common import ModError, add_flag, appdata, dedupe, documents_dir, first_existing, get_arg, http_json, ini_get, ini_set, lenient_json, rel_or_abs, set_arg, steam_details, user_home, workshop_id, _read_lines, _write_lines
 
 MARK = "-- managed by BaoBun (edit mods in BaoBun's Mods tab)"
 

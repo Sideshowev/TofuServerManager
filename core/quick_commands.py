@@ -4,7 +4,6 @@ Games that ignore their console window (ARK, Palworld, ...) get these over RCON.
 
 from __future__ import annotations
 
-import os
 from typing import Dict, List
 
 COMMANDS: Dict[str, List[tuple]] = {

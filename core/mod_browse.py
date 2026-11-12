@@ -11,7 +11,7 @@ from __future__ import annotations
 import html
 import re
 from html.parser import HTMLParser
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 IMG_HOSTS = ("moddbcdn.vintagestory.at", "mods.vintagestory.at", "cdn.modrinth.com", "i.imgur.com",
              "raw.githubusercontent.com", "github.com", "user-images.githubusercontent.com",

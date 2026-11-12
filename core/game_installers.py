@@ -22,7 +22,7 @@ import time
 import urllib.error
 import urllib.request
 import zipfile
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional
 
 from core.mods_common import USER_AGENT, http_json
 
