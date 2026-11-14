@@ -71,6 +71,11 @@ KNOWN_FILES = {
     "223350": [("Server settings", "{config}", "cfg")],
     "4020": [("Server settings", "garrysmod/cfg/server.cfg", "cfg")],
     "258550": [],
+    "source": [("Server settings", "{srccfg}", "cfg")],
+    "3792580": [("Server settings", "SCUM/Saved/Config/WindowsServer/ServerSettings.ini", "ini")],
+    "3349480": [("Server settings", "MoriaServerConfig.ini", "ini")],
+    "2465200": [("Server settings", "{sotf}", "json")],
+    "530870": [("Server settings", "dedicated.yaml", "yaml")],
 }
 EXT_FORMAT = {".json": "json", ".ini": "ini", ".toml": "toml", ".properties": "properties", ".env": "properties",
               ".cfg": "cfg", ".conf": "properties", ".yaml": "yaml", ".yml": "yaml", ".xml": "xmlprop",

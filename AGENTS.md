@@ -60,3 +60,11 @@ Write `HANDOFF.md` in the project folder:
 ## Open questions
 ```
 Keep it short - the point is to save the main developer reading time.
+
+## Extra research source: CreeperHost wiki
+
+https://www.creeperhost.net/help/docs/ has a section per game (about 45 games). Use it to learn WHICH settings
+and commands matter for a game (what a host puts on its settings page, how admins are added, how the world is
+changed). Its pages mostly describe CreeperHost's own panel, so they rarely name the real file, key or start
+option - confirm those from the game's official docs, WindowsGSM's notes or the files the game writes
+(logs/game_smoke_report.md lists them per game). Never copy its text.

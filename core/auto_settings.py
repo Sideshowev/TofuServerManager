@@ -18,15 +18,15 @@ from typing import Dict, List
 
 # essential -> (label, accepted key spellings after lowercasing and removing _ - . and spaces)
 ESSENTIALS = [
-    ("name", "Server name", {"servername", "hostname", "sessionname", "steamservername", "gamename", "worldname"}),
+    ("name", "Server name", {"servername", "hostname", "srvname", "publicname", "sessionname", "steamservername", "gamename", "worldname"}),
     ("description", "Description / message", {"serverdescription", "description", "motd", "welcomemessage",
                                               "servermessage"}),
-    ("password", "Password to join", {"serverpassword", "password", "joinpassword", "gamepassword",
+    ("password", "Password to join", {"serverpassword", "password", "srvpassword", "joinpassword", "gamepassword",
                                       "serverpass"}),
     ("admin", "Admin password", {"adminpassword", "serveradminpassword", "adminpass", "rconpassword"}),
-    ("players", "Max players", {"maxplayers", "maxplayer", "playerlimit", "slotcount", "maxconnectedplayers",
+    ("players", "Max players", {"maxplayers", "maxplayer", "srvmaxplayers", "playerlimit", "slotcount", "maxconnectedplayers",
                                 "maxusers", "maxclients", "players"}),
-    ("port", "Game port", {"port", "gameport", "serverport"}),
+    ("port", "Game port", {"port", "gameport", "serverport", "srvport"}),
     ("pvp", "PvP", {"pvp", "enablepvp", "ispvp", "serverpvp", "pvpenabled", "allowpvp", "bpvp"}),
     ("public", "Listed publicly", {"public", "ispublic", "publiclobby", "listed", "visibleinserverbrowser"}),
 ]

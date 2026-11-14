@@ -150,8 +150,65 @@ GAMES: Dict[str, dict] = {
         ("sv_password", "Password", "password", ("cfg", "garrysmod/cfg/server.cfg", "sv_password")),
         ("maxplayers", "Max players", "int", ("launch", "+maxplayers", " ")),
     ]},
+    # --- start options / files confirmed by the settings smoke test's gaps (2026-11) ---
+    "2857200": {"note": "Saved in the launch options.", "fields": [                       # Abiotic Factor
+        ("SteamServerName", "Server name", "text", ("launch", "-SteamServerName", "=")),
+        ("ServerPassword", "Password", "password", ("launch", "-ServerPassword", "=")),
+        ("MaxServerPlayers", "Max players", "int", ("launch", "-MaxServerPlayers", "=")),
+    ]},
+    "3017310": {"note": "Saved in the launch options.", "fields": [                       # Soulmask
+        ("SteamServerName", "Server name", "text", ("launch", "-SteamServerName", "=")),
+        ("PSW", "Password", "password", ("launch", "-PSW", "=")),
+        ("adminpsw", "Admin password", "password", ("launch", "-adminpsw", "=")),
+        ("MaxPlayers", "Max players", "int", ("launch", "-MaxPlayers", "=")),
+    ]},
+    "1963720": {"note": "Saved in the launch options. Friends join with the Game ID the server prints in its "
+                        "console.", "fields": [                                           # Core Keeper
+        ("worldname", "World name", "text", ("launch", "-worldname", " ")),
+        ("maxplayers", "Max players", "int", ("launch", "-maxplayers", " ")),
+    ]},
+    "581330": {"note": "Saved in the launch options.", "fields": [                        # Insurgency: Sandstorm
+        ("hostname", "Server name", "text", ("launch", "-hostname", "=")),
+    ]},
+    "3792580": {"note": "Saved to ServerSettings.ini (the game writes it on its first start).", "fields": [  # SCUM
+        ("scum.ServerName", "Server name", "text", ("ini", "SCUM/Saved/Config/WindowsServer/ServerSettings.ini", "General", "scum.ServerName")),
+        ("scum.ServerPassword", "Password", "password", ("ini", "SCUM/Saved/Config/WindowsServer/ServerSettings.ini", "General", "scum.ServerPassword")),
+        ("scum.MaxPlayers", "Max players", "int", ("ini", "SCUM/Saved/Config/WindowsServer/ServerSettings.ini", "General", "scum.MaxPlayers")),
+    ]},
+    "3349480": {"note": "Saved to MoriaServerConfig.ini (the game writes it on its first start).", "fields": [
+        ("Name", "World name", "text", ("ini", "MoriaServerConfig.ini", "World", "Name")),
+        ("OptionalPassword", "Password", "password", ("ini", "MoriaServerConfig.ini", "Main", "OptionalPassword")),
+    ]},
+    "2465200": {"note": "Saved to dedicatedserver.cfg (the game writes it on its first start).", "fields": [
+        ("ServerName", "Server name", "text", ("json", "{sotf}", "ServerName")),
+        ("Password", "Password", "password", ("json", "{sotf}", "Password")),
+        ("MaxPlayers", "Max players", "int", ("json", "{sotf}", "MaxPlayers")),
+    ]},
+    # any Source engine server (srcds: CS:S, TF2, L4D2, HL2DM, mods ...) and CS2
+    "source": {"note": "Saved to the game's cfg/server.cfg (BaoBun makes the file if the game didn't ship one) "
+                       "and the launch options.", "fields": [
+        ("hostname", "Server name", "text", ("cfg", "{srccfg}", "hostname")),
+        ("sv_password", "Password", "password", ("cfg", "{srccfg}", "sv_password")),
+        ("rcon_password", "Admin (RCON) password", "password", ("cfg", "{srccfg}", "rcon_password")),
+        ("maxplayers", "Max players", "int", ("launch", "{maxplayers}", " ")),
+    ]},
 }
 ALIASES = {"108600": "380870", "1890870": "1874900"}
+
+
+def source_cfg(srv: dict) -> Optional[str]:
+    """Path of cfg/server.cfg for a Source engine server (srcds or CS2), else None."""
+    from core import game_defaults as gd
+    d = srv.get("directory") or ""
+    app = str(srv.get("appId") or "")
+    exe = str(srv.get("executable") or "").replace("\\", "/").rsplit("/", 1)[-1].lower()
+    if app == "730" or exe == "cs2.exe":
+        return os.path.join(d, "game", "csgo", "cfg", "server.cfg")
+    if not gd._is_srcds(srv):
+        return None
+    mod = get_arg(srv.get("launchArgs") or "", "game") or (gd.SOURCE.get(app) or ("",))[0] or \
+        gd._source_mod(d)[0]
+    return os.path.join(d, mod, "cfg", "server.cfg") if mod else None
 
 
 def game_key(srv: dict) -> Optional[str]:
@@ -164,7 +221,9 @@ def game_key(srv: dict) -> Optional[str]:
         return None   # cluster-wide settings live in ARK Cluster Settings
     a = str(srv.get("appId") or "")
     a = ALIASES.get(a, a)
-    return a if a in GAMES else None
+    if a in GAMES:
+        return a
+    return "source" if source_cfg(srv) else None
 
 
 # --------------------------------------------------------------------------- #
@@ -200,6 +259,12 @@ def _resolve(srv: dict, path: str) -> str:
         root = get_arg(args, "persistent_storage_root") or os.path.join(documents_dir(), "Klei")
         path = path.replace("{dst}", os.path.join(root, get_arg(args, "conf_dir") or "DoNotStarveTogether",
                                                   get_arg(args, "cluster") or "Cluster_1"))
+    if "{srccfg}" in path:
+        path = source_cfg(srv) or os.path.join(d, "cfg", "server.cfg")
+    if "{sotf}" in path:
+        root = get_arg(args, "userdatapath")
+        path = os.path.join(rel_or_abs(d, root) if root else os.path.join(
+            user_home(), "AppData", "LocalLow", "Endnight", "SonsOfTheForestDS"), "dedicatedserver.cfg")
     if "{config}" in path:
         cfg = get_arg(args, "config")
         default = "config.json" if str(srv.get("appId")) in ("1874900", "1890870") else (
@@ -248,7 +313,15 @@ def _tuple_parse(text: str) -> List[List[str]]:
     return pairs
 
 
+def _where(srv, where):
+    if where[0] == "launch" and where[1] == "{maxplayers}":      # CS2 wants -maxplayers, srcds +maxplayers
+        cs2 = str(srv.get("appId") or "") == "730"
+        return ("launch", "-maxplayers" if cs2 else "+maxplayers", " ")
+    return where
+
+
 def read_value(srv, where):
+    where = _where(srv, where)
     kind = where[0]
     args = srv.get("launchArgs") or ""
     if kind == "launch":
@@ -297,6 +370,7 @@ def read_value(srv, where):
 
 
 def write_value(srv, where, value, typ):
+    where = _where(srv, where)
     kind = where[0]
     args = srv.get("launchArgs") or ""
     if kind == "launch":
@@ -324,6 +398,10 @@ def write_value(srv, where, value, typ):
         if os.path.isfile(default):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             shutil.copy2(default, path)
+    if kind == "cfg" and not os.path.isfile(path) and os.path.basename(os.path.dirname(path)).lower() == "cfg" \
+            and os.path.isdir(os.path.dirname(path)):
+        with open(path, "w", encoding="utf-8") as fh:      # Source games don't ship a server.cfg
+            fh.write("// Server settings - the game runs this file every time a map starts.\n")
     if not os.path.isfile(path):
         raise FileNotFoundError("%s doesn't exist yet. Start the server once so it creates its config, then "
                                 "try again." % os.path.basename(path))
@@ -372,7 +450,7 @@ def write_value(srv, where, value, typ):
     elif kind == "cfg":
         lines = _read_lines(path)
         num = typ == "int"
-        srcds = path.lower().endswith("server.cfg") and "garrysmod" in path.lower()
+        srcds = os.path.basename(os.path.dirname(path)).lower() == "cfg"
         if srcds:
             new = '%s "%s"' % (where[2], value)
         else:
