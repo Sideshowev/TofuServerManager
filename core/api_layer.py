@@ -1044,7 +1044,8 @@ class ApiLayer:
             except Exception:
                 ask = []
             out.append(dict(v, name=k, download=kind if k != "Custom / Other" else None, first_settings=ask,
-                            support=game_support.level(dict(v, name=k)) if k != "Custom / Other" else None))
+                            support=game_support.level(dict(v, name=k)) if k != "Custom / Other" else None,
+                            issue=game_support.issue(k)))
         return {"games": out, "mcFlavors": gi.MC_FLAVORS}
 
     _versions_cache: Dict[str, Any] = {}

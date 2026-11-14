@@ -300,6 +300,17 @@ def _source_mod(directory: str):
                 mods.append(d)
     except OSError:
         return None, None
+    if not mods:                                   # some mods sit one folder deeper (Dystopia)
+        try:
+            for d in sorted(os.listdir(directory)):
+                top = os.path.join(directory, d)
+                if d.lower() in skip or not os.path.isdir(top):
+                    continue
+                for e in sorted(os.listdir(top)):
+                    if e.lower() not in skip and os.path.isfile(os.path.join(top, e, "gameinfo.txt")):
+                        mods.append(d + "/" + e)
+        except OSError:
+            pass
     if not mods:
         return None, None
     mod = mods[0]

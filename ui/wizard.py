@@ -103,6 +103,14 @@ class AddServerWizard(ctk.CTkToplevel):
         self._btn("Cancel", self._close)
         self._btn("Advanced form…", lambda: (self.destroy(), self.on_advanced()), side="left")
 
+    @staticmethod
+    def _issue(game):
+        try:
+            from core import game_support
+            return game_support.issue(game)
+        except Exception:
+            return None
+
     def _render_games(self):
         for w in self.list_frame.winfo_children():
             w.destroy()
@@ -138,6 +146,8 @@ class AddServerWizard(ctk.CTkToplevel):
                 kind += " · needs Steam account"
             if n != "Custom / Other" and self._support.get(n) == "basic":
                 kind += " · basic support"
+            if self._issue(n):
+                kind += " · known problem"
             row = ctk.CTkButton(self.list_frame, text="%s\n%s" % (n, kind), anchor="w", height=48,
                                 corner_radius=8, fg_color=self.theme["bg_input"],
                                 hover_color=self.theme["border"], text_color=self.theme["text_light"],
@@ -191,6 +201,9 @@ class AddServerWizard(ctk.CTkToplevel):
         def label(text):
             ctk.CTkLabel(self.body, text=text, anchor="w", text_color=t["text_light"]).pack(
                 fill="x", padx=16, pady=(12, 0))
+        if self._issue(game):
+            ctk.CTkLabel(self.body, text="Known problem: " + self._issue(game), anchor="w", justify="left",
+                         wraplength=600, text_color=t["warning"]).pack(fill="x", padx=16, pady=(10, 0))
         if getattr(self, "_support", {}).get(game) == "basic":
             ctk.CTkLabel(self.body, text="Basic support: BaoBun installs and runs %s, but nothing in BaoBun was made "
                                          "for it yet - its settings are found by searching the server folder, and "

@@ -4149,7 +4149,9 @@ class SmokeToolTests(unittest.TestCase):
         self.assertIn("Valheim", names)
         self.assertNotIn("Hytale", names)
         self.assertEqual(game_support.level(dict(GAME_PRESETS["Valheim"], name="Valheim")), "full")
-        self.assertEqual(game_support.level(dict(GAME_PRESETS["Core Keeper"], name="Core Keeper")), "basic")
+        self.assertEqual(game_support.level(dict(GAME_PRESETS["Stationeers"], name="Stationeers")), "basic")
+        self.assertEqual(game_support.level(dict(GAME_PRESETS["Core Keeper"], name="Core Keeper")), "full")
+        self.assertEqual(game_support.level(dict(GAME_PRESETS["Counter-Strike: Source"], name="x")), "full")
         tmp = make_env([])
         e = engine(tmp)
         e.manager.set_setting("default_install_dir", str(tmp / "games"))
@@ -4395,3 +4397,99 @@ class SourceDefaultsTests(unittest.TestCase):
         self.assertIn("-port 27016", args)
         self.assertEqual(G.required({"appId": "232330", "executable": str(d / "srcds.exe"), "directory": str(d),
                                      "launchArgs": args})[1], [])
+
+
+class SourceEssentialsTests(unittest.TestCase):
+    def test_source_server_gets_essentials_and_a_server_cfg(self):
+        from core import quick_settings as Q, config_forms as C
+        tmp = make_env([{"id": "css", "name": "CSS", "appId": "232330", "executable": "srcds.exe"},
+                        {"id": "af", "name": "AF", "appId": "2857200", "executable": "x.exe",
+                         "launchArgs": "-log"}])
+        m = engine(tmp).manager
+        d = Path(m.get_server("css")["directory"])
+        (d / "cstrike" / "cfg").mkdir(parents=True)
+        (d / "cstrike" / "gameinfo.txt").write_text("x")
+        g = Q.get(m, "css")
+        self.assertEqual([f["label"] for f in g["fields"]][:1], ["Server name"])
+        r = Q.save(m, "css", {"hostname": "Bao Server", "maxplayers": "12"})
+        self.assertIn("hostname", r["saved"])
+        self.assertIn('hostname "Bao Server"', (d / "cstrike" / "cfg" / "server.cfg").read_text())
+        self.assertIn("+maxplayers 12", m.get_server("css")["launchArgs"])
+        self.assertEqual(Q.get(m, "css")["fields"][0]["value"], "Bao Server")
+        known = [f for f in C.files(m, "css") if f.get("known")]
+        self.assertTrue(known and known[0]["exists"])
+        # start-option games
+        Q.save(m, "af", {"SteamServerName": "My Lab", "MaxServerPlayers": "6"})
+        a = m.get_server("af")["launchArgs"]
+        self.assertIn('-SteamServerName="My Lab"', a)
+        self.assertIn("-MaxServerPlayers=6", a)
+        self.assertEqual(Q.get(m, "af")["fields"][0]["value"], "My Lab")
+
+
+class PerfTests(unittest.TestCase):
+    def test_marks_slow_blocks_and_quiet_widgets(self):
+        from core import perf
+        log = Path(tempfile.mkdtemp()) / "logs" / "perf.log"
+        perf.set_log(log)
+        perf.mark("step")
+        with perf.timed("fast thing"):
+            pass
+        with perf.timed("slow thing", slow=0.0):
+            pass
+        text = log.read_text()
+        self.assertIn("startup  step", text)
+        self.assertIn("slow thing", text)
+        self.assertNotIn("fast thing", text)
+
+        class W:
+            def __init__(self):
+                self.v, self.n = {"text": "a"}, 0
+
+            def cget(self, k):
+                return self.v[k]
+
+            def configure(self, require_redraw=False, **kw):
+                self.n += 1
+                self.v.update(kw)
+        W.configure = perf._quiet(W.configure)
+        w = W()
+        w.configure(text="a")
+        self.assertEqual(w.n, 0)
+        w.configure(text="b")
+        w.configure(unknown=1)
+        self.assertEqual((w.n, w.v["text"]), (2, "b"))
+
+    def test_get_server_is_a_copy_and_sees_changes(self):
+        tmp = make_env([{"id": "a", "name": "A", "appId": "1"}])
+        m = engine(tmp).manager
+        s = m.get_server("a")
+        s["name"] = "changed"
+        self.assertEqual(m.get_server("a")["name"], "A")
+        servers = m.load_servers()
+        servers[0]["name"] = "Renamed server"
+        m.save_servers(servers)
+        self.assertEqual(m.get_server("a")["name"], "Renamed server")
+        self.assertIsNone(m.get_server("nope"))
+
+
+class KnownIssueTests(unittest.TestCase):
+    def test_known_issues_name_real_games_and_reach_the_picker(self):
+        from core import game_support
+        from core.game_catalog import GAME_PRESETS
+        self.assertEqual([k for k in game_support.KNOWN_ISSUES if k not in GAME_PRESETS], [])
+        self.assertIsNone(game_support.issue("Valheim"))
+        self.assertIn("token", game_support.issue("Brickadia"))
+        tmp = make_env([])
+        r = engine(tmp).api.process("games.list", {})
+        if r.success:
+            by = {g["name"]: g for g in r.data["games"]}
+            self.assertTrue(by["Pavlov"]["issue"])
+            self.assertIsNone(by["Valheim"]["issue"])
+
+    def test_source_mod_one_folder_deeper(self):
+        from core import game_defaults as G
+        d = Path(tempfile.mkdtemp())
+        (d / "Dystopia" / "dystopia" / "maps").mkdir(parents=True)
+        (d / "Dystopia" / "dystopia" / "gameinfo.txt").write_text("x")
+        (d / "Dystopia" / "dystopia" / "maps" / "dys_vaccine.bsp").write_text("")
+        self.assertEqual(G._source_mod(str(d)), ("Dystopia/dystopia", "dys_vaccine"))
