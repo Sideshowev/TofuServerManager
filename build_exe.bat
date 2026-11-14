@@ -6,6 +6,7 @@ REM and the new one is copied in. Restart BaoBun afterwards to use it.
 title Build BaoBunCP.exe
 REM Finds Python on any PC: the "py" launcher that comes with python.org Python,
 REM else "python" on PATH. Set PYTHON yourself first to use a specific one.
+if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON set "PYTHON=python"
 cd /d "%~dp0"

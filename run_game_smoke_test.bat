@@ -5,6 +5,7 @@ REM stops and deletes it. Your real servers are never touched. Takes hours and
 REM downloads a lot - best overnight. Report: logs\game_smoke_report.md
 REM Extra options are passed on, e.g.:  run_game_smoke_test.bat --games "Valheim,Terraria"
 title BaoBun game smoke test
+if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON if exist "%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" set "PYTHON="%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" -3"
 if not defined PYTHON for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do if exist "%%D\python.exe" set "PYTHON="%%D\python.exe""

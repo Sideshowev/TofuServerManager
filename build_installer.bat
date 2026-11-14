@@ -5,6 +5,7 @@ REM The version comes from core\version.py - bump it there before a release.
 REM Publish the installer and its .sha256 file on a GitHub release of the repository
 REM named in core\version.py (UPDATE_REPO) and installed copies offer the update.
 title Build the BaoBun installer
+if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON set "PYTHON=python"
 cd /d "%~dp0"

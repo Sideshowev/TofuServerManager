@@ -1,6 +1,7 @@
 @echo off
 REM Re-test the games that failed last time, then test every game not tested yet.
 title BaoBun game smoke test (retest + all)
+if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON if exist "%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" set "PYTHON="%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" -3"
 if not defined PYTHON for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do if exist "%%D\python.exe" set "PYTHON="%%D\python.exe""
