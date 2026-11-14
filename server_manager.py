@@ -3,6 +3,7 @@ BaoBun Control Panel — Server Management Backend
 Handles process spawning, watchdog monitoring, config editing, log reading.
 """
 
+import copy
 import json
 import os
 import re
@@ -620,7 +621,19 @@ class ServerManager:
         atomic_write_json(self.config_path, servers)
 
     def get_server(self, server_id: str) -> dict | None:
-        return next((s for s in self.load_servers() if s.get("id") == server_id), None)
+        """One server's settings (a copy). Asked for constantly, so the parsed
+        list is kept until servers.json changes instead of re-reading it every time."""
+        try:
+            st = self.config_path.stat()
+            key = (st.st_mtime_ns, st.st_size)
+        except OSError:
+            return None
+        cache = getattr(self, "_servers_parsed", None)
+        if cache is None or cache[0] != key:
+            cache = (key, {s.get("id"): s for s in self.load_servers() if isinstance(s, dict)})
+            self._servers_parsed = cache
+        srv = cache[1].get(server_id)
+        return copy.deepcopy(srv) if srv is not None else None
 
     # ── Runtime registry (shared between GUI and agent) ──
 

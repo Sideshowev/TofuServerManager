@@ -8,6 +8,7 @@ from pathlib import Path
 if not getattr(sys, "frozen", False):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 from core.paths import base_dir as _base_dir, bundle_dir as _bundle_dir  # noqa: E402
+from core import perf  # noqa: E402  (first, so startup timing covers the imports below)
 
 # Data files live in BASE_DIR. For the exe that is its folder, unless a
 # data_dir.txt next to it points elsewhere (dist\data_dir.txt -> "..").
@@ -46,6 +47,13 @@ from ui.app_server_form import ServerFormMixin  # noqa: E402
 from ui.app_settings import SettingsDialogsMixin  # noqa: E402
 from ui.app_ark import ArkDialogsMixin  # noqa: E402
 from ui.app_legacy_mods import LegacyModsMixin  # noqa: E402
+
+try:
+    perf.set_log(BASE_DIR / "logs" / "perf.log")
+    perf.mark("loading the app's code")
+    perf.quiet_widgets()
+except Exception:
+    pass
 
 
 class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyModsMixin, ctk.CTk):
@@ -116,8 +124,10 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
             except Exception:
                 pass
         self.configure(fg_color=THEME["bg_dark"])
+        perf.mark("window created")
         self.engine = build_engine(role="gui", base_dir=APP_DIR)
         self.manager = self.engine.manager
+        perf.mark("engine and plugins")
         self._statuses = []
         self._poll_inflight = False
         self._local_mode = False
@@ -129,9 +139,12 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         self._poll_interval = 3.0
         self._current_config_data = None
         self._build_ui()
+        perf.mark("building the window")
         self._pump_ui()
         self._start_polling()
         self.refresh_servers()
+        perf.mark("first server list")
+        perf.watch(self)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         threading.Thread(target=self._startup_engine, daemon=True).start()
         self.after(400, self.maybe_show_onboarding)
@@ -1212,17 +1225,27 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
             return
         try:
             lines_count = max(10, min(5000, self.log_lines_var.get()))
-            entries = self.manager.get_logs(
-                self.selected_server_id, last_n=lines_count,
-            )
+        except Exception:
+            lines_count = 200
+        sid = self.selected_server_id
+
+        def show(entries):
+            if sid != self.selected_server_id:
+                return
             self.log_text.config(state="normal")
             self.log_text.delete(1.0, "end")
-            for entry in entries:
-                self.log_text.insert("end", entry + "\n")
+            self.log_text.insert("end", "\n".join(entries) + ("\n" if entries else ""))   # one insert, not thousands
             self.log_text.config(state="disabled")
             self.log_text.see("end")
-        except Exception as e:
-            messagebox.showerror("Load Logs Failed", str(e))
+
+        def work():                       # reading a big log off the disk must not freeze the window
+            try:
+                entries = self.manager.get_logs(sid, last_n=lines_count)
+                self.after(0, lambda: show(entries))
+            except Exception as e:
+                msg = str(e)
+                self.after(0, lambda: messagebox.showerror("Load Logs Failed", msg))
+        threading.Thread(target=work, daemon=True).start()
 
     def show_add_dialog(self):
         self._open_server_form("Add New Server", None, "Add Server")
