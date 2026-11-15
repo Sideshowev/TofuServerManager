@@ -80,3 +80,33 @@ def query_players(host: str, port: int, timeout: float = 1.5):
         return None
     finally:
         sock.close()
+
+
+def lan_ip() -> Optional[str]:
+    """This PC's main network address (no packet is sent to find it)."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))
+        ip = s.getsockname()[0]
+        return ip if ip and not ip.startswith("127.") else None
+    except OSError:
+        return None
+    finally:
+        s.close()
+
+
+def local_hosts(launch_args: str = "") -> list:
+    """Addresses to ask a server on this PC, most likely first. Most games answer on
+    127.0.0.1; Source engine servers (srcds) only listen on one address - the one given
+    with -ip / +ip, else this PC's network address - so that is tried too."""
+    import re
+    hosts = []
+    m = re.search(r"(?i)(?:^|\s)[-+]ip[\s=]+\"?(\d+\.\d+\.\d+\.\d+)", launch_args or "")
+    if m and m.group(1) != "0.0.0.0":
+        hosts.append(m.group(1))
+    hosts.append("127.0.0.1")
+    ip = lan_ip()
+    if ip and ip not in hosts:
+        hosts.append(ip)
+    return hosts
+

@@ -66,7 +66,7 @@ GAME_PRESETS = {
     },
     "Sons of the Forest": {
         "type": "steamcmd", "appId": "2465200", "port": 8766,
-        "executable": "SonsOfTheForestServer.exe",
+        "executable": "SonsOfTheForestDS.exe",
         "config_files": ["serverconfig.json"],
         "description": "Sons of the Forest dedicated server", "anonymous_login": True,
     },

@@ -1062,6 +1062,11 @@ class ServerManager:
             except Exception as e:
                 print(f"[WARN] first settings: {e}")
         filled = self._fill_required_args(srv_def)
+        try:      # the settings file a few games can't start without (Sons of the Forest, Arma Reforger)
+            from core import quick_settings as _qs0
+            _qs0.prepare(srv_def)
+        except Exception as e:
+            print(f"[WARN] first settings file: {e}")
         try:
             self._note_config_baseline(srv_def)
         except Exception as e:

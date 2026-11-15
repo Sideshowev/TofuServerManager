@@ -89,14 +89,16 @@ GAMES: Dict[str, dict] = {
         ("worldsize", "Map size", "int", ("launch", "+server.worldsize", " ")),
         ("seed", "Map seed", "int", ("launch", "+server.seed", " ")),
     ]},
-    "2430930": {"note": "Saved in the launch options (map URL). Cluster maps use ARK Cluster Settings instead.", "fields": [
-        ("SessionName", "Server name", "text", ("ark_url", "SessionName")),
+    "2430930": {"note": "Passwords and max players are saved in the launch options; a server name with spaces goes "
+                       "to GameUserSettings.ini (ARK cuts a name at the first space on the launch line). Cluster "
+                       "maps use ARK Cluster Settings instead.", "fields": [
+        ("SessionName", "Server name", "text", ("ark_name", "ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini")),
         ("ServerPassword", "Password", "password", ("ark_url", "ServerPassword")),
         ("ServerAdminPassword", "Admin password", "password", ("ark_url", "ServerAdminPassword")),
         ("WinLiveMaxPlayers", "Max players", "int", ("launch", "-WinLiveMaxPlayers", "=")),
     ]},
     "376030": {"note": "Saved in the launch options (map URL).", "fields": [
-        ("SessionName", "Server name", "text", ("ark_url", "SessionName")),
+        ("SessionName", "Server name", "text", ("ark_name", "ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini")),
         ("ServerPassword", "Password", "password", ("ark_url", "ServerPassword")),
         ("ServerAdminPassword", "Admin password", "password", ("ark_url", "ServerAdminPassword")),
         ("MaxPlayers", "Max players", "int", ("ark_url", "MaxPlayers")),
@@ -162,8 +164,8 @@ GAMES: Dict[str, dict] = {
         ("adminpsw", "Admin password", "password", ("launch", "-adminpsw", "=")),
         ("MaxPlayers", "Max players", "int", ("launch", "-MaxPlayers", "=")),
     ]},
-    "1963720": {"note": "Saved in the launch options. Friends join with the Game ID the server prints in its "
-                        "console.", "fields": [                                           # Core Keeper
+    "1963720": {"note": "Saved in the launch options. Core Keeper has no server name or password: friends join "
+                        "with the Game ID, which the server writes to GameID.txt next to its program.", "fields": [                                           # Core Keeper
         ("worldname", "World name", "text", ("launch", "-worldname", " ")),
         ("maxplayers", "Max players", "int", ("launch", "-maxplayers", " ")),
     ]},
@@ -179,10 +181,35 @@ GAMES: Dict[str, dict] = {
         ("Name", "World name", "text", ("ini", "MoriaServerConfig.ini", "World", "Name")),
         ("OptionalPassword", "Password", "password", ("ini", "MoriaServerConfig.ini", "Main", "OptionalPassword")),
     ]},
-    "2465200": {"note": "Saved to dedicatedserver.cfg (the game writes it on its first start).", "fields": [
+    "2465200": {"note": "Saved to dedicatedserver.cfg in the server's data folder (BaoBun makes it if it isn't "
+                        "there). Up to 8 players.", "fields": [
         ("ServerName", "Server name", "text", ("json", "{sotf}", "ServerName")),
         ("Password", "Password", "password", ("json", "{sotf}", "Password")),
         ("MaxPlayers", "Max players", "int", ("json", "{sotf}", "MaxPlayers")),
+    ]},
+    "232130": {"note": "Name and passwords are saved to PCServer-KFGame.ini, max players in the launch options "
+                       "(the game ignores the file for that). Survival allows up to 6.", "fields": [   # Killing Floor 2
+        ("ServerName", "Server name", "text", ("ini", "KFGame/Config/PCServer-KFGame.ini", "Engine.GameReplicationInfo", "ServerName")),
+        ("GamePassword", "Password", "password", ("ini", "KFGame/Config/PCServer-KFGame.ini", "Engine.AccessControl", "GamePassword")),
+        ("AdminPassword", "Admin password", "password", ("ini", "KFGame/Config/PCServer-KFGame.ini", "Engine.AccessControl", "AdminPassword")),
+        ("MaxPlayers", "Max players", "int", ("ark_url", "MaxPlayers")),
+    ]},
+    "1690800": {"note": "Satisfactory has no setting for its server name or passwords: start the server, then in "
+                        "the game open Server Manager, add this server and claim it - the game asks for a name "
+                        "and an admin password there. Max players is saved to Game.ini.", "fields": [
+        ("MaxPlayers", "Max players", "int", ("ini", "FactoryGame/Saved/Config/WindowsServer/Game.ini", "/Script/Engine.GameSession", "MaxPlayers")),
+    ]},
+    "2131400": {"note": "Saved to Game.ini. VEIN has no admin password - admins are listed by Steam ID in the "
+                        "same file.", "fields": [                                              # VEIN
+        ("ServerName", "Server name", "text", ("ini", "Vein/Saved/Config/WindowsServer/Game.ini", "/Script/Vein.VeinGameSession", "ServerName")),
+        ("Password", "Password", "password", ("ini", "Vein/Saved/Config/WindowsServer/Game.ini", "/Script/Vein.VeinGameSession", "Password")),
+        ("MaxPlayers", "Max players", "int", ("ini", "Vein/Saved/Config/WindowsServer/Game.ini", "/Script/Engine.GameSession", "MaxPlayers")),
+    ]},
+    "1026340": {"note": "Saved to serversettings.xml (the game writes it on its first start). Up to 16 players.",
+                "fields": [                                                                    # Barotrauma
+        ("name", "Server name", "text", ("xml_attr", "serversettings.xml", "name")),
+        ("password", "Password", "password", ("xml_attr", "serversettings.xml", "password")),
+        ("MaxPlayers", "Max players", "int", ("xml_attr", "serversettings.xml", "MaxPlayers")),
     ]},
     # any Source engine server (srcds: CS:S, TF2, L4D2, HL2DM, mods ...) and CS2
     "source": {"note": "Saved to the game's cfg/server.cfg (BaoBun makes the file if the game didn't ship one) "
@@ -265,6 +292,8 @@ def _resolve(srv: dict, path: str) -> str:
         root = get_arg(args, "userdatapath")
         path = os.path.join(rel_or_abs(d, root) if root else os.path.join(
             user_home(), "AppData", "LocalLow", "Endnight", "SonsOfTheForestDS"), "dedicatedserver.cfg")
+    if "{config}" in path and str(srv.get("appId")) in ("1874900", "1890870") and not get_arg(args, "config"):
+        path = path.replace("{config}", os.path.join(d, "config.json"))
     if "{config}" in path:
         cfg = get_arg(args, "config")
         default = "config.json" if str(srv.get("appId")) in ("1874900", "1890870") else (
@@ -313,6 +342,94 @@ def _tuple_parse(text: str) -> List[List[str]]:
     return pairs
 
 
+FIRST_MAP = {"2430930": "TheIsland_WP?listen", "376030": "TheIsland?listen", "232130": "KF-BioticsLab"}
+
+
+def _make_unreal_ini(path: str) -> None:
+    """Unreal games read Saved/Config/WindowsServer/*.ini at start but some never write
+    one themselves (Conan's Engine.ini), or only after a first start. An empty file there
+    is safe - the game adds the rest - so settings can be chosen before the first start."""
+    folder = os.path.dirname(path)
+    norm = folder.replace("\\", "/").lower()
+    if os.path.isfile(path) or not norm.endswith("/saved/config/windowsserver"):
+        return
+    game_root = os.path.dirname(os.path.dirname(os.path.dirname(folder)))      # <Game>/ next to Saved
+    if not os.path.isdir(game_root):
+        return                                      # the game isn't installed here
+    os.makedirs(folder, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("")
+
+
+def first_json(srv: dict):
+    """The settings file a game needs before it can start at all, for the two games that
+    don't make a usable one themselves. None for every other game."""
+    app = ALIASES.get(str(srv.get("appId") or ""), str(srv.get("appId") or ""))
+    name = str(srv.get("name") or "BaoBun server")
+    if app == "2465200":             # Sons of the Forest stops after writing its own default
+        port = int(srv.get("port") or 8766)
+        return {"IpAddress": "0.0.0.0", "GamePort": port, "QueryPort": 27016, "BlobSyncPort": 9700,
+                "ServerName": name, "MaxPlayers": 8, "Password": "", "LanOnly": False, "SaveSlot": 1,
+                "SaveMode": "Continue", "GameMode": "Normal", "SaveInterval": 600, "IdleDayCycleSpeed": 0.0,
+                "IdleTargetFramerate": 5, "ActiveTargetFramerate": 60, "LogFilesEnabled": False,
+                "TimestampLogFilenames": True, "SkipNetworkAccessibilityTest": True}
+    if app == "1874900":             # Arma Reforger ships no config and makes none
+        port = int(srv.get("port") or 2001)
+        return {"bindPort": port, "publicPort": port, "a2s": {"address": "0.0.0.0", "port": 17777},
+                "game": {"name": name, "password": "", "passwordAdmin": "",
+                         "scenarioId": "{ECC61978EDCC2B5A}Missions/23_Campaign.conf", "maxPlayers": 32,
+                         "visible": True, "gameProperties": {}, "mods": []}}
+    return None
+
+
+def _make_first_json(srv: dict, path: str) -> bool:
+    data = first_json(srv)
+    if data is None or os.path.isfile(path) or not os.path.isdir(srv.get("directory") or ""):
+        return False
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+    return True
+
+
+def prepare(srv: dict) -> list:
+    """Before a start: make the settings file the game can't start without. Returns notes."""
+    key = game_key(srv)
+    if key in ("2465200", "1874900"):
+        try:
+            path = _resolve(srv, "{sotf}" if key == "2465200" else "{config}")
+            if _make_first_json(srv, path):
+                return ["its settings file (%s)" % os.path.basename(path)]
+        except OSError:
+            pass
+    return []
+
+
+def _root_attr(path: str, name: str):
+    """Match of name="value" on the first element of an XML file (group 2 = the value)."""
+    with open(path, encoding="utf-8-sig", errors="replace") as fh:
+        text = fh.read()
+    start = text.find("?>") + 2 if "?>" in text else 0
+    m = re.search(r"<[A-Za-z][\w.-]*([^>]*)>", text[start:], re.S)
+    if not m:
+        return None
+    a = re.search(r'(\s%s=)"([^"]*)"' % re.escape(name), m.group(1))
+    if not a:
+        return None
+    base = start + m.start(1)
+
+    class _M:                                    # positions in the whole file
+        def start(self, g):
+            return base + a.start(g)
+
+        def end(self, g):
+            return base + a.end(g)
+
+        def group(self, g):
+            return a.group(g)
+    return _M()
+
+
 def _where(srv, where):
     if where[0] == "launch" and where[1] == "{maxplayers}":      # CS2 wants -maxplayers, srcds +maxplayers
         cs2 = str(srv.get("appId") or "") == "730"
@@ -329,9 +446,19 @@ def read_value(srv, where):
     if kind == "ark_url":
         m = re.search(r"[?&]%s=([^?&\s]*)" % re.escape(where[1]), args, re.I)
         return m.group(1) if m else None
+    if kind == "ark_name":                  # the launch line wins when the name is there
+        m = re.search(r"[?&]SessionName=([^?&\s]*)", args, re.I)
+        if m:
+            return m.group(1)
+        path = _resolve(srv, where[1])
+        vals = ini_get(path, "SessionSettings", "SessionName") if os.path.isfile(path) else None
+        return vals[-1] if vals else None
     path = _resolve(srv, where[1])
     if not os.path.isfile(path):
         return None
+    if kind == "xml_attr":
+        m = _root_attr(path, where[2])
+        return m.group(2) if m else None
     if kind == "json":
         cur = _json_load(path)
         for part in where[2].split("."):
@@ -384,6 +511,10 @@ def write_value(srv, where, value, typ):
             args = re.sub(r"([?&])%s=[^?&\s]*" % re.escape(key), lambda m: m.group(1) + key + "=" + value, args,
                           count=1, flags=re.I)
         else:
+            if not args.strip() or args.lstrip().startswith(("-", "+")):   # no map yet: the game's usual one
+                first = FIRST_MAP.get(ALIASES.get(str(srv.get("appId") or ""), str(srv.get("appId") or "")))
+                if first:
+                    args = (first + " " + args).strip()
             parts = args.split(" ", 1)
             if "?" in parts[0] or (parts[0] and not parts[0].startswith("-")):
                 parts[0] += "?%s=%s" % (key, value)
@@ -392,7 +523,26 @@ def write_value(srv, where, value, typ):
                 raise ValueError("The launch options don't start with a map (e.g. TheIsland_WP?listen), "
                                  "so BaoBun can't add %s. Add the map first in Settings." % key)
         return ("args", args)
+    if kind == "ark_name":
+        value = str(value).strip()
+        if re.search(r'[?&"]', value):
+            raise ValueError("The server name can't contain ? & or quotes")
+        if not re.search(r"\s", value):
+            return write_value(srv, ("ark_url", "SessionName"), value, typ)     # one word: the launch line
+        # a name with spaces: the settings file, and off the launch line, which would win over
+        # the file and cuts the name at the first space
+        path = _resolve(srv, where[1])
+        _make_unreal_ini(path)
+        if not os.path.isfile(path):
+            raise FileNotFoundError("GameUserSettings.ini doesn't exist yet. Install the game first.")
+        ini_set(path, "SessionSettings", "SessionName", value)
+        srv["_also_args"] = re.sub(r"\?SessionName=[^?&\s]*", "", args, flags=re.I)
+        return ("file", path)
     path = _resolve(srv, where[1])
+    if kind == "ini":
+        _make_unreal_ini(path)
+    if kind == "json" and not os.path.isfile(path):
+        _make_first_json(srv, path)
     if kind == "ini_tuple" and not os.path.isfile(path):
         default = os.path.join(srv.get("directory") or "", "DefaultPalWorldSettings.ini")
         if os.path.isfile(default):
@@ -434,6 +584,22 @@ def write_value(srv, where, value, typ):
         else:
             pairs.append([where[4], newv])
         ini_set(path, where[2], where[3], "(" + ",".join("%s=%s" % (k, v) for k, v in pairs) + ")")
+    elif kind == "xml_attr":
+        m = _root_attr(path, where[2])
+        from xml.sax.saxutils import quoteattr
+        with open(path, encoding="utf-8-sig") as fh:
+            text = fh.read()
+        if m:
+            text = text[:m.start(2) - 1] + quoteattr(str(value)) + text[m.end(2) + 1:]
+        else:
+            r = re.search(r"<[A-Za-z][\w.-]*", text[text.find("?>") + 2 if "?>" in text else 0:])
+            if not r:
+                raise ValueError("%s isn't in a form BaoBun understands" % os.path.basename(path))
+            at = (text.find("?>") + 2 if "?>" in text else 0) + r.end()
+            text = text[:at] + " %s=%s" % (where[2], quoteattr(str(value))) + text[at:]
+        shutil.copy2(path, path + ".bak")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
     elif kind == "xml_prop":
         with open(path, encoding="utf-8-sig") as fh:
             text = fh.read()
@@ -560,7 +726,14 @@ def save(mgr, server_id: str, values: dict, user: str = "system") -> dict:
         if key == "896660" and fkey == "password" and value and (
                 len(value) < 5 or value.lower() in (values.get("name") or read_value(srv, ("launch", "-name", " ")) or "").lower()):
             raise ValueError("Valheim passwords need at least 5 characters and can't be part of the server name")
+        if where[0] in ("ini", "ini_tuple", "ark_name") and mgr.is_running(server_id):
+            from core.config_forms import rewritten_on_exit
+            if rewritten_on_exit(_resolve(srv, where[1])):
+                raise ValueError("Stop the server first. %s writes its settings file again when it shuts down, "
+                                 "which would undo this change." % (srv.get("game") or "This game"))
         kind, out = write_value(srv, where, value, t)
+        if "_also_args" in srv:
+            srv["launchArgs"] = srv.pop("_also_args")
         if kind == "args":
             srv["launchArgs"] = out
         else:

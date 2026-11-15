@@ -107,6 +107,20 @@ def required(srv: dict) -> Tuple[str, List[str]]:
             args = _set(args, "-port", str(srv.get("port") or 7777))
         if not _value(args, "-players"):
             args = _set(args, "-players", "8")
+    elif app == "2465200":                                # Sons of the Forest
+        # Its data folder defaults to the Windows user's AppData, shared by every server on the
+        # PC. A server that has no data there yet keeps its settings and saves in its own folder.
+        import os
+        if not _either(args, "-userdatapath"):
+            shared = os.path.join(os.path.expanduser("~"), "AppData", "LocalLow", "Endnight", "SonsOfTheForestDS")
+            if not os.path.isdir(shared):
+                args = (args + " -userdatapath userdata").strip()
+                notes.append("its own data folder (userdata, inside the server folder)")
+    elif app in ("1874900", "1890870"):                   # Arma Reforger can't start without a config
+        if not _either(args, "-config"):
+            args = (args + " -config config.json -profile profile -maxFPS 60").strip()
+            notes.append("a settings file (config.json) - BaoBun makes a basic one; choose the scenario and "
+                         "passwords in the Settings tab")
     elif app == "232130":                                 # Killing Floor 2 needs a map first
         if "kf-" not in args.lower():
             args = ("KF-BioticsLab " + args).strip()

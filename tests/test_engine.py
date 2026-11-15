@@ -1388,7 +1388,9 @@ class QuickSettingsTests(unittest.TestCase):
         self.assertTrue(args.startswith("TheIsland_WP?listen?SessionName=BaoArk?ServerPassword=pw"))
         self.assertIn("-WinLiveMaxPlayers=20", args)
         with self.assertRaises(ValueError):
-            qs.save(m, "asa", {"SessionName": "has space"})
+            qs.save(m, "asa", {"ServerPassword": "has space"})      # passwords stay on the launch line
+        with self.assertRaises(ValueError):
+            qs.save(m, "asa", {"SessionName": "what?now"})
         qs.save(m, "rf", {"name": "Reforger Fam", "maxPlayers": "32", "visible": "false"})
         rc = json.loads((d["rf"] / "config.json").read_text())
         self.assertEqual((rc["game"]["name"], rc["game"]["maxPlayers"], rc["game"]["visible"], rc["bindPort"]),
@@ -4493,3 +4495,111 @@ class KnownIssueTests(unittest.TestCase):
         (d / "Dystopia" / "dystopia" / "gameinfo.txt").write_text("x")
         (d / "Dystopia" / "dystopia" / "maps" / "dys_vaccine.bsp").write_text("")
         self.assertEqual(G._source_mod(str(d)), ("Dystopia/dystopia", "dys_vaccine"))
+
+
+class SettingsFixTests(unittest.TestCase):
+    """Fixes from the Nov 14 settings run and the research that followed it."""
+
+    def _mgr(self, servers):
+        tmp = make_env(servers)
+        return engine(tmp).manager
+
+    def test_ark_name_with_spaces_goes_to_the_settings_file(self):
+        from core import quick_settings as Q
+        m = self._mgr([{"id": "a", "name": "A", "appId": "2430930", "executable": "x.exe",
+                        "launchArgs": "TheIsland_WP?listen?SessionName=Old -port=7777"}])
+        d = Path(m.get_server("a")["directory"])
+        (d / "ShooterGame").mkdir(parents=True)
+        Q.save(m, "a", {"SessionName": "Bao and Friends"})
+        a = m.get_server("a")["launchArgs"]
+        self.assertNotIn("SessionName", a)
+        self.assertIn("TheIsland_WP?listen", a)
+        ini = (d / "ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini").read_text()
+        self.assertIn("[SessionSettings]", ini)
+        self.assertIn("SessionName=Bao and Friends", ini)
+        self.assertEqual(Q.get(m, "a")["fields"][0]["value"], "Bao and Friends")
+        Q.save(m, "a", {"SessionName": "OneWord"})
+        self.assertIn("?SessionName=OneWord", m.get_server("a")["launchArgs"])
+
+    def test_ark_and_kf2_get_a_map_when_a_url_setting_is_saved(self):
+        from core import quick_settings as Q
+        m = self._mgr([{"id": "a", "name": "A", "appId": "2430930", "executable": "x.exe", "launchArgs": ""},
+                       {"id": "k", "name": "K", "appId": "232130", "executable": "x.exe",
+                        "launchArgs": "-Port=7777"}])
+        Q.save(m, "a", {"ServerPassword": "secret12"})
+        self.assertTrue(m.get_server("a")["launchArgs"].startswith("TheIsland_WP?listen?ServerPassword=secret12"))
+        d = Path(m.get_server("k")["directory"])
+        (d / "KFGame/Config").mkdir(parents=True)
+        (d / "KFGame/Config/PCServer-KFGame.ini").write_text("[Engine.GameReplicationInfo]\nServerName=Old\n")
+        Q.save(m, "k", {"ServerName": "Bao KF", "MaxPlayers": "6"})
+        self.assertTrue(m.get_server("k")["launchArgs"].startswith("KF-BioticsLab?MaxPlayers=6 -Port=7777"))
+        self.assertIn("ServerName=Bao KF", (d / "KFGame/Config/PCServer-KFGame.ini").read_text())
+
+    def test_conan_settings_can_be_saved_before_the_first_start(self):
+        from core import quick_settings as Q
+        m = self._mgr([{"id": "c", "name": "C", "appId": "443030", "executable": "x.exe"}])
+        d = Path(m.get_server("c")["directory"])
+        with self.assertRaises(Exception):            # game not installed: nothing is made up
+            Q.save(m, "c", {"ServerName": "Bao Conan"})
+        (d / "ConanSandbox").mkdir()
+        Q.save(m, "c", {"ServerName": "Bao Conan"})
+        text = (d / "ConanSandbox/Saved/Config/WindowsServer/Engine.ini").read_text()
+        self.assertIn("[OnlineSubsystem]", text)
+        self.assertIn("ServerName=Bao Conan", text)
+
+    def test_sons_of_the_forest_and_reforger_get_their_first_settings_file(self):
+        from core import quick_settings as Q, game_defaults as G
+        m = self._mgr([{"id": "s", "name": "Forest Crew", "appId": "2465200", "executable": "x.exe",
+                        "launchArgs": "-userdatapath userdata", "port": 8766},
+                       {"id": "r", "name": "Reforger Night", "appId": "1874900", "executable": "x.exe"}])
+        s = m.get_server("s")
+        self.assertEqual(Q.prepare(s), ["its settings file (dedicatedserver.cfg)"])
+        cfg = json.loads((Path(s["directory"]) / "userdata/dedicatedserver.cfg").read_text())
+        self.assertEqual((cfg["ServerName"], cfg["MaxPlayers"], cfg["GamePort"]), ("Forest Crew", 8, 8766))
+        self.assertTrue(cfg["SkipNetworkAccessibilityTest"])
+        self.assertEqual(Q.prepare(s), [])                         # never overwritten
+        Q.save(m, "s", {"ServerName": "New Name", "MaxPlayers": "6"})
+        cfg = json.loads((Path(s["directory"]) / "userdata/dedicatedserver.cfg").read_text())
+        self.assertEqual((cfg["ServerName"], cfg["MaxPlayers"]), ("New Name", 6))
+        r = m.get_server("r")
+        args, notes = G.required(r)
+        self.assertIn("-config config.json", args)
+        self.assertTrue(notes)
+        Q.save(m, "r", {"name": "Bao Reforger", "maxPlayers": "16"})
+        cfg = json.loads((Path(r["directory"]) / "config.json").read_text())
+        self.assertEqual((cfg["game"]["name"], cfg["game"]["maxPlayers"]), ("Bao Reforger", 16))
+        self.assertIn("scenarioId", cfg["game"])
+
+    def test_barotrauma_root_attributes_and_new_pages(self):
+        from core import quick_settings as Q
+        m = self._mgr([{"id": "b", "name": "B", "appId": "1026340", "executable": "x.exe"},
+                       {"id": "f", "name": "F", "appId": "1690800", "executable": "x.exe"},
+                       {"id": "v", "name": "V", "appId": "2131400", "executable": "x.exe"}])
+        d = Path(m.get_server("b")["directory"])
+        (d / "serversettings.xml").write_text('<?xml version="1.0" encoding="utf-8"?>\n<serversettings\n  '
+                                              'name="Server" port="27015" password="" MaxPlayers="10">\n'
+                                              '  <x name="inner" />\n</serversettings>\n')
+        Q.save(m, "b", {"name": "Bao Sub", "MaxPlayers": "12"})
+        text = (d / "serversettings.xml").read_text()
+        self.assertIn('name="Bao Sub" port="27015"', text)
+        self.assertIn('MaxPlayers="12"', text)
+        self.assertIn('<x name="inner" />', text)
+        self.assertEqual(Q.get(m, "b")["fields"][0]["value"], "Bao Sub")
+        self.assertEqual([f["label"] for f in Q.get(m, "f")["fields"]], ["Max players"])
+        self.assertIn("claim", Q.get(m, "f")["note"])
+        self.assertEqual([f["label"] for f in Q.get(m, "v")["fields"]], ["Server name", "Password", "Max players"])
+
+    def test_local_query_addresses(self):
+        from core import a2s
+        self.assertEqual(a2s.local_hosts("+ip 192.168.1.20 -port 27015")[0], "192.168.1.20")
+        self.assertIn("127.0.0.1", a2s.local_hosts(""))
+        self.assertEqual(a2s.local_hosts("-ip 0.0.0.0")[0], "127.0.0.1")
+
+    def test_unreal_settings_are_not_saved_under_a_running_server(self):
+        from core import quick_settings as Q
+        m = self._mgr([{"id": "c", "name": "C", "appId": "443030", "executable": "x.exe"}])
+        (Path(m.get_server("c")["directory"]) / "ConanSandbox").mkdir()
+        with mock.patch.object(m, "is_running", return_value=True):
+            with self.assertRaises(ValueError) as cm:
+                Q.save(m, "c", {"ServerName": "Bao Conan"})
+        self.assertIn("Stop the server first", str(cm.exception))

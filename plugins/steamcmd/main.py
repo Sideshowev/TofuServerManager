@@ -125,17 +125,32 @@ class SteamCmdPlugin(ManagedServerPlugin):
         if known in candidates:
             candidates.remove(known)
             candidates.insert(0, known)
-        for port in candidates[:4]:
-            info = query_info("127.0.0.1", port, timeout=1.0)
-            if info:
-                self._query_port_cache[srv["id"]] = port
-                names = None
-                if info["players"]:
-                    from core.a2s import query_players as a2s_players
-                    lst = a2s_players("127.0.0.1", port, timeout=1.0)
-                    if lst is not None:
-                        names = [{"name": p["name"], "seconds": p["seconds"]} for p in lst]
-                return {"count": info["players"], "max": info["max_players"], "names": names}
+        # Most games answer on 127.0.0.1. Source engine servers only listen on this PC's
+        # network address, so that is asked too - but only after an answer was found there
+        # once, or for a Source server, so other games don't wait twice as long for nothing.
+        from core.a2s import local_hosts
+        hosts = local_hosts(srv.get("launchArgs") or "")
+        if not hasattr(self, "_query_host_cache"):
+            self._query_host_cache = {}
+        host0 = self._query_host_cache.get(srv["id"])
+        exe = str(srv.get("executable") or "").replace("\\", "/").rsplit("/", 1)[-1].lower()
+        if host0 in hosts:
+            hosts = [host0]
+        elif exe not in ("srcds.exe", "srcds_win64.exe", "hlds.exe"):
+            hosts = hosts[:1] if hosts[0] != "127.0.0.1" else ["127.0.0.1"]
+        for host in hosts:
+            for port in candidates[:4]:
+                info = query_info(host, port, timeout=1.0)
+                if info:
+                    self._query_port_cache[srv["id"]] = port
+                    self._query_host_cache[srv["id"]] = host
+                    names = None
+                    if info["players"]:
+                        from core.a2s import query_players as a2s_players
+                        lst = a2s_players(host, port, timeout=1.0)
+                        if lst is not None:
+                            names = [{"name": p["name"], "seconds": p["seconds"]} for p in lst]
+                    return {"count": info["players"], "max": info["max_players"], "names": names}
         return self._rcon_players(srv)
 
     def _rcon_players(self, srv: Dict[str, Any]):

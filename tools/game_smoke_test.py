@@ -154,7 +154,7 @@ def query_name(pid):
     for port, protos in sorted((listening_ports(pid) or {}).items()):
         if "UDP" in protos:
             try:
-                info = query_info("127.0.0.1", port, timeout=1.0)
+                info = _ask(port)
             except Exception:
                 info = None
             if info and info.get("name"):
@@ -169,7 +169,7 @@ def query_any(pid):
     for port, protos in sorted((listening_ports(pid) or {}).items()):
         if "UDP" in protos:
             try:
-                info = query_info("127.0.0.1", port, timeout=1.0)
+                info = _ask(port)
             except Exception:
                 info = None
             if info and info.get("name"):
@@ -261,6 +261,8 @@ def essentials_check(mgr, sid, wait, log):
             e["result"] = "kept (not checkable)" if kept else "game rewrote it"
         else:
             e["result"] = "works" if ok else ("game ignores it" if kept else "game rewrote it")
+            if k == "password" and kept and seen is False and str((mgr.get_server(sid) or {}).get("appId") or "") in PASSWORD_FLAG_UNRELIABLE:
+                e["result"] = "kept (not checkable)"     # the game doesn't tell the browser it has a password
     return out
 
 
@@ -321,6 +323,19 @@ def settings_check(mgr, sid, wait, log):
     else:
         out["result"] = "kept (game name not checkable)" if kept else "game rewrote the file"
     return out
+
+# Games known not to report "needs a password" to the server browser even when one is set.
+PASSWORD_FLAG_UNRELIABLE = {"730"}          # Counter-Strike 2
+
+
+def _ask(port):
+    """A2S answer from a server on this PC, on whichever local address it listens on."""
+    from core.a2s import query_info, local_hosts
+    for host in local_hosts():
+        info = query_info(host, port, timeout=1.0)
+        if info:
+            return info
+    return None
 
 
 def test_game(mgr, api, name, wait, keep, log):
