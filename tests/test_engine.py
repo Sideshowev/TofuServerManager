@@ -4637,11 +4637,21 @@ class SettingsFixTests(unittest.TestCase):
         self.assertTrue(args.endswith("-load MoonBase1 Lunar -settings StartLocalHost true ServerVisible true "
                                       "GamePort 27500 UpdatePort 27501"), args)
         self.assertEqual(G.required(dict(st, launchArgs=args))[0], args)
-        (Path(st["directory"]) / "setting.xml").write_text(
-            '<?xml version="1.0" encoding="utf-8"?>\n<SettingData>\n  <ServerName>Old</ServerName>\n'
-            '  <ServerPassword />\n  <ServerMaxPlayers>10</ServerMaxPlayers>\n</SettingData>\n')
         Q.save(m, "st", {"ServerName": "Bao Moon", "ServerPassword": "pw12345", "ServerMaxPlayers": "6"})
-        text = (Path(st["directory"]) / "setting.xml").read_text()
-        for want in ("<ServerName>Bao Moon</ServerName>", "<ServerPassword>pw12345</ServerPassword>",
-                     "<ServerMaxPlayers>6</ServerMaxPlayers>"):
-            self.assertIn(want, text)
+        a = m.get_server("st")["launchArgs"]
+        self.assertIn("-load MoonBase1 Lunar -settings StartLocalHost true", a)
+        self.assertTrue(a.endswith('ServerName "Bao Moon" ServerPassword pw12345 ServerMaxPlayers 6'), a)
+        Q.save(m, "st", {"ServerName": "Short"})
+        a = m.get_server("st")["launchArgs"]
+        self.assertIn(" ServerName Short", a)
+        self.assertNotIn("Bao Moon", a)
+        self.assertEqual(Q.get(m, "st")["fields"][0]["value"], "Short")
+        self.assertEqual(G.required(m.get_server("st"))[0], a)           # nothing added twice
+        # Space Engineers: a world that exists keeps its own player limit
+        w = d / "Instance/Saves/My World"
+        w.mkdir(parents=True)
+        (w / "Sandbox_config.sbc").write_text("<MyObjectBuilder_WorldConfiguration><Settings>"
+                                              "<MaxPlayers>4</MaxPlayers></Settings></MyObjectBuilder_WorldConfiguration>")
+        with mock.patch.dict(os.environ, {"APPDATA": str(d / "nothing-here")}):
+            Q.save(m, "se", {"MaxPlayers": "10"})
+        self.assertIn("<MaxPlayers>10</MaxPlayers>", (w / "Sandbox_config.sbc").read_text())

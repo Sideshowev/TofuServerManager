@@ -217,11 +217,11 @@ GAMES: Dict[str, dict] = {
         ("WorldName", "World name", "text", ("xml_el", "{secfg}", "WorldName")),
         ("MaxPlayers", "Max players", "int", ("xml_el", "{secfg}", "MaxPlayers")),
     ]},
-    "600760": {"note": "Saved to setting.xml in the server folder (the game writes it on its first start).",
-               "fields": [                                                                     # Stationeers
-        ("ServerName", "Server name", "text", ("xml_el", "setting.xml", "ServerName")),
-        ("ServerPassword", "Password", "password", ("xml_el", "setting.xml", "ServerPassword")),
-        ("ServerMaxPlayers", "Max players", "int", ("xml_el", "setting.xml", "ServerMaxPlayers")),
+    "600760": {"note": "Saved in the launch options: Stationeers writes its setting.xml again from them on every "
+                       "start, so a change made in the file would be lost.", "fields": [       # Stationeers
+        ("ServerName", "Server name", "text", ("settings_arg", "ServerName")),
+        ("ServerPassword", "Password", "password", ("settings_arg", "ServerPassword")),
+        ("ServerMaxPlayers", "Max players", "int", ("settings_arg", "ServerMaxPlayers")),
     ]},
     # any Source engine server (srcds: CS:S, TF2, L4D2, HL2DM, mods ...) and CS2
     "source": {"note": "Saved to the game's cfg/server.cfg (BaoBun makes the file if the game didn't ship one) "
@@ -446,6 +446,37 @@ def prepare(srv: dict) -> list:
     return notes
 
 
+def _settings_arg(args: str, key: str):
+    """Match of " Key value" after -settings (group 1 = the value, quotes included)."""
+    at = re.search(r"(?i)(^|\s)-settings(\s|$)", args or "")
+    if not at:
+        return None
+    m = re.compile(r'(?i)\s%s\s+("[^"]*"|\S+)' % re.escape(key)).search(args, at.start())
+    return m
+
+
+def _space_engineers_worlds(cfg_path: str, element: str, value: str) -> None:
+    """Once a Space Engineers world exists it carries its own copy of the session settings
+    (Saves/<world>/Sandbox_config.sbc), which wins over the server's settings file."""
+    saves = os.path.join(os.path.dirname(cfg_path), "Saves")
+    if not os.path.isdir(saves):
+        return
+    from xml.sax.saxutils import escape
+    for name in os.listdir(saves):
+        p = os.path.join(saves, name, "Sandbox_config.sbc")
+        if not os.path.isfile(p):
+            continue
+        try:
+            with open(p, encoding="utf-8-sig") as fh:
+                text = fh.read()
+            m = _XML_EL(element).search(text)
+            if m:
+                with open(p, "w", encoding="utf-8") as fh:
+                    fh.write(text[:m.start()] + "<%s>%s</%s>" % (element, escape(str(value)), element) + text[m.end():])
+        except OSError:
+            pass
+
+
 def _XML_EL(name: str):
     """<Name>text</Name> (group 1 = text) or the empty <Name />."""
     return re.compile(r"<%s>([^<]*)</%s>|<%s\s*/>" % (re.escape(name), re.escape(name), re.escape(name)))
@@ -536,6 +567,9 @@ def read_value(srv, where):
     if kind == "ark_url":
         m = re.search(r"[?&]%s=([^?&\s]*)" % re.escape(where[1]), args, re.I)
         return m.group(1) if m else None
+    if kind == "settings_arg":
+        m = _settings_arg(args, where[1])
+        return None if not m else m.group(1).strip('"')
     if kind == "ark_name":                  # the launch line wins when the name is there
         m = re.search(r"[?&]SessionName=([^?&\s]*)", args, re.I)
         if m:
@@ -618,6 +652,22 @@ def write_value(srv, where, value, typ):
                 raise ValueError("The launch options don't start with a map (e.g. TheIsland_WP?listen), "
                                  "so BaoBun can't add %s. Add the map first in Settings." % key)
         return ("args", args)
+    if kind == "settings_arg":             # "-settings Key value Key value ..." at the end of the line
+        value = str(value).strip()
+        if '"' in value:
+            raise ValueError("That can't contain quotes")
+        if not re.search(r"(?i)(^|\s)-settings(\s|$)", args):
+            from core import game_defaults
+            args = game_defaults.required(dict(srv, launchArgs=args))[0]
+            if not re.search(r"(?i)(^|\s)-settings(\s|$)", args):
+                args = (args + " -settings").strip()
+        m = _settings_arg(args, where[1])
+        shown = '"%s"' % value if re.search(r"\s", value) else value
+        if m:
+            args = (args[:m.start()] + ((" %s %s" % (where[1], shown)) if value else "") + args[m.end():]).strip()
+        elif value:
+            args = "%s %s %s" % (args, where[1], shown)
+        return ("args", re.sub(r"\s{2,}", " ", args))
     if kind == "ark_name":
         value = str(value).strip()
         if re.search(r'[?&"]', value):
@@ -695,6 +745,8 @@ def write_value(srv, where, value, typ):
         shutil.copy2(path, path + ".bak")
         with open(path, "w", encoding="utf-8") as f:
             f.write(text)
+        if where[1] == "{secfg}" and where[2] == "MaxPlayers":
+            _space_engineers_worlds(path, where[2], value)
     elif kind == "xml_attr":
         m = _root_attr(path, where[2])
         from xml.sax.saxutils import quoteattr
