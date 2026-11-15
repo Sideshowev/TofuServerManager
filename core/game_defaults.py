@@ -113,12 +113,15 @@ def required(srv: dict) -> Tuple[str, List[str]]:
         import os
         if not _either(args, "-userdatapath"):
             shared = os.path.join(os.path.expanduser("~"), "AppData", "LocalLow", "Endnight", "SonsOfTheForestDS")
-            if not os.path.isdir(shared):
+            if not os.path.isdir(os.path.join(shared, "Saves")):       # no world there to keep using
                 args = (args + " -userdatapath userdata").strip()
                 notes.append("its own data folder (userdata, inside the server folder)")
     elif app in ("1874900", "1890870"):                   # Arma Reforger can't start without a config
         if not _either(args, "-config"):
-            args = (args + " -config config.json -profile profile -maxFPS 60").strip()
+            import os
+            d = srv.get("directory") or ""        # full paths: the game doesn't find "config.json" by itself
+            cfg, prof = (os.path.join(d, "config.json"), os.path.join(d, "profile")) if d else ("config.json", "profile")
+            args = ('%s -config "%s" -profile "%s" -maxFPS 60' % (args, cfg, prof)).strip()
             notes.append("a settings file (config.json) - BaoBun makes a basic one; choose the scenario and "
                          "passwords in the Settings tab")
     elif app == "232130":                                 # Killing Floor 2 needs a map first

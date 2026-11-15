@@ -207,7 +207,7 @@ GAMES: Dict[str, dict] = {
     ]},
     "1026340": {"note": "Saved to serversettings.xml (the game writes it on its first start). Up to 16 players.",
                 "fields": [                                                                    # Barotrauma
-        ("name", "Server name", "text", ("xml_attr", "serversettings.xml", "name")),
+        ("ServerName", "Server name", "text", ("xml_attr", "serversettings.xml", "ServerName")),
         ("password", "Password", "password", ("xml_attr", "serversettings.xml", "password")),
         ("MaxPlayers", "Max players", "int", ("xml_attr", "serversettings.xml", "MaxPlayers")),
     ]},
@@ -392,17 +392,35 @@ def _make_first_json(srv: dict, path: str) -> bool:
     return True
 
 
+SOTF_OWNERS = ("# To manage this server from inside the game, add the Steam ID of each owner below,\n"
+               "# one per line. Lines starting with # are ignored.\n")
+
+
 def prepare(srv: dict) -> list:
-    """Before a start: make the settings file the game can't start without. Returns notes."""
+    """Before a start: make the files the game can't start without. Returns notes.
+    Sons of the Forest checks itself on every start and stops ("Please restart the server")
+    each time one of three files is missing - its settings, its owners list and
+    steam_appid.txt - so a new server needed three starts. All three are made here."""
     key = game_key(srv)
+    notes = []
     if key in ("2465200", "1874900"):
         try:
             path = _resolve(srv, "{sotf}" if key == "2465200" else "{config}")
             if _make_first_json(srv, path):
-                return ["its settings file (%s)" % os.path.basename(path)]
+                notes.append("its settings file (%s)" % os.path.basename(path))
+            d = srv.get("directory") or ""
+            if key == "2465200" and os.path.isdir(d):
+                owners = os.path.join(os.path.dirname(path), "ownerswhitelist.txt")
+                if os.path.isdir(os.path.dirname(path)) and not os.path.isfile(owners):
+                    with open(owners, "w", encoding="utf-8") as fh:
+                        fh.write(SOTF_OWNERS)
+                appid = os.path.join(d, "steam_appid.txt")
+                if not os.path.isfile(appid):
+                    with open(appid, "w", encoding="ascii") as fh:
+                        fh.write("1326470")              # the game's own id, as its start script writes it
         except OSError:
             pass
-    return []
+    return notes
 
 
 def _root_attr(path: str, name: str):

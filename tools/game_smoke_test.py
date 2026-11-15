@@ -207,7 +207,7 @@ def essentials_check(mgr, sid, wait, log):
     stamp = int(time.time()) % 10000
     old_players = str(targets["players"].get("value") or "").strip() if "players" in targets else ""
     want = {"name": "BaoBun Check %d" % stamp, "password": "check%04dpw" % stamp,
-            "players": "7" if old_players != "7" else "9"}
+            "players": "5" if old_players != "5" else "4"}     # small: some games cap at 6 or 8
     log("  essentials check: " + ", ".join(sorted(targets)))
     try:
         mgr.stop_server(sid, user="smoke-test")
@@ -226,6 +226,12 @@ def essentials_check(mgr, sid, wait, log):
     time.sleep(10)
     st = next((s for s in mgr.get_all_statuses() if s["id"] == sid), {}) or {}
     info = query_any(st.get("pid")) if st.get("isRunning") else None
+    for _ in range(4):          # Source servers open their port early and only answer once the map is in
+        if info or not st.get("isRunning"):
+            break
+        time.sleep(10)
+        st = next((s for s in mgr.get_all_statuses() if s["id"] == sid), {}) or {}
+        info = query_any(st.get("pid")) if st.get("isRunning") else None
     out["answers_query"] = bool(info)
     try:
         mgr.stop_server(sid, user="smoke-test")
