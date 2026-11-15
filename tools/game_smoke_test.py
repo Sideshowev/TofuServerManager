@@ -353,13 +353,18 @@ def test_game(mgr, api, name, wait, keep, log):
            "started_at": time.time()}
     taken = [s.get("port") for s in mgr.load_servers()]
     port = pick_port(p.get("port") or 27015, taken) if p.get("port") else None
-    r = api.process("server.add_preset", {"game": name, "name": "Smoke " + name[:40], "port": port})
-    if not r.success:
-        res.update(result="add failed", error=r.error)
-        return res
-    sid = r.data.get("server_id") or r.data.get("id") or (r.data.get("server") or {}).get("id")
-    if not sid:
-        sid = next(s["id"] for s in mgr.load_servers() if s.get("name") == "Smoke " + name[:40])
+    left = next((s for s in mgr.load_servers() if s.get("name") == "Smoke " + name[:40]), None)
+    if left:                     # still there from an earlier run with --keep: test that one again
+        sid = left["id"]
+        res["reused_install"] = True
+    else:
+        r = api.process("server.add_preset", {"game": name, "name": "Smoke " + name[:40], "port": port})
+        if not r.success:
+            res.update(result="add failed", error=r.error)
+            return res
+        sid = r.data.get("server_id") or r.data.get("id") or (r.data.get("server") or {}).get("id")
+        if not sid:
+            sid = next(s["id"] for s in mgr.load_servers() if s.get("name") == "Smoke " + name[:40])
     srv = mgr.get_server(sid)
     res["directory"] = srv.get("directory")
     if str(p.get("appId")) == "380870" and srv.get("directory"):
