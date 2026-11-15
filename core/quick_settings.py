@@ -211,6 +211,18 @@ GAMES: Dict[str, dict] = {
         ("password", "Password", "password", ("xml_attr", "serversettings.xml", "password")),
         ("MaxPlayers", "Max players", "int", ("xml_attr", "serversettings.xml", "MaxPlayers")),
     ]},
+    "298740": {"note": "Saved to SpaceEngineers-Dedicated.cfg. A join password can only be set with the game's "
+                       "own setup tool (it is stored scrambled).", "fields": [                   # Space Engineers
+        ("ServerName", "Server name", "text", ("xml_el", "{secfg}", "ServerName")),
+        ("WorldName", "World name", "text", ("xml_el", "{secfg}", "WorldName")),
+        ("MaxPlayers", "Max players", "int", ("xml_el", "{secfg}", "MaxPlayers")),
+    ]},
+    "600760": {"note": "Saved to setting.xml in the server folder (the game writes it on its first start).",
+               "fields": [                                                                     # Stationeers
+        ("ServerName", "Server name", "text", ("xml_el", "setting.xml", "ServerName")),
+        ("ServerPassword", "Password", "password", ("xml_el", "setting.xml", "ServerPassword")),
+        ("ServerMaxPlayers", "Max players", "int", ("xml_el", "setting.xml", "ServerMaxPlayers")),
+    ]},
     # any Source engine server (srcds: CS:S, TF2, L4D2, HL2DM, mods ...) and CS2
     "source": {"note": "Saved to the game's cfg/server.cfg (BaoBun makes the file if the game didn't ship one) "
                        "and the launch options.", "fields": [
@@ -292,6 +304,11 @@ def _resolve(srv: dict, path: str) -> str:
         root = get_arg(args, "userdatapath")
         path = os.path.join(rel_or_abs(d, root) if root else os.path.join(
             user_home(), "AppData", "LocalLow", "Endnight", "SonsOfTheForestDS"), "dedicatedserver.cfg")
+    if "{secfg}" in path:
+        root = get_arg(args, "path")
+        path = os.path.join(rel_or_abs(d, root) if root else os.path.join(
+            os.environ.get("APPDATA") or os.path.join(user_home(), "AppData", "Roaming"),
+            "SpaceEngineersDedicated"), "SpaceEngineers-Dedicated.cfg")
     if "{config}" in path and str(srv.get("appId")) in ("1874900", "1890870") and not get_arg(args, "config"):
         path = path.replace("{config}", os.path.join(d, "config.json"))
     if "{config}" in path:
@@ -403,6 +420,12 @@ def prepare(srv: dict) -> list:
     steam_appid.txt - so a new server needed three starts. All three are made here."""
     key = game_key(srv)
     notes = []
+    if key == "298740":
+        try:
+            if _make_space_engineers_cfg(srv, _resolve(srv, "{secfg}")):
+                notes.append("its settings file (SpaceEngineers-Dedicated.cfg)")
+        except OSError:
+            pass
     if key in ("2465200", "1874900"):
         try:
             path = _resolve(srv, "{sotf}" if key == "2465200" else "{config}")
@@ -421,6 +444,55 @@ def prepare(srv: dict) -> list:
         except OSError:
             pass
     return notes
+
+
+def _XML_EL(name: str):
+    """<Name>text</Name> (group 1 = text) or the empty <Name />."""
+    return re.compile(r"<%s>([^<]*)</%s>|<%s\s*/>" % (re.escape(name), re.escape(name), re.escape(name)))
+
+
+SE_FIRST_CFG = """<?xml version="1.0"?>
+<MyConfigDedicated xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SessionSettings>
+    <GameMode>Survival</GameMode>
+    <MaxPlayers>4</MaxPlayers>
+    <OnlineMode>PUBLIC</OnlineMode>
+  </SessionSettings>
+  <LoadWorld />
+  <IP>0.0.0.0</IP>
+  <SteamPort>8766</SteamPort>
+  <ServerPort>%(port)d</ServerPort>
+  <AsteroidAmount>0</AsteroidAmount>
+  <Administrators />
+  <Banned />
+  <GroupID>0</GroupID>
+  <ServerName>%(name)s</ServerName>
+  <WorldName>%(name)s</WorldName>
+  <PauseGameWhenEmpty>false</PauseGameWhenEmpty>
+  <IgnoreLastSession>false</IgnoreLastSession>
+  <PremadeCheckpointPath>%(world)s</PremadeCheckpointPath>
+</MyConfigDedicated>
+"""
+
+
+def _make_space_engineers_cfg(srv: dict, path: str) -> bool:
+    """Space Engineers stops at once ("Premade world not found") without a settings file
+    that names a world to start from. Only for a server with its own -path folder."""
+    from xml.sax.saxutils import escape
+    d = srv.get("directory") or ""
+    worlds = os.path.join(d, "Content", "CustomWorlds")
+    if os.path.isfile(path) or not get_arg(srv.get("launchArgs") or "", "path") or not os.path.isdir(worlds):
+        return False
+    names = sorted(n for n in os.listdir(worlds) if os.path.isdir(os.path.join(worlds, n)))
+    if not names:
+        return False
+    world = "Star System" if "Star System" in names else names[0]
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(SE_FIRST_CFG % {"port": int(srv.get("port") or 27016),
+                                 "name": escape(str(srv.get("name") or "BaoBun server")),
+                                 "world": escape(os.path.join(worlds, world))})    # full path: a relative one isn't found
+    return True
 
 
 def _root_attr(path: str, name: str):
@@ -477,6 +549,11 @@ def read_value(srv, where):
     if kind == "xml_attr":
         m = _root_attr(path, where[2])
         return m.group(2) if m else None
+    if kind == "xml_el":
+        from xml.sax.saxutils import unescape
+        with open(path, encoding="utf-8-sig", errors="replace") as fh:
+            m = _XML_EL(where[2]).search(fh.read())
+        return None if not m else unescape(m.group(1) or "")
     if kind == "json":
         cur = _json_load(path)
         for part in where[2].split("."):
@@ -602,6 +679,22 @@ def write_value(srv, where, value, typ):
         else:
             pairs.append([where[4], newv])
         ini_set(path, where[2], where[3], "(" + ",".join("%s=%s" % (k, v) for k, v in pairs) + ")")
+    elif kind == "xml_el":
+        from xml.sax.saxutils import escape
+        with open(path, encoding="utf-8-sig") as fh:
+            text = fh.read()
+        new = "<%s>%s</%s>" % (where[2], escape(str(value)), where[2]) if str(value) != "" else "<%s />" % where[2]
+        m = _XML_EL(where[2]).search(text)
+        if m:
+            text = text[:m.start()] + new + text[m.end():]
+        else:
+            end = text.rstrip().rfind("</")
+            if end < 0:
+                raise ValueError("%s isn't in a form BaoBun understands" % os.path.basename(path))
+            text = text[:end] + "  " + new + "\n" + text[end:]
+        shutil.copy2(path, path + ".bak")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
     elif kind == "xml_attr":
         m = _root_attr(path, where[2])
         from xml.sax.saxutils import quoteattr

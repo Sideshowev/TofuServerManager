@@ -30,6 +30,7 @@ HELP = {"full": "BaoBun knows this game's settings and how to run it.",
 # shown in the game picker so nobody finds out the hard way. Remove a game when a later run passes.
 _NO_PROGRAM = ("BaoBun's test installed it but couldn't find its server program - you may have to pick the "
                "program yourself in Edit Server.")
+_LINUX_ONLY = "Steam gave BaoBun only the Linux version of this server, which can't run on Windows."
 _CRASHED = "It stopped right after starting in BaoBun's test, and it isn't known why yet - it may not work."
 KNOWN_ISSUES = {
     "ASKA": _CRASHED, "Military Conflict: Vietnam": _CRASHED, "Out of Reach": _CRASHED, "Sunkenland": _CRASHED,
@@ -39,8 +40,10 @@ KNOWN_ISSUES = {
     "Brickadia": "It needs a hosting token from your Brickadia account before it will start.",
     "Don't Starve Together": "It needs a server token from your Klei account - BaoBun tells you where to get it.",
     "Risk of Rain 2": "Steam gave no game files in BaoBun's test - it may need a Steam account that owns the game.",
-    "Astro Colony": _NO_PROGRAM, "D.I.P.R.I.P.": _NO_PROGRAM, "Nuclear Dawn": _NO_PROGRAM, "Pavlov": _NO_PROGRAM,
-    "The Front": _NO_PROGRAM,
+    "D.I.P.R.I.P.": _NO_PROGRAM,
+    "Pavlov": "Steam has no Windows version of this server - it only runs on Linux.",
+    "The Front": _LINUX_ONLY, "Astro Colony": _LINUX_ONLY,
+    "Nuclear Dawn": "Steam gave no game files in BaoBun's test - it may need a Steam account that owns the game.",
 }
 
 

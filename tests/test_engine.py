@@ -4151,7 +4151,8 @@ class SmokeToolTests(unittest.TestCase):
         self.assertIn("Valheim", names)
         self.assertNotIn("Hytale", names)
         self.assertEqual(game_support.level(dict(GAME_PRESETS["Valheim"], name="Valheim")), "full")
-        self.assertEqual(game_support.level(dict(GAME_PRESETS["Stationeers"], name="Stationeers")), "basic")
+        self.assertEqual(game_support.level(dict(GAME_PRESETS["ASTRONEER"], name="ASTRONEER")), "basic")
+        self.assertEqual(game_support.level(dict(GAME_PRESETS["Stationeers"], name="Stationeers")), "full")
         self.assertEqual(game_support.level(dict(GAME_PRESETS["Core Keeper"], name="Core Keeper")), "full")
         self.assertEqual(game_support.level(dict(GAME_PRESETS["Counter-Strike: Source"], name="x")), "full")
         tmp = make_env([])
@@ -4608,3 +4609,39 @@ class SettingsFixTests(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 Q.save(m, "c", {"ServerName": "Bao Conan"})
         self.assertIn("Stop the server first", str(cm.exception))
+
+    def test_space_engineers_and_stationeers_can_host_something(self):
+        from core import quick_settings as Q, game_defaults as G
+        m = self._mgr([{"id": "se", "name": "Bao & Ships", "appId": "298740", "executable": "x.exe", "port": 27016},
+                       {"id": "st", "name": "Moon Base 1", "appId": "600760", "executable": "x.exe", "port": 27500}])
+        se = m.get_server("se")
+        d = Path(se["directory"])
+        (d / "Content/CustomWorlds/Star System").mkdir(parents=True)
+        with mock.patch.dict(os.environ, {"APPDATA": str(d / "nothing-here")}):
+            args, notes = G.required(se)
+            self.assertIn('-path "%s"' % os.path.join(str(d), "Instance"), args)
+            self.assertIn("-console", args)
+            se = dict(se, launchArgs=args)
+            self.assertEqual(Q.prepare(se), ["its settings file (SpaceEngineers-Dedicated.cfg)"])
+            cfg = (d / "Instance/SpaceEngineers-Dedicated.cfg").read_text()
+            self.assertIn("<ServerName>Bao &amp; Ships</ServerName>", cfg)
+            self.assertIn(os.path.join(str(d), "Content", "CustomWorlds", "Star System"), cfg)
+            m._fill_required_args(m.get_server("se"))
+            Q.save(m, "se", {"ServerName": "New <Name>", "MaxPlayers": "8"})
+            cfg = (d / "Instance/SpaceEngineers-Dedicated.cfg").read_text()
+            self.assertIn("<ServerName>New &lt;Name&gt;</ServerName>", cfg)
+            self.assertIn("<MaxPlayers>8</MaxPlayers>", cfg)
+            self.assertEqual(Q.get(m, "se")["fields"][0]["value"], "New <Name>")
+        st = m.get_server("st")
+        args, notes = G.required(st)
+        self.assertTrue(args.endswith("-load MoonBase1 Lunar -settings StartLocalHost true ServerVisible true "
+                                      "GamePort 27500 UpdatePort 27501"), args)
+        self.assertEqual(G.required(dict(st, launchArgs=args))[0], args)
+        (Path(st["directory"]) / "setting.xml").write_text(
+            '<?xml version="1.0" encoding="utf-8"?>\n<SettingData>\n  <ServerName>Old</ServerName>\n'
+            '  <ServerPassword />\n  <ServerMaxPlayers>10</ServerMaxPlayers>\n</SettingData>\n')
+        Q.save(m, "st", {"ServerName": "Bao Moon", "ServerPassword": "pw12345", "ServerMaxPlayers": "6"})
+        text = (Path(st["directory"]) / "setting.xml").read_text()
+        for want in ("<ServerName>Bao Moon</ServerName>", "<ServerPassword>pw12345</ServerPassword>",
+                     "<ServerMaxPlayers>6</ServerMaxPlayers>"):
+            self.assertIn(want, text)

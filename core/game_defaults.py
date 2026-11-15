@@ -149,6 +149,25 @@ def required(srv: dict) -> Tuple[str, List[str]]:
             value = value.replace("{port}", port)
             if flag.lower() not in args.lower():
                 args = (args + " " + (flag + value)).strip()
+    if app == "298740" and not _either(args, "-path"):
+        # Space Engineers keeps its settings and worlds in the Windows user's AppData unless told
+        # otherwise. A server with no settings there yet keeps them in its own folder.
+        import os
+        shared = os.path.join(os.environ.get("APPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Roaming"),
+                              "SpaceEngineersDedicated", "SpaceEngineers-Dedicated.cfg")
+        d = srv.get("directory") or ""
+        if d and not os.path.isfile(shared):
+            args = ('%s -path "%s"' % (args, os.path.join(d, "Instance"))).strip()
+            notes.append("its own settings and worlds folder (Instance, inside the server folder) and a first "
+                         "world (Star System)")
+    if app == "600760" and not re.search(r"(?i)(^|\s)-(load|new|loadlatest|file)\b", args):
+        # Stationeers sits at a "Ready" prompt and hosts nothing until it is told which world to
+        # load; -load makes that world the first time. -settings must come last on the line.
+        save = re.sub(r"[^A-Za-z0-9]", "", str(srv.get("name") or "")) or "BaoBun"
+        port = int(srv.get("port") or 27500)
+        args = ("%s -batchmode -nographics -load %s Lunar -settings StartLocalHost true ServerVisible true "
+                "GamePort %d UpdatePort %d" % (args, save, port, port + 1)).strip()
+        notes.append('a world to host ("%s", on the Moon)' % save)
     return args, notes
 
 
