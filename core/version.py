@@ -7,5 +7,5 @@ Leave it empty to turn the check off for builds you don't publish; people can
 also point it elsewhere with the "update_repo" setting.
 """
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"      # 1.1.0: renamed from BaoBun Control Panel to Tofu Server Manager
 UPDATE_REPO = ""
