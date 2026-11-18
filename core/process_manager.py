@@ -1,6 +1,6 @@
 """Process helpers: liveness, whole-tree stop, and CPU/RAM metrics.
 
-This is the one place BaoBun touches OS processes directly. ServerManager uses
+This is the one place Tofu touches OS processes directly. ServerManager uses
 these helpers for every server it runs, so GUI, agent and Discord bot all see
 the same numbers.
 

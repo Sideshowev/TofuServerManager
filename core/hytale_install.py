@@ -1,13 +1,13 @@
 """Installing / updating a Hytale server with Hytale's own downloader.
 
 Steps (all from the Install button):
-  1. Java 25 - downloaded into BaoBun's runtime folder if the PC has none.
+  1. Java 25 - downloaded into Tofu's runtime folder if the PC has none.
   2. hytale-downloader - fetched from Hytale (downloader.hytale.com) into
      runtime/hytale-downloader the first time. It keeps its own sign-in there
      (.hytale-downloader-credentials.json), so only the first run asks.
-  3. It runs; the first time it prints a link and a code. BaoBun shows them in
+  3. It runs; the first time it prints a link and a code. Tofu shows them in
      the install window (and the web panel) - open the link, sign in with your
-     Hytale account, type the code. BaoBun never sees the password.
+     Hytale account, type the code. Tofu never sees the password.
   4. The game zip (Server/ + Assets.zip) is unpacked into the server's folder,
      leaving the server's own settings, worlds, mods and sign-in alone.
 
@@ -27,7 +27,7 @@ from typing import Optional
 
 DOWNLOADER_URL = "https://downloader.hytale.com/hytale-downloader.zip"
 MANUAL_URL = "https://support.hytale.com/hc/en-us/articles/45326769420827"
-SIGNIN_TAG = "BaoBun SIGNIN:"
+SIGNIN_TAG = "Tofu SIGNIN:"
 GAME_ZIP = "_hytale_download.zip"
 # never overwritten when unpacking an update
 PROTECT = {"config.json", "permissions.json", "whitelist.json", "bans.json", "jvm.options", "auth.enc",
@@ -75,7 +75,7 @@ def parse_signin(text: str) -> Optional[dict]:
 
 
 def last_signin(log_text: str) -> Optional[dict]:
-    """The newest SIGNIN line BaoBun wrote into install.log."""
+    """The newest SIGNIN line Tofu wrote into install.log."""
     found = None
     for line in (log_text or "").splitlines():
         if SIGNIN_TAG in line:

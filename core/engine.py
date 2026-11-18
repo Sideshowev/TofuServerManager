@@ -1,4 +1,4 @@
-"""Builds BaoBun's single engine: ServerManager + plugins + database + API.
+"""Builds Tofu's single engine: ServerManager + plugins + database + API.
 
 Both the desktop app and the background agent call ``build_engine`` so they
 are wired exactly the same way.
@@ -39,7 +39,13 @@ def build_engine(role: str = "gui", base_dir: Optional[Path] = None) -> Engine:
 
     try:
         from core.database_layer import DatabaseLayer
-        engine.db = DatabaseLayer(base / "settings" / "baobun.db")
+        from core.rebrand import move_db, move_logs
+        (base / "settings").mkdir(parents=True, exist_ok=True)
+        engine.db = DatabaseLayer(move_db(base / "settings"))
+        try:
+            move_logs(manager.load_servers())
+        except Exception as e:
+            print(f"[WARN] moving old log files: {e}")
         manager.db = engine.db
     except Exception as e:
         print(f"[WARN] database unavailable: {e}")

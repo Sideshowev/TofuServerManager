@@ -234,7 +234,7 @@
     "why": "this call must go through later()"
    }
   ],
-  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or Tofu is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
  },
  {
   "id": "later-checkup-dialog",
@@ -279,7 +279,7 @@
     "why": "this call must go through later()"
    }
   ],
-  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or Tofu is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
  },
  {
   "id": "later-install-dialog",
@@ -324,7 +324,7 @@
     "why": "this call must go through later()"
    }
   ],
-  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or Tofu is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There is 1 call to change (shown in the excerpts)."
  },
  {
   "id": "later-mod-browser",
@@ -380,7 +380,7 @@
     "why": "this call must go through later()"
    }
   ],
-  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or Tofu is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
  },
  {
   "id": "later-nightly-dialog",
@@ -436,7 +436,7 @@
     "why": "this call must go through later()"
    }
   ],
-  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or BaoBun is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
+  "instruction": "Background threads in this file hand their result to the window with `X.after(0, fn)`. When the\nwindow has been closed (or Tofu is closing) that raises \"main thread is not in main loop\" inside the thread.\nThere is a helper for exactly this in ui/app_common.py:\n\n    def later(widget, fn):   # runs fn on the window's own thread; does nothing if the window is gone\n\nDo exactly this and nothing else:\n1. Add the line `from ui.app_common import later` directly after the line `import customtkinter as ctk`.\n2. In the `work()` functions shown, change each `X.after(0, SOMETHING)` into `later(X, SOMETHING)` - same X, same\n   SOMETHING, same indentation. There are 2 calls to change (shown in the excerpts)."
  },
  {
   "id": "presets-need-account",

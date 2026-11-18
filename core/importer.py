@@ -1,4 +1,4 @@
-"""Find game servers that are already installed and add them to BaoBun.
+"""Find game servers that are already installed and add them to Tofu.
 
 scan(root) walks a few folder levels looking for known server programs (from the
 game catalog), Steam app manifests, Vintage Story and Minecraft servers.
@@ -102,7 +102,7 @@ def scan(root: str, depth: int = 3, known_dirs=(), limit_seconds: float = 60.0) 
 
 
 def import_servers(mgr, items: List[dict], user: str = "gui") -> List[dict]:
-    """Add scanned servers (skips folders that are already in BaoBun)."""
+    """Add scanned servers (skips folders that are already in Tofu)."""
     servers = mgr.load_servers()
     known = {os.path.normcase(os.path.normpath(s.get("directory") or "")) for s in servers}
     names = {s.get("name") for s in servers}

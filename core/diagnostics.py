@@ -1,5 +1,5 @@
 """Save diagnostics: one zip with what's needed to understand a problem, safe to
-share. It holds BaoBun's logs, the end of each server's console log, its server
+share. It holds Tofu's logs, the end of each server's console log, its server
 list and settings, what Checkup says, the server statuses and some facts about
 the PC (Windows version, CPU, RAM, free disk).
 
@@ -116,14 +116,14 @@ def build(mgr, dest_dir: Optional[str] = None, include_server_logs: bool = True)
     base = Path(mgr.config_path).parent
     dest = Path(dest_dir) if dest_dir else base / "diagnostics"
     dest.mkdir(parents=True, exist_ok=True)
-    path = dest / ("BaoBun-diagnostics-%s.zip" % time.strftime("%Y%m%d-%H%M%S"))
+    path = dest / ("TofuSM-diagnostics-%s.zip" % time.strftime("%Y%m%d-%H%M%S"))
     problems = []
 
     def add_json(z, name, data):
         z.writestr(name, json.dumps(redact(data), indent=2, default=str))
 
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("README.txt", "BaoBun diagnostics, made %s.\nPasswords, tokens, keys and internet IP addresses "
+        z.writestr("README.txt", "Tofu diagnostics, made %s.\nPasswords, tokens, keys and internet IP addresses "
                    "have been replaced with **** / x.x.x.x.\n" % time.strftime("%Y-%m-%d %H:%M"))
         sysinfo = _system()
         try:

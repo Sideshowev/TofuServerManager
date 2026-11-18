@@ -140,7 +140,7 @@ def event_message(event: str, info: dict, srv: dict) -> Optional[str]:
     if user.startswith("discord:"):
         return None     # already logged when the button / command was used
     if event == "started":
-        why = {"smart-boot": "BaoBun started it after the PC booted", "nightly": "back after the nightly restart",
+        why = {"smart-boot": "Tofu started it after the PC booted", "nightly": "back after the nightly restart",
                "schedule": "scheduled restart"}.get(user)
         if user.startswith("web:"):
             why = "started by %s from the web panel" % user[4:]
@@ -159,7 +159,7 @@ def event_message(event: str, info: dict, srv: dict) -> Optional[str]:
         if user == "schedule":
             return None
         if user == "agent":
-            return "⏹ **%s** stopped (BaoBun on the server PC is shutting down)." % name
+            return "⏹ **%s** stopped (Tofu on the server PC is shutting down)." % name
         return "⏹ **%s** stopped." % name
     if event == "gave_up":
         return None       # alerts.py posts crash alerts
@@ -222,7 +222,7 @@ def join_text(mgr, server_id: str, show_public: bool) -> str:
     return ""
 
 
-HELP = ("**BaoBun bot**\n"
+HELP = ("**Tofu bot**\n"
         "• Press a button on the panel to start a server (admins can also stop one).\n"
         "• `/servers` - what's online (just for you) · `/status` - the same, posted for everyone\n"
         "• `/start <server>` - start a server; I'll tell you when it's ready to join\n"
@@ -232,4 +232,4 @@ HELP = ("**BaoBun bot**\n"
         "• `/event` - plan a game night: people sign up, get pinged 30 min before, and I start the server\n"
         "• `/events`, `/event-cancel` - see or cancel game nights · `/stats` - who played the most\n"
         "• Admins: `/stop`, `/restart`, `/say`, `/access` (allow list, bans, admins), `/backup`, `/restore`, `/logs`, `/update`, `/checkup`, "
-        "`/baobun-setup` (channels and roles)")
+        "`/tofu-setup` (channels and roles)")

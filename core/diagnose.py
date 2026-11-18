@@ -44,7 +44,7 @@ NTSTATUS = {
                  "Look at the last lines of the console for the error. If it mentions a mod, remove or update that mod.",
                  None),
     0xC000013A: ("closed", "The server window was closed (Ctrl+C or the console was closed)",
-                 "Nothing is broken. Start it again from BaoBun instead of closing its window.", None),
+                 "Nothing is broken. Start it again from Tofu instead of closing its window.", None),
 }
 
 # (key, regex, title, fix, link) - checked against the last lines of output.
@@ -97,7 +97,7 @@ PATTERNS = [
     ("disk_full",
      r"(not enough space on the disk|no space left on device|disk full|ioexception: there is not enough space)",
      "The disk is full",
-     "Free up space on the drive (old backups are in BaoBun's backups folder) and start again.", None),
+     "Free up space on the drive (old backups are in Tofu's backups folder) and start again.", None),
     ("needs_steam_client",
      r"(steam client is not running)",
      "This game needs Steam running on the PC",

@@ -382,7 +382,7 @@ class ModsPanel(ctk.CTkFrame):
         if r.get("pinned_skipped"):
             lines.append("Kept at their version: " + ", ".join(r["pinned_skipped"]))
         if r.get("removed"):
-            lines.append("Removed %s (a copy is kept in BaoBun's backups folder)" % r["removed"])
+            lines.append("Removed %s (a copy is kept in Tofu's backups folder)" % r["removed"])
         if r.get("restart_needed") and (r.get("installed") or r.get("updated") or r.get("removed") or r.get("changed")):
             lines.append("Restart the server to load the change.")
         if lines:
@@ -410,7 +410,7 @@ class ModsPanel(ctk.CTkFrame):
             if not self.app.ask_yes_no("Remove ARK mod", msg):
                 return
         elif not self.app.ask_yes_no("Remove mod", "Remove %s from this server?\n\nNothing is deleted: files go to "
-                                     "BaoBun's backups folder (backups\\%s\\removed-mods)." % (m["name"], self.sid)):
+                                     "Tofu's backups folder (backups\\%s\\removed-mods)." % (m["name"], self.sid)):
             return
         self._run("Removing %s..." % m["name"], lambda sid: self.mods.remove(sid, m["key"], user="gui"))
 

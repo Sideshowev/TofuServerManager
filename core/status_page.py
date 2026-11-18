@@ -213,7 +213,7 @@ footer{color:#5d5448;font-size:12px;margin-top:22px}</style></head><body><div cl
 function cp(b){var c=b.previousSibling,t=c.textContent;
 if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t);}
 else{var r=document.createRange();r.selectNodeContents(c);var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");}catch(e){}}
-b.textContent="Copied";}</script><footer>Updated %(when)s &middot; refreshes every minute &middot; BaoBun</footer></div></body></html>""" % {
+b.textContent="Copied";}</script><footer>Updated %(when)s &middot; refreshes every minute &middot; Tofu</footer></div></body></html>""" % {
         "title": e(snap["title"]), "invite": invite, "online": snap["online"], "total": len(snap["servers"]),
         "players": snap["players"], "cards": "".join(cards) or "<p>No servers to show.</p>", "when": when}
     return page.encode("utf-8")
@@ -301,7 +301,7 @@ class StatusServer:
 
 
 def firewall_commands(port: int = DEFAULT_PORT, public: bool = False) -> List[str]:
-    name = "BaoBun status page"
+    name = "Tofu status page"
     remote = "any" if public else "LocalSubnet,100.64.0.0/10"
     return ['netsh advfirewall firewall delete rule name="%s"' % name,
             'netsh advfirewall firewall add rule name="%s" dir=in action=allow protocol=TCP localport=%d '

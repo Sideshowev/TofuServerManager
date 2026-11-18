@@ -207,7 +207,7 @@ def load_extra_presets():
         bundled = BUNDLE_DIR / "presets.json"
         marker = APP_DIR / "runtime" / "presets.bundled.sha1"
         if local.exists():
-            # A copy BaoBun wrote itself and nobody edited since: refresh it when a newer
+            # A copy Tofu wrote itself and nobody edited since: refresh it when a newer
             # build ships a different list (so game fixes reach existing installs).
             try:
                 if (bundled.exists() and bundled != local and marker.exists()
@@ -256,7 +256,7 @@ def load_extra_presets():
             "category": p.get("category") or old.get("category") or "other",
             "popular": bool(p.get("popular", old.get("popular", False))),
         }
-        # games BaoBun can't download: where to get the files and how
+        # games Tofu can't download: where to get the files and how
         man = p.get("manual") or old.get("manual")
         if isinstance(man, dict) and str(man.get("url") or "").startswith("https://"):
             GAME_PRESETS[name]["manual"] = {"url": man["url"], "how": str(man.get("how") or "")[:600]}

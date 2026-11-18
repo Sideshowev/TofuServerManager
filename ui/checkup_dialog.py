@@ -1,5 +1,5 @@
 """Desktop "Checkup": everything that needs attention across all servers, with a
-button to fix each one where BaoBun can (see core/checkup.py)."""
+button to fix each one where Tofu can (see core/checkup.py)."""
 
 from __future__ import annotations
 

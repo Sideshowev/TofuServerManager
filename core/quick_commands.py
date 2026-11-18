@@ -52,7 +52,7 @@ COMMANDS: Dict[str, List[tuple]] = {
         ("Save the world now", "saveworld"),
         ("Kick a player", "kick \"{player}\""),
     ],
-    # these go over RCON (BaoBun routes them automatically once RCON is on)
+    # these go over RCON (Tofu routes them automatically once RCON is on)
     "2430930": [   # ARK: Survival Ascended
         ("Broadcast a message", "Broadcast {text}"),
         ("List online players", "ListPlayers"),

@@ -13,7 +13,7 @@ friendly models used by the panels:
 * loot: [{"crate", "mode": "add"|"replace", "picks_min", "picks_max",
           "items": [{"cls", "weight", "qty_min", "qty_max", "quality_min",
                      "quality_max", "blueprint"}]}]
-  Lines BaoBun can't show in that shape (several item sets, hand-tuned weights
+  Lines Tofu can't show in that shape (several item sets, hand-tuned weights
   per class...) come back as {"crate", "advanced": True, "raw": text} and are
   written back unchanged unless the panel replaces them.
 
@@ -335,7 +335,7 @@ def loot_to_struct(r: dict) -> str:
             ("ItemClassStrings", [Quoted(_cls(i["cls"]))]), ("ItemsWeights", [1.0]),
             ("MinQuantity", qmin), ("MaxQuantity", qmax), ("MinQuality", lmin), ("MaxQuality", lmax),
             ("bForceBlueprint", bp >= 1.0), ("ChanceToBeBlueprintOverride", bp)]))
-    item_set = Struct([("SetName", Quoted("BaoBun")), ("MinNumItems", float(lo)), ("MaxNumItems", float(hi)),
+    item_set = Struct([("SetName", Quoted("Tofu")), ("MinNumItems", float(lo)), ("MaxNumItems", float(hi)),
                        ("NumItemsPower", 1.0), ("SetWeight", 1.0), ("bItemsRandomWithoutReplacement", True),
                        ("ItemEntries", entries)])
     st = Struct([("SupplyCrateClassString", Quoted(crate)), ("MinItemSets", 1.0), ("MaxItemSets", 1.0),

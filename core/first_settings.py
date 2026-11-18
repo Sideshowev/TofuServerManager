@@ -76,7 +76,7 @@ def _spec(game: dict):
 
 def fields(game: dict, server_name: str = "") -> List[dict]:
     """What to ask for this game: [{"key", "kind", "label", "type", "value", "required", "help"}].
-    Empty when BaoBun has nothing proven to offer for it."""
+    Empty when Tofu has nothing proven to offer for it."""
     key, spec = _spec(game)
     out = []
     for fkey, kind, _label, typ, _where in spec:
@@ -244,7 +244,7 @@ def watch_first_start(mgr, server_id: str, started_at: Optional[float] = None,
                     continue                             # someone is already playing: wait
                 print("[INFO] %s: restarting once to use the settings chosen when it was added" %
                       srv_now.get("name"))
-                mgr.restart_server(server_id, user="BaoBun (first settings)")
+                mgr.restart_server(server_id, user="Tofu (first settings)")
                 return
         except Exception as e:
             print("[WARN] first settings for %s: %s" % (server_id, e))

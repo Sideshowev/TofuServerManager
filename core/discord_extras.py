@@ -1,6 +1,6 @@
 """More things the Discord bot works out without discord.py (so they can be tested):
 "ping me" subscriptions, the /mods list and mod pack, console log tails, the
-/checkup summary, the bot's status line, the in-Discord setup (/baobun setup)
+/checkup summary, the bot's status line, the in-Discord setup (/tofu setup)
 and who counts as an admin.
 """
 
@@ -206,7 +206,7 @@ def checkup_text(mgr, visible_ids: Optional[set] = None) -> str:
         lines.append("%s %s%s\n   %s" % (icon.get(i["level"], ""), ("**%s** - " % i["server"]) if i.get("server") else "",
                                          i["title"], i.get("fix") or ""))
     if len(items) > 15:
-        lines.append("…and %d more - open Checkup in BaoBun." % (len(items) - 15))
+        lines.append("…and %d more - open Checkup in Tofu." % (len(items) - 15))
     return "\n".join(lines)[:1990]
 
 
@@ -244,7 +244,7 @@ def save_setup(mgr, **values) -> dict:
 
 
 def merged_config(raw: dict, setup: dict) -> dict:
-    """discord_config.json with anything set from Discord (/baobun setup) on top."""
+    """discord_config.json with anything set from Discord (/tofu setup) on top."""
     out = dict(raw or {})
     for k, v in (setup or {}).items():
         if k in SETUP_KEYS and v not in (None, 0, []):
@@ -266,7 +266,7 @@ def setup_summary(cfg: dict) -> str:
 
     def roles(k):
         return ", ".join("<@&%d>" % r for r in cfg.get(k) or []) or "-"
-    return ("**BaoBun bot setup**\n"
+    return ("**Tofu bot setup**\n"
             "Control panel: %s\nActivity feed: %s\nAlerts: %s\nGame-night events: %s\n"
             "Admin roles: %s (the server owner and anyone with Manage Server are admins too)\n"
             "Who may start servers: %s\nShow join address: %s"

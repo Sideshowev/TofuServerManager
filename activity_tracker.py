@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel — Activity Tracker
+Tofu Server Manager — Activity Tracker
 
 Watches each server's log for player joins and records which days had players.
 Smart boot uses this to skip auto-starting servers nobody has played for days.
@@ -120,7 +120,7 @@ class ActivityTracker:
         if self.manager is not None:
             return self.manager.get_log_candidates(srv["id"])
         d = srv.get("directory", "")
-        cand = os.path.join(d, "logs", f"baobun-{srv['id']}.log")
+        cand = os.path.join(d, "logs", f"tofusm-{srv['id']}.log")
         return [cand] if os.path.isfile(cand) else []
 
     def scan_server(self, srv: dict) -> int:

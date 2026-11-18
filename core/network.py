@@ -59,7 +59,7 @@ def public_ip(timeout: float = 5.0) -> Optional[str]:
     ip = None
     try:
         req = urllib.request.Request("https://api.ipify.org?format=json",
-                                     headers={"User-Agent": "BaoBunControlPanel"})
+                                     headers={"User-Agent": "TofuServerManager"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             ip = json.loads(r.read().decode()).get("ip")
         ipaddress.ip_address(ip)
@@ -219,7 +219,7 @@ def connect_info(mgr, server_id: str, lookup_public: bool = True) -> dict:
             addr["tailscale"] = "%s:%d" % (ts_dns or ts_ip, game)
     tips = []
     if not game:
-        tips.append("BaoBun doesn't know this server's port. Set it in Settings (Game port).")
+        tips.append("Tofu doesn't know this server's port. Set it in Settings (Game port).")
     if fw is False:
         tips.append("Windows Firewall has no rule for this server yet - use Open Firewall.")
     if st.get("isRunning") and listening and any(p["listening"] is False for p in ports[:1]):
@@ -295,7 +295,7 @@ def _soap(url, service, action, args: Dict[str, str]) -> str:
         return r.read().decode("utf-8", "replace")
 
 
-def upnp_forward(ports: List[dict], lan_ip: str, label: str = "BaoBun", remove: bool = False,
+def upnp_forward(ports: List[dict], lan_ip: str, label: str = "Tofu", remove: bool = False,
                  gateway: Optional[Tuple[str, str]] = None) -> dict:
     """Ask the router to forward (or stop forwarding) ports to lan_ip."""
     gw = gateway or find_gateway()

@@ -30,12 +30,12 @@ class PluginMetadata:
     name: str
     version: str
     description: str
-    author: str = "BaoBun"
+    author: str = "Tofu"
     game_name: str = ""
     game_id: str = ""
     capabilities: List[PluginCapability] = field(default_factory=list)
     dependencies: List[str] = field(default_factory=list)
-    min_baobun_version: str = "1.0.0"
+    min_app_version: str = "1.0.0"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -44,7 +44,7 @@ class PluginMetadata:
             "game_name": self.game_name, "game_id": self.game_id,
             "capabilities": [c.value for c in self.capabilities],
             "dependencies": self.dependencies,
-            "min_baobun_version": self.min_baobun_version,
+            "min_app_version": self.min_app_version,
         }
 
 
@@ -365,12 +365,12 @@ class PluginManager:
                     id=raw["id"], name=raw.get("name", raw["id"]),
                     version=raw.get("version", "1.0.0"),
                     description=raw.get("description", ""),
-                    author=raw.get("author", "BaoBun"),
+                    author=raw.get("author", "Tofu"),
                     game_name=raw.get("game_name", ""),
                     game_id=raw.get("game_id", ""),
                     capabilities=caps,
                     dependencies=raw.get("dependencies", []),
-                    min_baobun_version=raw.get("min_baobun_version", "1.0.0"),
+                    min_app_version=raw.get("min_app_version") or raw.get("min_baobun_version", "1.0.0"),
                 )
                 found.append(meta)
             except Exception as e:
@@ -388,7 +388,7 @@ class PluginManager:
             return None
         try:
             spec = importlib.util.spec_from_file_location(
-                f"bao_plugin_{metadata.id}", main_py)
+                f"tofu_plugin_{metadata.id}", main_py)
             if spec is None or spec.loader is None:
                 return None
             module = importlib.util.module_from_spec(spec)

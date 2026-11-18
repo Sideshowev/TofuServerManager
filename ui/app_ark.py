@@ -1,4 +1,4 @@
-"""ARK cluster setup, gameplay and cluster settings windows. Part of the desktop app (BaoBunApp in app.py)."""
+"""ARK cluster setup, gameplay and cluster settings windows. Part of the desktop app (TofuApp in app.py)."""
 # flake8: noqa
 import threading
 
@@ -25,7 +25,7 @@ class ArkDialogsMixin:
         form = ctk.CTkScrollableFrame(dlg, fg_color=THEME["bg_card"], corner_radius=10)
         form.pack(fill="both", expand=True, padx=20, pady=(0, 15))
         dir_var = ctk.StringVar()
-        cid_var = ctk.StringVar(value="BaoBunCluster")
+        cid_var = ctk.StringVar(value="TofuCluster")
         pw_var = ctk.StringVar()
         apw_var = ctk.StringVar()
         mods_var = ctk.StringVar()
@@ -226,7 +226,7 @@ class ArkDialogsMixin:
                 messagebox.showwarning(
                     "No maps", "Select at least one map or add a custom map.")
                 return
-            cluster_id = cid_var.get().strip() or "BaoBunCluster"
+            cluster_id = cid_var.get().strip() or "TofuCluster"
             server_name_val = server_name_var.get().strip()
             server_names = {}
             for f in map_vars:

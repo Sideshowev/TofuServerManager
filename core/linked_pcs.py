@@ -1,12 +1,12 @@
 """One panel, several PCs ("Linked PCs").
 
-Every PC that hosts servers runs its own BaoBun and Watchdog - servers always run
-on the PC they're installed on. One BaoBun (the desktop window, its web panel and
+Every PC that hosts servers runs its own Tofu and Watchdog - servers always run
+on the PC they're installed on. One Tofu (the desktop window, its web panel and
 its Discord bot) can also show and control the servers on other PCs:
 
-* On the other PC: Settings > Linked PCs > "Let another BaoBun control this PC".
+* On the other PC: Settings > Linked PCs > "Let another Tofu control this PC".
   Its Watchdog then answers on port 8792, from the home network and Tailscale
-  only, and shows a pairing code like  baobun://192.168.1.50:8792/Xy3...  (address
+  only, and shows a pairing code like  tofu://192.168.1.50:8792/Xy3...  (address
   + a secret key). "Make a new code" changes the key and cuts off old links.
 * On the main PC: Add a PC, paste the code. The key is kept encrypted.
 
@@ -31,6 +31,8 @@ import socket
 import threading
 import time
 import urllib.error
+
+from core.rebrand import both_headers
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -38,7 +40,7 @@ from typing import Dict, List, Optional, Tuple
 
 DEFAULT_PORT = 8792
 MAX_SKEW = 120                 # seconds between the two PCs' clocks (signed requests)
-CODE_RX = re.compile(r"^\s*baobun://(?P<addr>[^/\s]+)/(?P<key>[A-Za-z0-9_-]{20,})\s*$")
+CODE_RX = re.compile(r"^\s*(?:tofu|baobun)://(?P<addr>[^/\s]+)/(?P<key>[A-Za-z0-9_-]{20,})\s*$")  # old codes too
 BLOCKED_PARAMS = {"dest_dir", "keep", "user", "user_id", "directory", "executable"}
 NOT_OVER_LINK = {"backup.download", "diagnostics.download", "servers.bring", "servers.bring_scan",
                  "servers.bring_job", "host.settings_save", "agent.update_now", "discord.reload", "fleet.status"}
@@ -56,7 +58,7 @@ def parse_code(code: str) -> Tuple[str, str]:
     """(address "host:port", key) from a pairing code; ValueError if it isn't one."""
     m = CODE_RX.match(code or "")
     if not m:
-        raise ValueError("That isn't a BaoBun pairing code (it starts with baobun://).")
+        raise ValueError("That isn't a Tofu pairing code (it starts with tofu://).")
     addr = m.group("addr")
     if ":" not in addr.rsplit("]", 1)[-1]:
         addr += ":%d" % DEFAULT_PORT
@@ -69,7 +71,7 @@ def allowed_actions() -> set:
 
 
 # --------------------------------------------------------------------------- #
-# this PC: answer a linked BaoBun
+# this PC: answer a linked Tofu
 # --------------------------------------------------------------------------- #
 def pc_name(mgr) -> str:
     return (mgr.get_setting("pc_name", "") or "").strip() or socket.gethostname()
@@ -133,11 +135,11 @@ def addresses() -> List[Tuple[str, str]]:
 def pairing_code(mgr, address: Optional[str] = None) -> str:
     cfg = host_config(mgr)
     addr = address or (addresses() or [("", socket.gethostname())])[0][1]
-    return "baobun://%s:%d/%s" % (addr, cfg["port"], host_key(mgr))
+    return "tofu://%s:%d/%s" % (addr, cfg["port"], host_key(mgr))
 
 
 def hello(mgr) -> dict:
-    """What a linked BaoBun sees about this PC."""
+    """What a linked Tofu sees about this PC."""
     from core.version import VERSION
     statuses = mgr.get_all_statuses()
     games = {}
@@ -173,7 +175,7 @@ def hello(mgr) -> dict:
 
 
 class LinkServer:
-    """The agent's listener for linked BaoBuns."""
+    """The agent's listener for linked Tofu apps."""
 
     def __init__(self, mgr, api, port: int = DEFAULT_PORT, log=print):
         self.mgr, self.api, self.port, self.log = mgr, api, port, log
@@ -190,8 +192,8 @@ class LinkServer:
         key = host_key(self.mgr, create=False)
         if not key:
             return "no key"
-        ts, nonce, sig = headers.get("X-BaoBun-Ts", ""), headers.get("X-BaoBun-Nonce", ""), \
-            headers.get("X-BaoBun-Sig", "")
+        from core.rebrand import header
+        ts, nonce, sig = header(headers, "Ts"), header(headers, "Nonce"), header(headers, "Sig")
         try:
             if abs(now - float(ts)) > MAX_SKEW:
                 return "the clocks of the two PCs differ too much (or an old request)"
@@ -251,7 +253,8 @@ class LinkServer:
                     payload = json.loads(body.decode() or "{}")
                 except ValueError:
                     return self._reply(400, {"success": False, "error": "bad request"})
-                self._reply(200, srv.handle(payload, self.headers.get("X-BaoBun-From", "")))
+                from core.rebrand import header
+                self._reply(200, srv.handle(payload, header(self.headers, "From")))
 
         self._httpd = ThreadingHTTPServer(("0.0.0.0", self.port), Handler)
         self._httpd.daemon_threads = True
@@ -266,7 +269,7 @@ class LinkServer:
 
 
 def firewall_commands(port: int) -> List[str]:
-    name = "BaoBun linked PCs"
+    name = "Tofu linked PCs"
     return ['netsh advfirewall firewall delete rule name="%s"' % name,
             'netsh advfirewall firewall add rule name="%s" dir=in action=allow protocol=TCP localport=%d '
             'remoteip=LocalSubnet,100.64.0.0/10 profile=private,domain' % (name, port)]
@@ -283,8 +286,8 @@ class LinkClient:
         body = json.dumps({"action": action, "params": params or {}}).encode()
         ts, nonce = str(int(time.time())), secrets.token_hex(12)
         req = urllib.request.Request("http://%s/link" % self.address, data=body, method="POST", headers={
-            "Content-Type": "application/json", "X-BaoBun-Ts": ts, "X-BaoBun-Nonce": nonce,
-            "X-BaoBun-Sig": sign(self.key, ts, nonce, body), "X-BaoBun-From": self.me[:40]})
+            "Content-Type": "application/json",
+            **both_headers({"Ts": ts, "Nonce": nonce, "Sig": sign(self.key, ts, nonce, body), "From": self.me[:40]})})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return json.loads(r.read().decode() or "{}")
@@ -295,7 +298,7 @@ class LinkClient:
                 return {"success": False, "error": "HTTP %s" % e.code}
         except (urllib.error.URLError, OSError, socket.timeout) as e:
             reason = getattr(e, "reason", e)
-            return {"success": False, "error": "Can't reach %s (%s) - is it on, with BaoBun's Watchdog running?"
+            return {"success": False, "error": "Can't reach %s (%s) - is it on, with Tofu's Watchdog running?"
                     % (self.address, reason), "offline": True}
 
 
@@ -304,7 +307,7 @@ def _safe_id(text: str) -> str:
 
 
 class Fleet:
-    """The linked PCs this BaoBun shows (setting "linked_pcs": [{id, name, address, key_protected}])."""
+    """The linked PCs this Tofu shows (setting "linked_pcs": [{id, name, address, key_protected}])."""
 
     def __init__(self, mgr):
         self.mgr = mgr

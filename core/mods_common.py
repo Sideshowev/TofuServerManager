@@ -16,7 +16,7 @@ import urllib.request
 import zipfile
 from typing import Dict, Iterable, List, Optional
 
-USER_AGENT = "BaoBunControlPanel/1.0 (self-hosted game server manager)"
+USER_AGENT = "TofuServerManager/1.0 (self-hosted game server manager)"
 
 
 class ModError(Exception):

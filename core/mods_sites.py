@@ -178,7 +178,7 @@ class ThunderstoreBackend:
                     m["check_error"] = str(e)[:150]
         extra = {"folder": self._dirs(srv)[0]}
         if not self.bepinex_installed(srv):
-            extra["hint"] = "BepInEx isn't installed yet - BaoBun installs it with the first mod."
+            extra["hint"] = "BepInEx isn't installed yet - Tofu installs it with the first mod."
             extra["setup"] = [{"action": "install_bepinex", "label": "Install BepInEx now"}]
         return mods, extra
 
@@ -278,7 +278,7 @@ class ModrinthBackend:
     def _need(self, srv):
         loader, version = self.detect(srv)
         if not loader or not version:
-            raise ModError("BaoBun can't tell this server's %s. Set it in the options below the mod list."
+            raise ModError("Tofu can't tell this server's %s. Set it in the options below the mod list."
                            % ("loader and Minecraft version" if not (loader or version) else
                               "loader" if not loader else "Minecraft version"))
         return loader, version
@@ -642,7 +642,7 @@ class FolderBackend:
         on = os.path.realpath(os.path.join(d, rel))
         if os.path.commonpath([on, os.path.realpath(d)]) != os.path.realpath(d):
             raise ModError("The mods folder must be inside the server folder.")
-        off = os.path.join(d, "BaoBun-disabled-mods", safe_name(rel, "mods"))
+        off = os.path.join(d, "TofuSM-disabled-mods", safe_name(rel, "mods"))
         return on, off
 
     def list(self, srv, check):

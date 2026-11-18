@@ -3,7 +3,7 @@
 One JSON file per game, named after the Steam App ID (e.g. `892970.json`) or the
 game (`minecraft-bedrock.json`). Fill `TEMPLATE.json`; every value must come
 from a source you list in `sources` - write `null` when unsure instead of
-guessing. These files are **not** read by BaoBun directly: the main developer
+guessing. These files are **not** read by Tofu directly: the main developer
 checks them and adds them to `core/game_defaults.py`, `core/config_forms.py`
 and `core/game_catalog.py`.
 

@@ -112,7 +112,7 @@ class ModBrowser(ctk.CTkToplevel):
         self.detail.grid(row=0, column=1, sticky="nsew")
         self._placeholder("Pick a mod on the left to see its pictures and details.")
         if Image is None:
-            self.status.configure(text="Pictures need Pillow (included in BaoBun.exe).")
+            self.status.configure(text="Pictures need Pillow (included in Tofu.exe).")
         self.after(50, self.search)
 
     # -- pictures ---------------------------------------------------------------

@@ -3,7 +3,7 @@
   "name": "Vintage Story",
   "version": "1.0.0",
   "description": "Vintage Story dedicated server plugin with ModDB integration",
-  "author": "BaoBun",
+  "author": "Tofu",
   "game_name": "Vintage Story",
   "game_id": "",
   "capabilities": [
@@ -14,5 +14,5 @@
     "monitoring"
   ],
   "dependencies": [],
-  "min_baobun_version": "1.0.0"
+  "min_app_version": "1.0.0"
 }

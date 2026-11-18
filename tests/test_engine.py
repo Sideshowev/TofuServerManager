@@ -1,6 +1,6 @@
-"""BaoBun engine tests: real processes (a fake server), no GUI.
+"""Tofu engine tests: real processes (a fake server), no GUI.
 
-Run from the BaoBun folder:   python -m unittest discover -s tests -v
+Run from the Tofu folder:   python -m unittest discover -s tests -v
 (or double-click selftest.bat). Nothing here touches your real servers: every
 test works in its own temporary folder.
 """
@@ -25,14 +25,14 @@ FAKE = str(Path(__file__).with_name("fake_server.py"))
 
 # Safety: point every per-user data location at a throwaway folder so no test
 # can ever read or write your real game data (e.g. %APPDATA%\VintagestoryData).
-_SANDBOX = Path(tempfile.mkdtemp(prefix="baobun_test_home_"))
+_SANDBOX = Path(tempfile.mkdtemp(prefix="tofusm_test_home_"))
 for _var in ("APPDATA", "LOCALAPPDATA", "USERPROFILE", "HOME"):
     os.environ[_var] = str(_SANDBOX)
 
 
 def make_env(servers):
-    """Temp BaoBun data folder with the given server entries (directories created)."""
-    tmp = Path(tempfile.mkdtemp(prefix="baobun_test_"))
+    """Temp Tofu data folder with the given server entries (directories created)."""
+    tmp = Path(tempfile.mkdtemp(prefix="tofusm_test_"))
     out = []
     for s in servers:
         d = tmp / s.pop("_dir", s["id"])
@@ -260,8 +260,8 @@ class ProtocolTests(unittest.TestCase):
 class LogicTests(unittest.TestCase):
 
     def test_schedule_due(self):
-        from baobun_agent import BaoBunAgent
-        due = BaoBunAgent._schedule_due
+        from tofusm_agent import TofuSMAgent
+        due = TofuSMAgent._schedule_due
         now = time.time()
         self.assertTrue(due({"mode": "interval", "hours": 1}, now - 3700, now))
         self.assertFalse(due({"mode": "interval", "hours": 1}, now - 100, now))
@@ -353,7 +353,7 @@ class HostingTests(unittest.TestCase):
         cmds = firewall_commands('My "Server"', r"C:\games\srv.exe", [2456, 2457])
         self.assertTrue(any('program="C:\\games\\srv.exe"' in c for c in cmds))
         self.assertTrue(any("protocol=UDP localport=2456,2457" in c for c in cmds))
-        self.assertTrue(all('"BaoBun - My Server' in c for c in cmds))
+        self.assertTrue(all('"Tofu - My Server' in c or '"BaoBun - My Server' in c for c in cmds))
 
     def test_steamcmd_progress(self):
         from core.hosting import parse_steamcmd_progress
@@ -375,10 +375,10 @@ class HostingTests(unittest.TestCase):
         self.assertFalse(t.update("v", None, 30, now=10 ** 6))
 
     def test_agent_idle_stop(self):
-        from baobun_agent import BaoBunAgent
+        from tofusm_agent import TofuSMAgent
         from core.hosting import IdleTracker
         tmp = make_env([{"id": "i", "name": "Idle", "idleStopMinutes": 1}])
-        agent = BaoBunAgent.__new__(BaoBunAgent)       # no API server / threads
+        agent = TofuSMAgent.__new__(TofuSMAgent)       # no API server / threads
         agent.mgr = engine(tmp).manager
         agent.mgr.start_server("i")
         agent.mgr.player_count = lambda sid: 0
@@ -559,7 +559,7 @@ class WebPanelTests(unittest.TestCase):
     def test_oauth_secret_is_encrypted_at_rest(self):
         from core.secrets import migrate_discord_config
         from core.web_auth import DiscordAuth
-        tmp = Path(tempfile.mkdtemp(prefix="baobun_test_"))
+        tmp = Path(tempfile.mkdtemp(prefix="tofusm_test_"))
         (tmp / "discord_config.json").write_text(json.dumps({"oauth_client_secret": "s3cret",
                                                              "token": ""}))
         self.assertTrue(migrate_discord_config(tmp / "discord_config.json"))
@@ -1174,7 +1174,7 @@ class PlayerTests(unittest.TestCase):
                          r"\[Server Event\]\s+(?P<name>\S+)\s+joins"],
                 "leave": [r"\[Server Event\]\s+(?:Player\s+)?(?P<name>\S+)\s+left"]}
         p = Path(tempfile.mkdtemp()) / "c.log"
-        p.write_text("[Server Event] Old 1.1.1.1:5 joins.\n==== BaoBun: starting VS ====\n"
+        p.write_text("[Server Event] Old 1.1.1.1:5 joins.\n==== Tofu: starting VS ====\n"
                      "[Server Event] Ann 10.0.0.2:55 joins.\n[Server Event] Cid joins.\n")
         lp = LogPlayers()
         self.assertEqual(sorted(lp.update("x", str(p), pats)), ["Ann", "Cid"])
@@ -1252,7 +1252,7 @@ class NetworkTests(unittest.TestCase):
                                   "urn:schemas-upnp-org:service:WANIPConnection:1"))
             r = net.upnp_forward([{"port": 2456, "proto": "UDP", "label": "Game"},
                                   {"port": 42420, "proto": "TCP/UDP", "label": "Game"}], "192.168.1.20",
-                                 label="BaoBun A&B", gateway=gw)
+                                 label="Tofu A&B", gateway=gw)
             self.assertTrue(r["ok"])
             self.assertEqual(r["done"], ["UDP 2456", "TCP 42420", "UDP 42420"])
             self.assertIn("AddPortMapping", calls[0][1])
@@ -1285,10 +1285,10 @@ class UpdateFlagTests(unittest.TestCase):
 
 
     def test_agent_auto_update_only_when_empty(self):
-        from baobun_agent import BaoBunAgent
+        from tofusm_agent import TofuSMAgent
         tmp = make_env([{"id": "a", "name": "A", "appId": "896660", "autoUpdateWhenEmpty": True},
                         {"id": "b", "name": "B", "appId": "896660", "_dir": "other"}])
-        agent = BaoBunAgent.__new__(BaoBunAgent)
+        agent = TofuSMAgent.__new__(TofuSMAgent)
         eng = engine(tmp)
         agent.engine, agent.mgr = eng, eng.manager
         calls = []
@@ -1342,10 +1342,10 @@ class QuickSettingsTests(unittest.TestCase):
         f = {x["key"]: x for x in g["fields"]}
         self.assertEqual((f["ServerName"]["value"], f["MaxClients"]["value"], f["Password"]["value"], f["Password"]["has_value"]),
                          ("A", "16", "", True))
-        qs.save(m, "vs", {"ServerName": "BaoBun Survival", "MaxClients": "24", "AdvertiseServer": "true", "Password": ""})
+        qs.save(m, "vs", {"ServerName": "Tofu Survival", "MaxClients": "24", "AdvertiseServer": "true", "Password": ""})
         cfg = json.loads((d["vs"] / "Data" / "serverconfig.json").read_text())
         self.assertEqual((cfg["ServerName"], cfg["MaxClients"], cfg["AdvertiseServer"], cfg["Password"]),
-                         ("BaoBun Survival", 24, True, "x"))        # blank password = unchanged
+                         ("Tofu Survival", 24, True, "x"))        # blank password = unchanged
         qs.save(m, "mc", {"motd": "Fam", "max-players": "10", "difficulty": "hard"})
         props = (d["mc"] / "server.properties").read_text()
         self.assertIn("motd=Fam", props)
@@ -1433,7 +1433,7 @@ class ImportTests(unittest.TestCase):
         self.assertTrue(games["VS"]["already_added"])
         added = import_servers(m, [f for f in found if not f["already_added"]])
         self.assertEqual(len(added), 4)
-        self.assertEqual(len(import_servers(m, found)), 1)       # VS folder wasn't in this BaoBun yet
+        self.assertEqual(len(import_servers(m, found)), 1)       # VS folder wasn't in this Tofu yet
         self.assertEqual(import_servers(m, found), [])           # nothing twice
         names = [s["name"] for s in m.load_servers()]
         self.assertIn("Valheim Fam", names)
@@ -1462,7 +1462,7 @@ class BackupMirrorTests(unittest.TestCase):
 
 class AnnouncementTests(unittest.TestCase):
     def test_scheduled_message(self):
-        from baobun_agent import BaoBunAgent
+        from tofusm_agent import TofuSMAgent
         tmp = make_env([{"id": "vs", "name": "VS", "type": "vintage-story"}])
         eng = engine(tmp)
         r = eng.api.process("schedules.set", {"server_id": "vs", "kind": "message",
@@ -1472,7 +1472,7 @@ class AnnouncementTests(unittest.TestCase):
                                               "config": {"enabled": True, "mode": "interval", "hours": 1,
                                                          "text": "Join our Discord!"}})
         self.assertTrue(r.success, r.error)
-        agent = BaoBunAgent.__new__(BaoBunAgent)
+        agent = TofuSMAgent.__new__(TofuSMAgent)
         agent.engine, agent.mgr, agent._busy = eng, eng.manager, {}
         agent.mgr.start_server("vs")
         try:
@@ -2260,7 +2260,7 @@ class PortPlanTests(unittest.TestCase):
         self.assertEqual(port_plan.apply_pending(m, m.get_server("vs2")), ["Game"])
         self.assertEqual(json.loads((data / "serverconfig.json").read_text())["Port"], 42422)
         self.assertNotIn("portsPending", m.get_server("vs2"))
-        # start check: blocked only by a *running* BaoBun server on the same port
+        # start check: blocked only by a *running* Tofu server on the same port
         m.is_running = lambda sid: sid == "vs1"
         (data / "serverconfig.json").write_text('{"Port": 42420}')
         chk = port_plan.start_check(m, m.get_server("vs2"), check_os=False)
@@ -2297,7 +2297,7 @@ class PortPlanTests(unittest.TestCase):
         cfg = (d["a3"] / "BattlEye" / "beserver_x64.cfg").read_text()
         self.assertIn("RConPassword " + b["password"], cfg)
         self.assertIn("RConPort 2310", cfg)
-        # RCON refuses to talk to a port another BaoBun server owns
+        # RCON refuses to talk to a port another Tofu server owns
         m.port_owner = lambda port: ("ark", {123})
         with self.assertRaises(RuntimeError):
             m._rcon_target_ok("pw", 25575)
@@ -2306,7 +2306,7 @@ class PortPlanTests(unittest.TestCase):
         m.port_owner = lambda port: (None, set())
         m._rcon_target_ok("pw", 25575)
         m.port_owner = lambda port: (None, {999})
-        m._rcon_target_ok("pw", 25575)               # some other program: allowed (only BaoBun clashes refuse)
+        m._rcon_target_ok("pw", 25575)               # some other program: allowed (only Tofu clashes refuse)
         m._server_pid = lambda sid: 4242
         m._rcon_target_ok("pw", 25575)               # helper processes / detached .bat launches are allowed
 
@@ -2399,13 +2399,13 @@ class NightlyTests(unittest.TestCase):
     def test_boot_task_xml(self):
         from core import boot_task
         import xml.dom.minidom
-        x = boot_task.task_xml(r"C:\BaoBun & Co\BaoBunCP.exe", "--agent", r"C:\BaoBun & Co", user="PC\\me")
+        x = boot_task.task_xml(r"C:\Tofu & Co\TofuSM.exe", "--agent", r"C:\Tofu & Co", user="PC\\me")
         doc = xml.dom.minidom.parseString(x.replace('encoding="UTF-16"', 'encoding="UTF-8"').encode("utf-8"))
         self.assertEqual(doc.getElementsByTagName("LogonType")[0].firstChild.data, "S4U")
         self.assertEqual(doc.getElementsByTagName("ExecutionTimeLimit")[0].firstChild.data, "PT0S")
         self.assertEqual(doc.getElementsByTagName("Priority")[0].firstChild.data, "4")
-        self.assertEqual(doc.getElementsByTagName("Command")[0].firstChild.data, r"C:\BaoBun & Co\BaoBunCP.exe")
-        p = boot_task.write_xml(["C:/x/BaoBunCP.exe", "--agent"], "C:/x")
+        self.assertEqual(doc.getElementsByTagName("Command")[0].firstChild.data, r"C:\Tofu & Co\TofuSM.exe")
+        p = boot_task.write_xml(["C:/x/TofuSM.exe", "--agent"], "C:/x")
         self.assertTrue(open(p, "rb").read().startswith(b"\xff\xfe"))   # UTF-16 for schtasks
         os.remove(p)
         self.assertIn("/XML", boot_task.install_commands("t.xml")[0])
@@ -2782,13 +2782,13 @@ class DiscordBotTests(unittest.TestCase):
         view = discord_bot._build_grid_view(mgr.get_all_statuses())
         self.assertEqual(len(view.children), 3)
         self.assertTrue(view.children[0].label.startswith("\u25B6 Start"))
-        self.assertEqual(view.children[0].custom_id, "baobun:toggle:v")
+        self.assertEqual(view.children[0].custom_id, "tofu:toggle:v")
         self.assertIn("players", discord_bot._players_text(mgr.sts[1]) + "players")
         tree = discord_bot._setup_commands(types.SimpleNamespace())
         self.assertEqual(sorted(tree.commands), sorted([
             "help", "join", "players", "restart", "say", "servers", "start", "stop", "status", "mods", "notify",
             "stats", "event", "events", "event-cancel", "backup", "restore", "logs", "update", "checkup",
-            "baobun-setup", "access"]))
+            "tofu-setup", "access"]))
         # server owner / Manage Server count as admins on a fresh install
         owner = types.SimpleNamespace(id=99, roles=[], guild=types.SimpleNamespace(owner_id=99))
         manager = types.SimpleNamespace(id=98, roles=[], guild=types.SimpleNamespace(owner_id=1),
@@ -2799,7 +2799,9 @@ class DiscordBotTests(unittest.TestCase):
         ev = {"id": "abc", "title": "Boss night", "when": 2000000000, "going": [5], "not_going": [],
               "creator_name": "Bo", "server_name": "Rust", "auto_start": True}
         v = discord_bot._event_view(ev)
-        self.assertEqual([b.custom_id for b in v.children], ["baobun:ev:in:abc", "baobun:ev:out:abc"])
+        self.assertEqual([b.custom_id for b in v.children], ["baobun:ev:in:abc", "baobun:ev:out:abc"])   # old event
+        v = discord_bot._event_view(dict(ev, cid="tofu"))
+        self.assertEqual([b.custom_id for b in v.children], ["tofu:ev:in:abc", "tofu:ev:out:abc"])
         self.assertIn("<t:2000000000:F>", discord_bot._event_text(ev))
         self.assertIn("<@5>", discord_bot._event_text(ev))
 
@@ -2808,7 +2810,7 @@ class SelfUpdateTests(unittest.TestCase):
     def test_watcher_and_api(self):
         from core import self_update
         d = Path(tempfile.mkdtemp())
-        exe = d / "BaoBunCP.exe"
+        exe = d / "TofuSM.exe"
         exe.write_bytes(b"old build")
         w = self_update.Watcher(str(exe))
         self.assertFalse(w.check()["ready"])
@@ -2868,7 +2870,7 @@ class WatchdogTests(unittest.TestCase):
         n.step({"ok": True, "next_nightly": 1000}, now=900)
         self.assertIsNone(n.step(None, pings=False, now=1100))
         self.assertEqual(n.step(None, pings=True, now=1000 + 25 * 60)[0], "down")
-        self.assertIn("BaoBun on it doesn't", n.step({"ok": True}, now=3000) and "BaoBun on it doesn't")
+        self.assertIn("Tofu on it doesn't", n.step({"ok": True}, now=3000) and "Tofu on it doesn't")
 
 
 class HostSettingsApiTests(unittest.TestCase):
@@ -3794,7 +3796,7 @@ class PlayerAccessTests(unittest.TestCase):
             res = PA.change_many(m, ["vh", "vh2"], "ban", "add", sid)
         self.assertEqual(sent, ["/player Friend role admin", 'ban "Cheater"'])
         self.assertTrue(all("error" not in r for r in res.values()))
-        self.assertEqual(PA.overview(m, "rust")["data"]["ban"][0]["name"], "Cheater")    # BaoBun's own record
+        self.assertEqual(PA.overview(m, "rust")["data"]["ban"][0]["name"], "Cheater")    # Tofu's own record
         self.assertFalse(PA.overview(m, "x")["supported"])
         txt = PA.discord_text(PA.overview(m, "vs"))
         self.assertIn("Banned** (1): Troll", txt)
@@ -3830,10 +3832,10 @@ class UpdateCheckTests(unittest.TestCase):
         asked = []
         rel = {"tag_name": "v99.0.0", "html_url": "https://github.com/someone/baobun/releases/tag/v99.0.0",
                "body": "Lots of new things", "assets": [
-                   {"name": "BaoBun-Setup-99.0.0.exe", "size": 10,
-                    "browser_download_url": "https://github.com/someone/baobun/releases/download/v99.0.0/BaoBun-Setup-99.0.0.exe"},
-                   {"name": "BaoBun-Setup-99.0.0.exe.sha256", "size": 80,
-                    "browser_download_url": "https://github.com/someone/baobun/releases/download/v99.0.0/BaoBun-Setup-99.0.0.exe.sha256"}]}
+                   {"name": "TofuSM-Setup-99.0.0.exe", "size": 10,
+                    "browser_download_url": "https://github.com/someone/baobun/releases/download/v99.0.0/TofuSM-Setup-99.0.0.exe"},
+                   {"name": "TofuSM-Setup-99.0.0.exe.sha256", "size": 80,
+                    "browser_download_url": "https://github.com/someone/baobun/releases/download/v99.0.0/TofuSM-Setup-99.0.0.exe.sha256"}]}
         info = U.check(m, force=True, fetch=lambda url: asked.append(url) or rel)
         self.assertEqual(asked, ["https://api.github.com/repos/someone/baobun/releases/latest"])
         self.assertTrue(info["newer"])
@@ -3864,7 +3866,7 @@ class LinkedPcsTests(unittest.TestCase):
         srv.start()
         try:
             code = LP.pairing_code(host.manager, "127.0.0.1")
-            self.assertTrue(code.startswith("baobun://127.0.0.1:%d/" % port))
+            self.assertTrue(code.startswith("tofu://127.0.0.1:%d/" % port))
             main = engine(make_env([{"id": "mine", "name": "Mine"}]))
             f = LP.fleet(main.manager)
             added = f.add(code)
@@ -3898,12 +3900,12 @@ class LinkedPcsTests(unittest.TestCase):
             self.assertIn("wrong key", bad["error"])
             body = b'{"action":"link.hello"}'
             ts, nonce = str(int(time.time())), "n1"
-            hdr = {"X-BaoBun-Ts": ts, "X-BaoBun-Nonce": nonce,
-                   "X-BaoBun-Sig": LP.sign(LP.host_key(host.manager), ts, nonce, body)}
+            hdr = {"X-TofuSM-Ts": ts, "X-TofuSM-Nonce": nonce,
+                   "X-TofuSM-Sig": LP.sign(LP.host_key(host.manager), ts, nonce, body)}
             self.assertIsNone(srv.check("127.0.0.1", hdr, body))
             self.assertEqual(srv.check("127.0.0.1", hdr, body), "replayed request")
             self.assertIn("home network", srv.check("8.8.8.8", hdr, body))
-            old = dict(hdr, **{"X-BaoBun-Ts": str(int(time.time()) - 3600)})
+            old = dict(hdr, **{"X-TofuSM-Ts": str(int(time.time()) - 3600)})
             self.assertIn("clocks", srv.check("127.0.0.1", old, body))
             self.assertIn("chain", srv.handle({"action": "server.status", "params": {"server_id": "@x/y"}}, "t")["error"])
             self.assertFalse(srv.handle({"action": "host.settings_save", "params": {}}, "t")["success"])
@@ -3998,7 +4000,7 @@ class GameDefaultsTests(unittest.TestCase):
             args7, notes7 = G.required({"appId": "380870", "launchArgs": args6})
             self.assertEqual((args7, notes7), (args6, []), "unchanged with cachedir")
 
-            odd = Path(home) / "Zomboid" / "db" / "odd.db"       # a file BaoBun can't read: left alone
+            odd = Path(home) / "Zomboid" / "db" / "odd.db"       # a file Tofu can't read: left alone
             odd.write_bytes(b"not a database at all" * 10)
             self.assertEqual(G.required({"appId": "380870", "launchArgs": "-servername odd"})[1], [])
 
@@ -4025,7 +4027,7 @@ class GameDefaultsTests(unittest.TestCase):
         bat.write_text(BAT)
 
         out = G.full_launcher({"appId": "380870"}, str(bat))
-        self.assertEqual(out, str(d / "StartServer64-BaoBun.bat"))
+        self.assertEqual(out, str(d / "StartServer64-Tofu.bat"))
         self.assertTrue(Path(out).exists())
 
         text = Path(out).read_text()
@@ -4087,7 +4089,7 @@ class GameDefaultsTests(unittest.TestCase):
         terr, n = G.required({"appId": "105600", "directory": "C:\\GameServers\\Terraria", "port": 7777,
                               "launchArgs": ""})
         self.assertIn("-autocreate 2", terr)
-        self.assertIn("C:\\GameServers\\Terraria\\Worlds\\BaoBun.wld", terr)
+        self.assertIn("C:\\GameServers\\Terraria\\Worlds\\Tofu.wld", terr)
         self.assertEqual(G.required({"appId": "105600", "launchArgs": "-config serverconfig.txt -port 7777 "
                                                                   "-players 8"})[1], [])
         sm, n = G.required({"appId": "3017310", "port": 8777, "launchArgs": ""})
@@ -4095,7 +4097,7 @@ class GameDefaultsTests(unittest.TestCase):
         self.assertEqual(G.required({"appId": "3017310", "port": 8777, "launchArgs": sm}), (sm, []))
         self.assertNotIn("-PORT=", G.required({"appId": "2857200", "launchArgs": ""})[0])   # no port known
         nec, _ = G.required({"appId": "1169370", "port": 14159, "launchArgs": ""})          # Necesse: Java itself
-        self.assertEqual(nec, "-jar Server.jar -nogui -world BaoBun -port 14159")
+        self.assertEqual(nec, "-jar Server.jar -nogui -world Tofu -port 14159")
         self.assertEqual(G.required({"appId": "1169370", "port": 14159, "launchArgs": nec}), (nec, []))
         kf, _ = G.required({"appId": "232130", "launchArgs": ""})
         self.assertTrue(kf.startswith("KF-BioticsLab"))
@@ -4655,3 +4657,86 @@ class SettingsFixTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {"APPDATA": str(d / "nothing-here")}):
             Q.save(m, "se", {"MaxPlayers": "10"})
         self.assertIn("<MaxPlayers>10</MaxPlayers>", (w / "Sandbox_config.sbc").read_text())
+
+
+class RebrandTests(unittest.TestCase):
+    """The app used to be BaoBun Control Panel: what that left on a PC still works."""
+
+    def test_appdata_folder_moves_over_once(self):
+        from core import rebrand
+        base = Path(tempfile.mkdtemp())
+        (base / "BaoBun" / "SteamCMD").mkdir(parents=True)
+        (base / "BaoBun" / "servers.json").write_text("[]")
+        with mock.patch.dict(os.environ, {"LOCALAPPDATA": str(base)}):
+            p = rebrand.appdata_folder()
+            self.assertEqual(p, base / "TofuSM")
+            self.assertTrue((p / "SteamCMD").is_dir() and (p / "servers.json").is_file())
+            self.assertFalse((base / "BaoBun").exists())
+            self.assertEqual(rebrand.appdata_folder(), base / "TofuSM")
+        with mock.patch.dict(os.environ, {"LOCALAPPDATA": str(base / "empty")}):
+            self.assertEqual(rebrand.appdata_folder(), base / "empty" / "TofuSM")
+
+    def test_database_and_logs_move_over(self):
+        from core import rebrand
+        d = Path(tempfile.mkdtemp())
+        (d / "settings").mkdir()
+        (d / "settings" / "baobun.db").write_text("db")
+        self.assertEqual(rebrand.move_db(d / "settings"), d / "settings" / "tofusm.db")
+        self.assertEqual((d / "settings" / "tofusm.db").read_text(), "db")
+        logs = d / "srv" / "logs"
+        logs.mkdir(parents=True)
+        (logs / "baobun-s1.log").write_text("==== BaoBun: starting X ====\n")
+        (logs / "baobun-s1.log.1").write_text("old")
+        self.assertEqual(rebrand.move_logs([{"id": "s1", "directory": str(d / "srv")}]), 2)
+        self.assertEqual(sorted(p.name for p in logs.iterdir()), ["tofusm-s1.log", "tofusm-s1.log.1"])
+
+    def test_engine_opens_an_old_install(self):
+        tmp = make_env([{"id": "a", "name": "A", "appId": "1"}])
+        (tmp / "settings").mkdir(exist_ok=True)
+        e1 = engine(tmp)
+        e1.db.close() if hasattr(e1.db, "close") else None
+        db = tmp / "settings" / "tofusm.db"
+        if db.exists():
+            os.replace(db, tmp / "settings" / "baobun.db")
+        e2 = engine(tmp)
+        self.assertTrue((tmp / "settings" / "tofusm.db").exists())
+        self.assertIsNotNone(e2.db)
+
+    def test_old_backups_profiles_codes_and_headers(self):
+        from core import linked_pcs, rebrand, backup_check
+        self.assertEqual(linked_pcs.parse_code("baobun://192.168.1.5:8792/" + "k" * 24)[0], "192.168.1.5:8792")
+        self.assertEqual(linked_pcs.parse_code("tofu://192.168.1.5/" + "k" * 24)[0], "192.168.1.5:%d"
+                         % linked_pcs.DEFAULT_PORT)
+        self.assertEqual(rebrand.header({"X-BaoBun-Ts": "1"}, "Ts"), "1")
+        self.assertEqual(rebrand.header({"X-TofuSM-Ts": "2", "X-BaoBun-Ts": "1"}, "Ts"), "2")
+        self.assertEqual(rebrand.both_headers({"Sig": "s"}), {"X-TofuSM-Sig": "s", "X-BaoBun-Sig": "s"})
+        # a backup made by BaoBun restores and checks as good
+        tmp = make_env([{"id": "s", "name": "S", "appId": "1"}])
+        m = engine(tmp).manager
+        d = Path(m.get_server("s")["directory"])
+        zp = tmp / "old_backup.zip"
+        with zipfile.ZipFile(zp, "w") as z:
+            z.writestr("world/save.dat", "x" * 2000)
+            z.writestr("baobun_backup.json", json.dumps({"server": "s", "external": {}}))
+        self.assertFalse([p for p in backup_check.verify_zip(str(zp), deep=False).get("problems", [])
+                          if "manifest" in p])
+        # an exported profile from before the rename imports
+        prof = tmp / "p.json"
+        prof.write_text(json.dumps({"_baoBunProfile": 1, "name": "Imported", "appId": "1", "executable": "x.exe"}))
+        m.import_server_profile(str(prof))
+        self.assertTrue(any(s["name"] == "Imported" and "_baoBunProfile" not in s for s in m.load_servers()))
+
+    def test_firewall_and_boot_task_clean_up_old_names(self):
+        from core import hosting, boot_task
+        cmds = hosting.firewall_commands("My Server", "C:/x.exe", [7777])
+        self.assertIn('netsh advfirewall firewall delete rule name="BaoBun - My Server"', cmds)
+        self.assertTrue(any('add rule name="Tofu - My Server"' in c for c in cmds))
+        self.assertIn('schtasks /Delete /F /TN "BaoBun Agent"', boot_task.install_commands("t.xml"))
+        self.assertIn('schtasks /Delete /F /TN "BaoBun Agent"', boot_task.remove_commands())
+
+    def test_old_log_start_marker_still_splits_runs(self):
+        from core.players import LogPlayers
+        p = Path(tempfile.mkdtemp()) / "l.log"
+        p.write_text("Ann joined\n==== BaoBun: starting X ====\nBob joined\n")
+        got = LogPlayers().update("s", str(p), {"join": [r"(?P<name>\w+) joined"], "leave": []})
+        self.assertEqual(sorted(got), ["Bob"])

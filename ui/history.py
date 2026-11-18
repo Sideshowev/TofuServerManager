@@ -228,7 +228,7 @@ class HistoryPanel(ctk.CTkFrame):
         pts = d["points"]
         args = (d["since"], d["until"], d["bucket"])
         self.cpu.set_data([(p["ts"], p["cpu"]) for p in pts], *args,
-                          note="No data yet - BaoBun records usage once a minute while the server runs.")
+                          note="No data yet - Tofu records usage once a minute while the server runs.")
         self.ram.set_data([(p["ts"], p["ram"]) for p in pts], *args)
         self.players.set_data([(p["ts"], p["players"]) for p in pts], *args,
                               note="This game doesn't report players (or the server wasn't running).")

@@ -1,11 +1,11 @@
-# Instructions for AI helpers working on BaoBun
+# Instructions for AI helpers working on Tofu
 
-BaoBun Control Panel is a Windows game-server manager (Python, customtkinter
+Tofu Server Manager is a Windows game-server manager (Python, customtkinter
 desktop app + a background "Watchdog" service + web panel + Discord bot). Read
 this whole file before changing anything.
 
 ## Rules (never break these)
-1. **Universal.** BaoBun is shared with other people. Nothing may assume a
+1. **Universal.** Tofu is shared with other people. Nothing may assume a
    particular PC, drive letter, user name, folder or hardware. Use settings,
    detection or the user's own folders - never hard-coded paths.
 2. **Secrets.** Never print, log, copy or commit passwords, tokens or keys.
@@ -23,7 +23,7 @@ this whole file before changing anything.
 |---|---|
 | Server control (start/stop, installs, backups, configs) | `server_manager.py` |
 | One API for desktop/web/Discord | `core/api_layer.py` (permissions: `core/web_auth.py`) |
-| Watchdog (background service) | `baobun_agent.py` |
+| Watchdog (background service) | `tofusm_agent.py` |
 | Desktop windows | `app.py`, `ui/*.py` |
 | Web panel | `core/web_panel.py`, `ui/web/index.html` |
 | Discord bot | `discord_bot.py`, `core/discord_*.py` |

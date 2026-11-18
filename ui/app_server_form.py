@@ -1,4 +1,4 @@
-"""The Add / Edit Server form. Part of the desktop app (BaoBunApp in app.py)."""
+"""The Add / Edit Server form. Part of the desktop app (TofuApp in app.py)."""
 # flake8: noqa
 import os
 import time
@@ -145,7 +145,7 @@ class ServerFormMixin:
         java_args_var = ctk.StringVar(value=(existing or {}).get("javaArgs") or "")
         if is_mc:
             make_field("Minecraft memory in MB (blank = 4096)", java_mem_var, "e.g. 6144")
-            make_field("Java to use (blank = BaoBun picks the right one)", java_path_var,
+            make_field("Java to use (blank = Tofu picks the right one)", java_path_var,
                        "e.g. C:\\Program Files\\Eclipse Adoptium\\jdk-21\\bin\\java.exe")
             make_field("Extra Java flags (optional)", java_args_var, "e.g. -XX:+UseG1GC")
 

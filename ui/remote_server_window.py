@@ -1,6 +1,6 @@
 """Desktop window for a server on a linked PC (core/linked_pcs.py): status, the
 live console, start / stop / restart, back up, update and players. Everything is
-done by BaoBun on that PC (and recorded in its own activity log)."""
+done by Tofu on that PC (and recorded in its own activity log)."""
 
 from __future__ import annotations
 

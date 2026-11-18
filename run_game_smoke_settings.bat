@@ -1,6 +1,6 @@
 @echo off
 REM Settings check: change each popular game's server name, restart, see if it sticks. Then retest Source games.
-title BaoBun settings check
+title Tofu settings check
 if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON if exist "%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" set "PYTHON="%LOCALAPPDATA%\Programs\Python\Launcher\py.exe" -3"

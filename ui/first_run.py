@@ -1,6 +1,6 @@
 """First-run walkthrough (core/first_run.py has the logic).
 
-Six short pages: welcome (what BaoBun is, this PC), where servers go, backups,
+Six short pages: welcome (what Tofu is, this PC), where servers go, backups,
 keeping servers running, optional extras (Discord, web panel, nightly restart,
 status page) and a finish page that adds the first server or brings servers
 over from another PC. Every page can be skipped; everything is in Settings later.
@@ -25,7 +25,7 @@ class FirstRunWindow(ctk.CTkToplevel):
     def __init__(self, app, theme):
         super().__init__(app)
         self.app, self.t, self.mgr = app, theme, app.manager
-        self.title("Welcome to BaoBun")
+        self.title("Welcome to Tofu")
         self.transient(app)
         app.center_window(self, 680, 560, fit=True)
         d = F.defaults(self.mgr)
@@ -99,13 +99,13 @@ class FirstRunWindow(ctk.CTkToplevel):
 
     def page_welcome(self):
         t = self.t
-        self.h("Welcome to BaoBun")
-        self.p("BaoBun runs your game servers for you: it installs them, keeps them running, backs up the worlds, "
+        self.h("Welcome to Tofu")
+        self.p("Tofu runs your game servers for you: it installs them, keeps them running, backs up the worlds, "
                "updates games and mods, and lets your friends start servers from Discord or a web page.")
         self.p("This takes about a minute. Everything here can be changed later in Settings.")
         self.p("This PC", t["text_light"], top=10)
         self.hw = self.p("Looking at this PC…")
-        self.p("BaoBun keeps its settings, backups and logs in:\n%s" % self.mgr.config_path.parent, top=6)
+        self.p("Tofu keeps its settings, backups and logs in:\n%s" % self.mgr.config_path.parent, top=6)
 
         def work():
             text = F.hardware_text(F.hardware())
@@ -141,7 +141,7 @@ class FirstRunWindow(ctk.CTkToplevel):
     def page_backups(self):
         t = self.t
         self.h("Backups")
-        self.p("BaoBun backs up each server's world before updates and restores, on a schedule you choose, and "
+        self.p("Tofu backs up each server's world before updates and restores, on a schedule you choose, and "
                "checks every week that the newest backup would really restore.")
         row = ctk.CTkFrame(self.body, fg_color="transparent")
         row.pack(fill="x", padx=18, pady=(4, 8))
@@ -162,7 +162,7 @@ class FirstRunWindow(ctk.CTkToplevel):
                 res.configure(text="Leave it blank to skip.", text_color=t["text_muted"])
                 return
             r = self.mgr.test_mirror(target)
-            res.configure(text=("✓ BaoBun can write there (%s GB free)." % r.get("free_gb")) if r.get("ok") else
+            res.configure(text=("✓ Tofu can write there (%s GB free)." % r.get("free_gb")) if r.get("ok") else
                           "✕ Can't write there: %s" % r.get("error"),
                           text_color=t["status_online"] if r.get("ok") else t["warning"])
         ctk.CTkButton(row2, text="Test", width=70, fg_color=t["border"], command=test).pack(side="left")
@@ -173,11 +173,11 @@ class FirstRunWindow(ctk.CTkToplevel):
         self.h("Keep servers running")
         ctk.CTkCheckBox(self.body, text="Turn on the Watchdog (recommended)", variable=self.watchdog_var,
                         fg_color=t["accent_blue"]).pack(anchor="w", padx=18, pady=(4, 2))
-        self.p("The Watchdog is BaoBun's background service. With it, servers keep running when you close this "
+        self.p("The Watchdog is Tofu's background service. With it, servers keep running when you close this "
                "window, crashed servers restart by themselves, and schedules, backups, Discord and the web panel "
-               "keep working. Without it, servers stop when BaoBun closes.")
+               "keep working. Without it, servers stop when Tofu closes.")
         if os.name == "nt":
-            ctk.CTkCheckBox(self.body, text="Start BaoBun when Windows starts, before anyone signs in",
+            ctk.CTkCheckBox(self.body, text="Start Tofu when Windows starts, before anyone signs in",
                             variable=self.boot_var, fg_color=t["accent_blue"]).pack(anchor="w", padx=18,
                                                                                    pady=(12, 2))
             self.p("Best for a PC that hosts servers: after a power cut or update restart, the servers come back on "
@@ -191,7 +191,7 @@ class FirstRunWindow(ctk.CTkToplevel):
         items = [
             ("Discord bot", "A control panel in your Discord: friends see and start servers, get alerts, game-night "
                             "events and mod lists.", "show_discord_bot_dialog"),
-            ("Web panel", "Run BaoBun from a browser or phone, with sign-in for your admins.",
+            ("Web panel", "Run Tofu from a browser or phone, with sign-in for your admins.",
              "show_web_panel_dialog"),
             ("Nightly restart", "Restart the PC at night, back up first, and bring back the servers people use.",
              "show_nightly_dialog"),
@@ -213,7 +213,7 @@ class FirstRunWindow(ctk.CTkToplevel):
         self.h("All set")
         for line in self.summary:
             self.p("✓ " + line, t["text_light"])
-        self.p("Next: add your first server - pick a game and BaoBun downloads and sets it up.", top=10)
+        self.p("Next: add your first server - pick a game and Tofu downloads and sets it up.", top=10)
         btns = ctk.CTkFrame(self.body, fg_color="transparent")
         btns.pack(fill="x", padx=18, pady=(4, 6))
         ctk.CTkButton(btns, text="Add a server", fg_color=t["success"],
@@ -263,7 +263,7 @@ class FirstRunWindow(ctk.CTkToplevel):
             from core import boot_task
             base = self.mgr.config_path.parent
             ok = boot_task.install(self.app._startup_command(), str(base), folder=str(base / "runtime"))
-            return "BaoBun starts with Windows" if ok else \
+            return "Tofu starts with Windows" if ok else \
                 "Start with Windows wasn't set up (permission declined) - try again in Settings > Nightly restart"
         except Exception as e:
             return "Start with Windows wasn't set up: %s" % e

@@ -5,9 +5,9 @@ Made by `tools/smoke_summary.py` from `logs/game_smoke_report.json` on 2026-11-1
 ## In short
 
 - **133 games tested, 113 installed, started and stayed up.**
-- 68 of those opened a port BaoBun expects (or answered a player query) - confirmed up.
-- 19 were up on ports BaoBun doesn't know about - BaoBun's port list for them is wrong or missing.
-- 26 kept running but BaoBun saw no open port after two minutes - **not confirmed**: still loading, or quietly not working.
+- 68 of those opened a port Tofu expects (or answered a player query) - confirmed up.
+- 19 were up on ports Tofu doesn't know about - Tofu's port list for them is wrong or missing.
+- 26 kept running but Tofu saw no open port after two minutes - **not confirmed**: still loading, or quietly not working.
 - 20 did not work (below).
 
 ## Settings a new-server form could ask for
@@ -16,10 +16,10 @@ For each game the test set the server name, join password and max players throug
 
 - **works** - the game kept it and players see it (checked with the Steam server query)
 - **kept** - the game kept it in its settings; this game doesn't answer the query, so it couldn't be checked from outside
-- **IGNORED** - saved, but the game showed something else: BaoBun is writing to the wrong place
+- **IGNORED** - saved, but the game showed something else: Tofu is writing to the wrong place
 - **REWRITTEN** - the game threw the value away when it started
-- **can't save** - BaoBun couldn't write it (reasons below the table)
-- `-` - BaoBun doesn't know where this game keeps it
+- **can't save** - Tofu couldn't write it (reasons below the table)
+- `-` - Tofu doesn't know where this game keeps it
 
 | Game | Essentials | Server name | Password | Max players |
 |---|---|---|---|---|
@@ -89,16 +89,16 @@ For each game the test set the server name, join password and max players throug
 Why some couldn't be saved:
 
 - ARK: Survival Evolved, Server name: Server name can't contain spaces, ? or & (ARK reads it from the launch line)
-- ARK: Survival Evolved, Password: The launch options don't start with a map (e.g. TheIsland_WP?listen), so BaoBun can't add ServerPassword. Add the map first in Settings.
-- ARK: Survival Evolved, Max players: The launch options don't start with a map (e.g. TheIsland_WP?listen), so BaoBun can't add MaxPlayers. Add the map first in Settings.
+- ARK: Survival Evolved, Password: The launch options don't start with a map (e.g. TheIsland_WP?listen), so Tofu can't add ServerPassword. Add the map first in Settings.
+- ARK: Survival Evolved, Max players: The launch options don't start with a map (e.g. TheIsland_WP?listen), so Tofu can't add MaxPlayers. Add the map first in Settings.
 
-(The ARK "server name" lines are the test's fault: its test name has a space in it. The ARK password / max players lines are real: a new ARK server has no map in its launch options yet. Arma Reforger and Conan Exiles are real too: the settings file BaoBun writes to doesn't exist even after the first start.)
+(The ARK "server name" lines are the test's fault: its test name has a space in it. The ARK password / max players lines are real: a new ARK server has no map in its launch options yet. Arma Reforger and Conan Exiles are real too: the settings file Tofu writes to doesn't exist even after the first start.)
 
 **No server name, password or max players known at all (51 games that run):** Alien Swarm: Reactive Drop, American Truck Simulator, Avorion, Black Mesa: Deathmatch, Citadel: Forged with Fire, Colony Survival, Counter-Strike: Global Offensive, Counter-Strike: Source, Day of Defeat: Source, Day of Infamy, Dead Matter, Eco, Empires, Euro Truck Simulator 2, Fortress Forever, Foundry, Frozen Flame, Ground Branch, HL Deathmatch: Source, Holdfast: Nations At War, Hurtworld, Icarus, Insurgency (2014), Insurgency: Modern Infantry Combat, JBMod, Just Cause 2 MP, Kingdoms Rise, Last Oasis, Left 4 Dead, Life is Feudal: Your Own, Medieval Engineers, Mount & Blade II: Bannerlord, Myth of Empires, NEOTOKYO, NS2: Combat, Necesse, No One Survived, Operation: Harsh Doorstop, Plains of Pain, Reflex, SCP: Secret Laboratory, Smalland: Survive the Wilds, Squad 44 (Post Scriptum), StarRupture, Stormworks: Build and Rescue, Sven Co-op, TerraTech Worlds, The Forest, The Isle (Evrima), Tower Unite, Wurm Unlimited
 
-## Up, but on ports BaoBun doesn't expect
+## Up, but on ports Tofu doesn't expect
 
-| Game | Open ports | BaoBun expected |
+| Game | Open ports | Tofu expected |
 |---|---|---|
 | ASTRONEER | 7777/UDP | 8777 |
 | Barotrauma | 27015/UDP, 55893/UDP, 65133/TCP | 27017 |
@@ -131,20 +131,20 @@ American Truck Simulator, Colony Survival, Counter-Strike 1.6, Counter-Strike: C
 | ASKA | basic | crashed | Log: Failed to load "SDL3.dll" - it can't load one of its own libraries. | Not looked into yet. Likely needs to be started from another folder, or its real program is a different file. |
 | BlazeRush | basic | crashed | Log: "Failed to initialize Steam. Probably Steam client is not running." | Needs the Steam client running on the PC - not a real dedicated server. Say so in its description or drop it from the list. |
 | Brickadia | basic | crashed | Log: "Authentication failed on dedicated server. Exiting now." | Needs a Brickadia account sign-in / token, like Don't Starve Together. |
-| Dystopia | full | crashed | Source mod: "Unable to find gameinfo.txt". | Needs -game <its folder>; BaoBun's automatic -game only looks one folder deep. Not fixed. |
+| Dystopia | full | crashed | Source mod: "Unable to find gameinfo.txt". | Needs -game <its folder>; Tofu's automatic -game only looks one folder deep. Not fixed. |
 | Military Conflict: Vietnam | basic | crashed | Exits with code 1 and writes nothing at all. | Unknown. |
 | Out of Reach | basic | crashed | Exits with code 1 and writes nothing at all. | Unknown. |
 | Sunkenland | basic | crashed | Unity memory report at exit, no clear error. | Unknown. |
 | Synergy | full | crashed | Source mod: file system fails to start. | Probably needs Half-Life 2 content that the server download doesn't include. Not confirmed. |
-| Don't Starve Together | full | didn't start | Starts now (it has to be started from its bin64 folder), but lets nobody in without a Klei server token. | BaoBun refuses to start it without the token and says where to get it. Next: a place in BaoBun to paste the token. |
-| Astro Colony | basic | install failed | Installed, but BaoBun couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
-| D.I.P.R.I.P. | full | install failed | Installed, but BaoBun couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
+| Don't Starve Together | full | didn't start | Starts now (it has to be started from its bin64 folder), but lets nobody in without a Klei server token. | Tofu refuses to start it without the token and says where to get it. Next: a place in Tofu to paste the token. |
+| Astro Colony | basic | install failed | Installed, but Tofu couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
+| D.I.P.R.I.P. | full | install failed | Installed, but Tofu couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
 | Eden Star | basic | install failed | Steam couldn't write the game files (code 8). | Earlier run said "No subscription": it needs a Steam account that owns the game. |
 | FiveM (GTA V roleplay) | basic | install failed | Not on Steam. | Expected - the list already says to copy the files in. |
-| Nuclear Dawn | full | install failed | Installed, but BaoBun couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
+| Nuclear Dawn | full | install failed | Installed, but Tofu couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
 | Path of Titans | basic | install failed | Not on Steam. | Expected - the list already says to copy the files in. |
-| Pavlov | basic | install failed | Installed, but BaoBun couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
+| Pavlov | basic | install failed | Installed, but Tofu couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
 | Risk of Rain 2 | full | install failed | Steam finishes without giving any game files (an empty depot). | Unknown whether a Steam account that owns the game gets the files. Until that's tested it shouldn't be marked fully supported. |
 | Serious Sam HD: The Second Encounter | basic | install failed | Needs a Steam account that owns the game. | Expected - mark it "needs a Steam account" in the list. |
 | Takedown: Red Sabre | full | install failed | Needs a Steam account that owns the game. | Expected - mark it "needs a Steam account" in the list. |
-| The Front | basic | install failed | Installed, but BaoBun couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |
+| The Front | basic | install failed | Installed, but Tofu couldn't find the server program. | Look at what the install contains and set the program in the game list. Not done yet. |

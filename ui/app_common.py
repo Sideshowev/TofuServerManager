@@ -81,7 +81,7 @@ THEME = build_theme("gold")
 
 def later(widget, fn):
     """Run fn on the window's own thread - for background threads that finished their
-    work and want to show it. Does nothing when the window is gone or BaoBun is closing
+    work and want to show it. Does nothing when the window is gone or Tofu is closing
     (tkinter otherwise raises "main thread is not in main loop" inside the thread).
     Returns True when fn was handed over."""
     try:

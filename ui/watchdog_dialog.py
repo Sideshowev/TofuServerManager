@@ -30,14 +30,14 @@ def open_watchdog_dialog(app, theme):
         return lbl
 
     heading("Know when the server PC goes down", top=4)
-    note("If the server PC freezes or loses power, BaoBun on it can't send alerts. So BaoBun on another PC (for "
+    note("If the server PC freezes or loses power, Tofu on it can't send alerts. So Tofu on another PC (for "
          "example your own PC) checks it every minute and posts to your Discord alert webhook when it stops answering for 3 "
          "minutes - and again when it's back. The nightly restart doesn't count.")
 
     heading("On the server PC")
     hb_var = ctk.BooleanVar(value=mgr.get_setting("heartbeat_enabled", False) is True)
     port = int(mgr.get_setting("heartbeat_port", heartbeat.DEFAULT_PORT) or heartbeat.DEFAULT_PORT)
-    ctk.CTkCheckBox(body, text="Let other PCs check that BaoBun is alive (port %d)" % port, variable=hb_var,
+    ctk.CTkCheckBox(body, text="Let other PCs check that Tofu is alive (port %d)" % port, variable=hb_var,
                     fg_color=t["accent_blue"]).pack(anchor="w", padx=12, pady=(4, 2))
     note("Home network and Tailscale only; it only shows how many servers and players are on.")
     ctk.CTkButton(body, text="Allow it through Windows Firewall", width=240, fg_color=t["border"],
@@ -75,11 +75,11 @@ def open_watchdog_dialog(app, theme):
             r = heartbeat.probe(h)
             pings = None if r else heartbeat.pc_pings(h)
             if r:
-                txt, col = ("✅ BaoBun on %s answers: %d server(s) running, %d player(s)."
+                txt, col = ("✅ Tofu on %s answers: %d server(s) running, %d player(s)."
                             % (r.get("host", h), r.get("running", 0), r.get("players", 0)), t["status_online"])
             elif pings:
                 txt, col = ("The PC answers pings but not the alive-check page. On the server PC: tick the box above, "
-                            "click 'Allow it through Windows Firewall', and make sure BaoBun is updated."), t["warning"]
+                            "click 'Allow it through Windows Firewall', and make sure Tofu is updated."), t["warning"]
             else:
                 txt, col = "Can't reach %s at all - check the name/address." % h, t["danger"]
             app.after(0, lambda: result.configure(text=txt, text_color=col) if dlg.winfo_exists() else None)

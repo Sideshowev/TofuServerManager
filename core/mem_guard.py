@@ -2,7 +2,7 @@
 
 Per server ``memLimitMB`` (0 / blank = off). The agent calls MemGuard.step() once a
 minute with the server statuses. When a running server stays above its limit for
-OVER_SAMPLES minutes in a row, BaoBun warns the players (5 and 1 minutes, skipped
+OVER_SAMPLES minutes in a row, Tofu warns the players (5 and 1 minutes, skipped
 when nobody is on), restarts it cleanly and posts to Discord with how fast its
 memory was growing. At most one restart per server every COOLDOWN seconds, and
 never during the nightly restart.

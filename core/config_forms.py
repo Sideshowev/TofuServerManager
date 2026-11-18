@@ -2,7 +2,7 @@
 
 Every setting in the file becomes a field (toggle / number / text / dropdown),
 grouped by section, with friendly labels and help from core/config_catalog.py
-for the games BaoBun knows. Saving changes only the values that changed, in
+for the games Tofu knows. Saving changes only the values that changed, in
 place: comments, blank lines, key order and quoting stay exactly as they were.
 
 Formats: json, ini (Unreal-style too), toml, properties (key=value / .env),
@@ -190,7 +190,7 @@ def raw_write(mgr, server_id: str, file_id: str, text: str, user: str = "system"
 
 
 def _locate(mgr, server_id: str, file_id: str, raw: bool = False) -> Tuple[dict, str, str, Optional[str]]:
-    """(server, absolute path, format, known label) - only paths BaoBun produced itself."""
+    """(server, absolute path, format, known label) - only paths Tofu produced itself."""
     from core.quick_settings import game_key
     srv = mgr.get_server(server_id)
     if not srv:
@@ -212,7 +212,7 @@ def _locate(mgr, server_id: str, file_id: str, raw: bool = False) -> Tuple[dict,
         if rel.lower().endswith((".bat", ".cmd", ".ps1", ".exe", ".dll", ".vbs")):
             raise FormError("That file can't be edited here")
         if not fmt and not raw:
-            raise FormError("BaoBun can't show this file as a form - use the raw view")
+            raise FormError("Tofu can't show this file as a form - use the raw view")
         return srv, full, fmt, None
     raise FormError("Unknown settings file")
 
@@ -654,7 +654,7 @@ def save(mgr, server_id: str, file_id: str, changes: Dict[str, object], user: st
         mgr._audit("game_settings_queued", server_id, user=user, file=current["path"],
                    keys=[f["key"] for f, _, _ in plan][:50])
         return {"saved": [f["key"] for f, _, _ in plan], "restart_needed": True, "pending": True,
-                "note": "The game rewrites this file when it stops, so BaoBun will apply these changes "
+                "note": "The game rewrites this file when it stops, so Tofu will apply these changes "
                         "right before it next starts. Restart the server to use them."}
     existed = os.path.isfile(path)
     original = None

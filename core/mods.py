@@ -7,7 +7,7 @@ Every backend answers the same questions (list / install / remove / on-off /
 update ...) so the desktop and web Mods tabs work the same for all of them.
 
 Safety for all sources:
-  * nothing is deleted - removed mods go to BaoBun's backups/<server>/removed-mods
+  * nothing is deleted - removed mods go to Tofu's backups/<server>/removed-mods
   * the world is backed up before installs and updates (unless a backup is
     less than 30 minutes old)
   * changes made while a server runs show "restart to apply"
@@ -359,7 +359,7 @@ class ModManager:
         value = "" if value is None else str(value).strip()
         if key in GLOBAL_OPTION_KEYS:
             if str(user).startswith("web:"):
-                raise ModError("API keys can only be set in BaoBun on the server PC.")
+                raise ModError("API keys can only be set in Tofu on the server PC.")
             self.mgr.set_setting(key, value)
             return {"changed": True}
         if key not in OPTION_KEYS:

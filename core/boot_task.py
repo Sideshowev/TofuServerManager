@@ -1,6 +1,6 @@
-"""Start the BaoBun agent when Windows boots - before anyone signs in.
+"""Start the Tofu agent when Windows boots - before anyone signs in.
 
-"Run at startup" (the registry Run key) only starts BaoBun when someone signs in,
+"Run at startup" (the registry Run key) only starts Tofu when someone signs in,
 so after a nightly restart nothing would come back on a server PC nobody logs into.
 This adds a Windows Task Scheduler task instead:
 
@@ -24,7 +24,8 @@ import tempfile
 from typing import List, Optional
 from xml.sax.saxutils import escape
 
-TASK_NAME = "BaoBun Agent"
+TASK_NAME = "Tofu Server Manager Agent"
+OLD_TASK_NAME = "BaoBun Agent"      # made before the rename; it starts the old program file
 
 
 def current_user() -> str:
@@ -39,8 +40,8 @@ def task_xml(command: str, arguments: str, workdir: str, user: Optional[str] = N
     return """<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Author>BaoBun Control Panel</Author>
-    <Description>Starts the BaoBun agent when the PC turns on, so game servers come back after a restart without anyone signing in.</Description>
+    <Author>Tofu Server Manager</Author>
+    <Description>Starts the Tofu agent when the PC turns on, so game servers come back after a restart without anyone signing in.</Description>
   </RegistrationInfo>
   <Triggers>
     <BootTrigger><Enabled>true</Enabled><Delay>PT1M</Delay></BootTrigger>
@@ -88,7 +89,7 @@ def _quote(a: str) -> str:
 def write_xml(parts: List[str], workdir: str, folder: Optional[str] = None, logon: str = "S4U") -> str:
     """Write the task definition (UTF-16, as schtasks wants) and return its path."""
     xml = task_xml(parts[0], " ".join(_quote(a) for a in parts[1:]), workdir, logon=logon)
-    fd, path = tempfile.mkstemp(prefix="baobun_task_", suffix=".xml", dir=folder)
+    fd, path = tempfile.mkstemp(prefix="tofusm_task_", suffix=".xml", dir=folder)
     with os.fdopen(fd, "wb") as f:
         f.write(xml.encode("utf-16"))
     return path
@@ -96,11 +97,12 @@ def write_xml(parts: List[str], workdir: str, folder: Optional[str] = None, logo
 
 def install_commands(xml_path: str) -> List[str]:
     return ['schtasks /Create /F /TN "%s" /XML "%s"' % (TASK_NAME, xml_path),
+            'schtasks /Delete /F /TN "%s"' % OLD_TASK_NAME,
             'del "%s"' % xml_path]
 
 
 def remove_commands() -> List[str]:
-    return ['schtasks /Delete /F /TN "%s"' % TASK_NAME]
+    return ['schtasks /Delete /F /TN "%s"' % TASK_NAME, 'schtasks /Delete /F /TN "%s"' % OLD_TASK_NAME]
 
 
 def installed() -> Optional[bool]:
@@ -113,6 +115,24 @@ def installed() -> Optional[bool]:
         return r.returncode == 0
     except Exception:
         return None
+
+
+def old_task_left() -> bool:
+    """True when start-at-boot was set up before the rename and not since: that task starts
+    the old program file (BaoBunCP.exe), which is gone after updating."""
+    if os.name != "nt":
+        return False
+    try:
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        old = subprocess.run(["schtasks", "/Query", "/TN", OLD_TASK_NAME], capture_output=True, text=True,
+                             timeout=15, creationflags=flags)
+        if old.returncode != 0:
+            return False
+        new = subprocess.run(["schtasks", "/Query", "/TN", TASK_NAME], capture_output=True, text=True,
+                             timeout=15, creationflags=flags)
+        return new.returncode != 0
+    except Exception:
+        return False
 
 
 def install(parts: List[str], workdir: str, folder: Optional[str] = None) -> bool:
@@ -139,7 +159,7 @@ def mode() -> Optional[str]:
 
 def install_with_password(parts: List[str], workdir: str, folder: Optional[str] = None) -> bool:
     """Like install(), but the task keeps the user's Windows password (typed into a
-    Windows console prompt, never into BaoBun) so BaoBun can reach network shares -
+    Windows console prompt, never into Tofu) so Tofu can reach network shares -
     e.g. backups copied to another PC. Opens one visible admin window."""
     if os.name != "nt":
         return False
@@ -147,11 +167,11 @@ def install_with_password(parts: List[str], workdir: str, folder: Optional[str] 
     if folder:
         os.makedirs(folder, exist_ok=True)
     xml = write_xml(parts, workdir, folder, logon="Password")
-    fd, script = tempfile.mkstemp(prefix="baobun_task_", suffix=".cmd", dir=folder)
+    fd, script = tempfile.mkstemp(prefix="tofusm_task_", suffix=".cmd", dir=folder)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write("@echo off\r\ntitle BaoBun - start at boot\r\n")
-        f.write("echo BaoBun needs your Windows password once so it can start at boot AND reach network\r\n")
-        f.write("echo folders (like backups on another PC). Windows stores it - BaoBun never sees it.\r\n")
+        f.write("@echo off\r\ntitle Tofu - start at boot\r\n")
+        f.write("echo Tofu needs your Windows password once so it can start at boot AND reach network\r\n")
+        f.write("echo folders (like backups on another PC). Windows stores it - Tofu never sees it.\r\n")
         f.write("echo.\r\n")
         f.write('schtasks /Create /F /TN "%s" /XML "%s" /RU "%s" /RP *\r\n' % (TASK_NAME, xml, current_user()))
         f.write("echo.\r\nif errorlevel 1 (echo Didn't work - check the password and try again.) else "

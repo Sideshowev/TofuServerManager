@@ -1,6 +1,6 @@
-"""BaoBun updating itself on the server PC.
+"""Tofu updating itself on the server PC.
 
-deploy_to_host.bat copies a new BaoBunCP.exe over the running one (Windows lets it
+deploy_to_host.bat copies a new TofuSM.exe over the running one (Windows lets it
 rename the running file out of the way). The agent keeps running the old program
 until it restarts, so it watches its own exe:
 
@@ -131,7 +131,7 @@ def restart_agent(base_dir) -> bool:
 
 
 def note_version(base_dir, started: Optional[dict]) -> Optional[str]:
-    """Remember which build ran last; returns a "BaoBun was updated" line when it changed."""
+    """Remember which build ran last; returns a "Tofu was updated" line when it changed."""
     if not started:
         return None
     p = Path(base_dir) / "runtime" / "version.json"
@@ -145,5 +145,5 @@ def note_version(base_dir, started: Optional[dict]) -> Optional[str]:
     except Exception:
         pass
     if old.get("sha1") and old["sha1"] != started["sha1"]:
-        return "BaoBun on the server PC was updated (build from %s)." % fmt_time(started["mtime"])
+        return "Tofu on the server PC was updated (build from %s)." % fmt_time(started["mtime"])
     return None

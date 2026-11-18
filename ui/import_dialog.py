@@ -32,10 +32,10 @@ def open_import_dialog(app, theme):
             return
         new = [f for f in found if not f.get("already_added")]
         head.configure(text=("Found %d server(s)" % len(found)) + (
-            " - %d already in BaoBun" % (len(found) - len(new)) if len(found) != len(new) else "")
+            " - %d already in Tofu" % (len(found) - len(new)) if len(found) != len(new) else "")
             + (". Tick the ones to add." if new else "."))
         if not found:
-            ctk.CTkLabel(body, text="No known game servers found (BaoBun looks 3 folders deep).",
+            ctk.CTkLabel(body, text="No known game servers found (Tofu looks 3 folders deep).",
                          text_color=t["text_muted"]).pack(pady=20)
         for f in found:
             row = ctk.CTkFrame(body, fg_color=t["bg_dark"], corner_radius=8)

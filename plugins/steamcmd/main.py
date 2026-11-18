@@ -27,7 +27,7 @@ KNOWN_STOP_COMMANDS = {
 }
 
 # App ID -> save folders (relative to the install directory). Servers not listed
-# fall back to BaoBun's folder-name heuristics; set "savePaths" on a server to override.
+# fall back to Tofu's folder-name heuristics; set "savePaths" on a server to override.
 KNOWN_SAVE_PATHS = {
     "2394010": ["Pal/Saved"],   # Palworld
     "2278520": ["savegame"],    # Enshrouded

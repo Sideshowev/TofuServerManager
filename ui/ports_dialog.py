@@ -7,7 +7,7 @@ import threading
 
 import customtkinter as ctk
 
-SOURCE = {"default": "game default", "pending": "set on next start", "baobun": "from Edit Server", "set": ""}
+SOURCE = {"default": "game default", "pending": "set on next start", "tofu": "from Edit Server", "set": ""}
 
 
 def turn_on_rcon(app, theme, server_id, on_done=None, parent=None):
@@ -62,7 +62,7 @@ def open_ports_dialog(app, theme):
                  font=("Bahnschrift SemiBold", 18, "bold")).pack(fill="x", padx=18, pady=(16, 0))
     ctk.CTkLabel(dlg, anchor="w", justify="left", wraplength=800, text_color=t["text_muted"],
                  text="Every server needs its own ports - lots of games all default to 7777 or 27015. "
-                      "RCON ports are only used by BaoBun on this PC: they are never opened in the firewall "
+                      "RCON ports are only used by Tofu on this PC: they are never opened in the firewall "
                       "or forwarded on your router.").pack(fill="x", padx=18, pady=(2, 8))
     banner = ctk.CTkFrame(dlg, fg_color="transparent")
     banner.pack(fill="x", padx=16)
@@ -183,7 +183,7 @@ def open_ports_dialog(app, theme):
                               command=lambda sid=s["id"]: turn_on_rcon(app, t, sid, on_done=load,
                                                                        parent=dlg)).pack(side="right", padx=6)
             if not s["rows"]:
-                ctk.CTkLabel(card, text="BaoBun doesn't know this game's ports - set the game port in Edit "
+                ctk.CTkLabel(card, text="Tofu doesn't know this game's ports - set the game port in Edit "
                                         "Server.", anchor="w", text_color=t["text_muted"],
                              font=("Segoe UI", 11)).pack(fill="x", padx=30, pady=(0, 8))
                 continue
@@ -206,7 +206,7 @@ def open_ports_dialog(app, theme):
                              text_color=t["danger"] if r["clash"] else t["text_muted"],
                              font=("Segoe UI", 11)).grid(row=i, column=2, sticky="w")
             if not s["known"]:
-                ctk.CTkLabel(card, text="BaoBun only knows the port from Edit Server for this game - change it "
+                ctk.CTkLabel(card, text="Tofu only knows the port from Edit Server for this game - change it "
                                         "in the game's own settings too.", anchor="w", wraplength=760,
                              text_color=t["text_muted"], font=("Segoe UI", 11)).pack(fill="x", padx=30,
                                                                                     pady=(0, 8))

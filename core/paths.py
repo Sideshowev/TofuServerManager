@@ -1,4 +1,4 @@
-"""Central path resolution for BaoBun (works from source and from the PyInstaller exe).
+"""Central path resolution for Tofu (works from source and from the PyInstaller exe).
 
 Everything that used to do ``Path(__file__).resolve().parents[1]`` should use
 these helpers instead: inside a onefile exe ``__file__`` points into a temporary
@@ -20,11 +20,11 @@ def base_dir() -> Path:
 
     Source: the project folder. Exe: the exe's folder, unless a ``data_dir.txt``
     next to the exe names another folder (relative paths are relative to the
-    exe), so dist\\BaoBunCP.exe and start.bat can share one set of files. If the
-    exe's folder can't be written to (e.g. Program Files), %LOCALAPPDATA%\\BaoBun.
-    The BAOBUN_HOME environment variable overrides both.
+    exe), so dist\\TofuSM.exe and start.bat can share one set of files. If the
+    exe's folder can't be written to (e.g. Program Files), %LOCALAPPDATA%\\TofuSM.
+    The TOFUSM_HOME environment variable overrides both.
     """
-    env = os.environ.get("BAOBUN_HOME")
+    env = os.environ.get("TOFUSM_HOME") or os.environ.get("BAOBUN_HOME")     # old name still read or os.environ.get("BAOBUN_HOME")     # old name still read
     if env and Path(env).is_dir():
         return Path(env).resolve()
     if getattr(sys, "frozen", False):
@@ -43,7 +43,8 @@ def base_dir() -> Path:
         if _writable(exe_dir):
             return exe_dir
         # e.g. installed under Program Files: keep the data in the user's own folder instead
-        fallback = Path(os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local")) / "BaoBun"
+        from core.rebrand import appdata_folder
+        fallback = appdata_folder()          # moved over from %LOCALAPPDATA%\\BaoBun the first time
         try:
             fallback.mkdir(parents=True, exist_ok=True)
             return fallback
@@ -64,7 +65,7 @@ def _writable(folder: Path) -> bool:
 
 def _try_write(folder: Path) -> bool:
     try:
-        fd, name = tempfile.mkstemp(prefix=".baobun_write_test_", dir=str(folder))
+        fd, name = tempfile.mkstemp(prefix=".tofusm_write_test_", dir=str(folder))
         os.close(fd)
         os.remove(name)
         return True
@@ -84,7 +85,8 @@ def servers_path() -> Path:
 
 
 def db_path() -> Path:
-    return base_dir() / "settings" / "baobun.db"
+    from core.rebrand import move_db
+    return move_db(base_dir() / "settings")
 
 
 def atomic_write_text(path, text: str, encoding: str = "utf-8") -> None:

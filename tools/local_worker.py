@@ -36,7 +36,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TRIES = 3
 SYSTEM = """You are a careful Python developer making ONE small change to an existing Windows desktop app \
-(BaoBun, a game-server manager). Follow the instruction exactly and change nothing else.
+(Tofu, a game-server manager). Follow the instruction exactly and change nothing else.
 
 Rules of this codebase:
 - Follow the style of the code you are shown (naming, quoting, comments). Lines are at most 118 characters.

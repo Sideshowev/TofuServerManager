@@ -1,7 +1,7 @@
 """Turn on RCON for a server: its own free port and a strong random password.
 
 Games like ARK, Palworld, Conan, V Rising, Arma and DayZ ignore commands typed
-into their console window, so BaoBun needs RCON to warn players, save before a
+into their console window, so Tofu needs RCON to warn players, save before a
 backup and stop them cleanly. enable() switches it on in the game's own config:
 
 * the port comes from the port plan (never one another server uses)
@@ -144,7 +144,7 @@ def enable(mgr, server_id: str, user: str = "system") -> dict:
         raise ValueError("Server not found")
     k = key_for(srv)
     if k not in SUPPORTED:
-        raise ValueError("BaoBun can't set up RCON for this game automatically.")
+        raise ValueError("Tofu can't set up RCON for this game automatically.")
 
     def safe(where):
         try:
@@ -237,7 +237,7 @@ def enable(mgr, server_id: str, user: str = "system") -> dict:
     mgr._audit("rcon_setup", server_id, user=user, port=port, new_password=not pw_existing)
     note = "RCON is on (port %s, only reachable from this PC)." % port
     if not pw_existing:
-        note += " BaoBun made a random password and saved it in the game's settings - you'll find it there " \
+        note += " Tofu made a random password and saved it in the game's settings - you'll find it there " \
                 "again in Settings."
         if ADMIN_NOTE.get(k):
             note += " " + ADMIN_NOTE[k]

@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel - Configuration Engine
+Tofu Server Manager - Configuration Engine
 
 Universal configuration schema system that supports:
 - JSON, JSONC, HJSON, INI, XML, YAML, CFG, Properties, TOML

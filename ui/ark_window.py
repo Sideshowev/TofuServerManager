@@ -164,7 +164,7 @@ def open_ark_window(app, theme, server_id=None):
                 app.show_error("ARK World", err, parent=win)
                 return
             gb = plan["bytes"] / 1024 ** 3
-            msg = ("Give %s its own install folder?\n\nBaoBun copies the install (%.1f GB) to:\n%s\n\n%s gets its "
+            msg = ("Give %s its own install folder?\n\nTofu copies the install (%.1f GB) to:\n%s\n\n%s gets its "
                    "own Game.ini / GameUserSettings.ini, so its creatures, loot and rules can differ. Mods, the world and "
                    "transfers stay the same: every map is pointed at one shared cluster folder. Choose No to pick "
                    "another folder." % (m["name"], gb, plan["target"], m["name"]))
@@ -246,7 +246,7 @@ def open_ark_window(app, theme, server_id=None):
                        "space as the install), then pick it in the list at the top to change its settings alone.")
         if r["cluster"]:
             note(body, "Cluster mods: %s. Change them in the Mods tab of any map (it updates every map). Before a "
-                       "map starts BaoBun puts this list back on it, so creatures can't vanish because one map is "
+                       "map starts Tofu puts this list back on it, so creatures can't vanish because one map is "
                        "missing a mod." % (", ".join(r["mods"] or []) or "none"))
 
     # --------------------------------------------------------------- creatures
@@ -458,7 +458,7 @@ def open_ark_window(app, theme, server_id=None):
                               border_color=t["border"],
                               command=lambda c=c: (loot.remove(c), render(), dirty(save_btn))).pack(side="right")
                 if c.get("advanced"):
-                    note(card, "Hand-written layout BaoBun can't show as a list - kept exactly as it is.")
+                    note(card, "Hand-written layout Tofu can't show as a list - kept exactly as it is.")
                     continue
                 mode = ctk.CTkOptionMenu(hd, values=["Add to its normal loot", "Replace its loot"], width=190,
                                          command=lambda v, c=c: (c.__setitem__("mode", "add" if v.startswith("Add")

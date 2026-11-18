@@ -1,15 +1,15 @@
 """Knowing when the server PC itself is down.
 
-If the server PC freezes, loses power or Windows hangs, BaoBun on it can't tell
+If the server PC freezes, loses power or Windows hangs, Tofu on it can't tell
 anyone - its Discord bot and alerts go down with it. So:
 
 * on the server PC the agent answers a tiny "are you alive" page:
   http://<game-pc>:8791/healthz  ->  {"ok": true, "running": 3, "players": 5, ...}
   (home network and Tailscale only, nothing secret in it)
-* on another PC (for example your own PC) BaoBun watches that page once a minute and posts
+* on another PC (for example your own PC) Tofu watches that page once a minute and posts
   to the Discord alert webhook when it stops answering for 3 minutes, and again
   when it's back. It also pings the PC so the message says whether the whole PC is
-  gone or just BaoBun.
+  gone or just Tofu.
 
 Settings: heartbeat_enabled (off until turned on) and heartbeat_port (8791) on the server PC;
 watch_host ("SERVER-PC" or an IP, optionally ":port") on the watching PC.
@@ -47,7 +47,7 @@ class HeartbeatServer:
                     players += int(st.get("playerCount") or 0)
         except Exception:
             pass
-        out = {"ok": True, "app": "BaoBun", "host": socket.gethostname(), "running": running,
+        out = {"ok": True, "app": "Tofu", "host": socket.gethostname(), "running": running,
                "players": players, "time": int(time.time())}
         if self.extra:
             try:
@@ -114,7 +114,7 @@ def host_name(host: str) -> str:
 
 def probe(host: str, timeout: float = 5.0) -> Optional[dict]:
     try:
-        req = urllib.request.Request(target_url(host), headers={"User-Agent": "BaoBun-watchdog"})
+        req = urllib.request.Request(target_url(host), headers={"User-Agent": "TofuSM-watchdog"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             data = json.loads(r.read().decode("utf-8", "replace"))
             return data if data.get("ok") else None
@@ -167,7 +167,7 @@ class HostWatch:
             if self.alerted:
                 mins = int((now - (self.down_since or now)) // 60)
                 msg = ("ok", "\U0001F7E2 %s is back" % name,
-                       "BaoBun on %s answers again after about %d minute%s. %d server%s running."
+                       "Tofu on %s answers again after about %d minute%s. %d server%s running."
                        % (name, mins, "" if mins == 1 else "s", result.get("running", 0),
                           "" if result.get("running", 0) == 1 else "s"))
             self.fails, self.down_since, self.alerted = 0, None, False
@@ -180,13 +180,13 @@ class HostWatch:
         if self.fails >= self.need and not self.alerted:
             self.alerted = True
             if pings:
-                text = ("The PC answers pings, but BaoBun on it doesn't. BaoBun may have crashed or been closed - "
-                        "the game servers may still be running. Check the PC or restart BaoBun there.")
+                text = ("The PC answers pings, but Tofu on it doesn't. Tofu may have crashed or been closed - "
+                        "the game servers may still be running. Check the PC or restart Tofu there.")
             elif pings is False:
                 text = ("The PC doesn't answer at all - it may be off, frozen, restarting or off the network. "
                         "Game servers on it are down too.")
             else:
-                text = "BaoBun on it stopped answering."
+                text = "Tofu on it stopped answering."
             return ("down", "\U0001F534 %s is not answering" % name,
                     text + " (Checked from %s.)" % socket.gethostname())
         return None
@@ -218,7 +218,7 @@ def watch_loop(get_host, notify: Callable[[str, str, str], None], stop: threadin
 
 
 def firewall_commands(port: int = DEFAULT_PORT):
-    name = "BaoBun watchdog page"
+    name = "Tofu watchdog page"
     return ['netsh advfirewall firewall delete rule name="%s"' % name,
             'netsh advfirewall firewall add rule name="%s" dir=in action=allow protocol=TCP localport=%d '
             'remoteip=LocalSubnet,100.64.0.0/10 profile=any' % (name, int(port))]

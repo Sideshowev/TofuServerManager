@@ -1,8 +1,8 @@
 @echo off
-REM BaoBun - run every test, including the desktop smoke test that opens the real
+REM Tofu - run every test, including the desktop smoke test that opens the real
 REM windows for a moment. Uses fake servers in temporary folders; your servers and
 REM settings are not touched. Same as selftest.bat but shows the windows test too.
-title BaoBun tests
+title Tofu tests
 REM Finds Python on any PC: the "py" launcher that comes with python.org Python,
 REM else "python" on PATH. Set PYTHON yourself first to use a specific one.
 if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"

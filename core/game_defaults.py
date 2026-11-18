@@ -3,7 +3,7 @@
 Most dedicated servers start with no options at all. A few exit straight away
 unless they're told certain things - Valheim needs a server name, a world name
 and a password of at least 5 characters (that isn't part of the server name).
-BaoBun fills in whatever is missing when the server is added and again before
+Tofu fills in whatever is missing when the server is added and again before
 each start (so servers added another way are fixed too), and says what it chose
 in the console log; everything can be changed in the server's Settings tab.
 """
@@ -47,7 +47,7 @@ def required(srv: dict) -> Tuple[str, List[str]]:
     args = srv.get("launchArgs") or ""
     notes: List[str] = []
     if app == "896660":                                   # Valheim
-        name = _value(args, "-name") or (srv.get("name") or "BaoBun server")
+        name = _value(args, "-name") or (srv.get("name") or "Tofu server")
         if not _value(args, "-name"):
             args = _set(args, "-name", name)
             notes.append('server name "%s"' % name)
@@ -98,11 +98,11 @@ def required(srv: dict) -> Tuple[str, List[str]]:
         if not _value(args, "-config") and not _value(args, "-world"):
             d = srv.get("directory") or "."
             world = d.rstrip("\\/") + ("\\" if "\\" in d or ":" in d else "/") + "Worlds" + \
-                ("\\" if "\\" in d or ":" in d else "/") + "BaoBun.wld"
+                ("\\" if "\\" in d or ":" in d else "/") + "Tofu.wld"
             args = _set(args, "-autocreate", "2")
-            args = _set(args, "-worldname", "BaoBun")
+            args = _set(args, "-worldname", "Tofu")
             args = _set(args, "-world", world)
-            notes.append('a world called "BaoBun" (made on the first start)')
+            notes.append('a world called "Tofu" (made on the first start)')
         if not _value(args, "-port"):
             args = _set(args, "-port", str(srv.get("port") or 7777))
         if not _value(args, "-players"):
@@ -122,7 +122,7 @@ def required(srv: dict) -> Tuple[str, List[str]]:
             d = srv.get("directory") or ""        # full paths: the game doesn't find "config.json" by itself
             cfg, prof = (os.path.join(d, "config.json"), os.path.join(d, "profile")) if d else ("config.json", "profile")
             args = ('%s -config "%s" -profile "%s" -maxFPS 60' % (args, cfg, prof)).strip()
-            notes.append("a settings file (config.json) - BaoBun makes a basic one; choose the scenario and "
+            notes.append("a settings file (config.json) - Tofu makes a basic one; choose the scenario and "
                          "passwords in the Settings tab")
     elif app == "232130":                                 # Killing Floor 2 needs a map first
         if "kf-" not in args.lower():
@@ -163,7 +163,7 @@ def required(srv: dict) -> Tuple[str, List[str]]:
     if app == "600760" and not re.search(r"(?i)(^|\s)-(load|new|loadlatest|file)\b", args):
         # Stationeers sits at a "Ready" prompt and hosts nothing until it is told which world to
         # load; -load makes that world the first time. -settings must come last on the line.
-        save = re.sub(r"[^A-Za-z0-9]", "", str(srv.get("name") or "")) or "BaoBun"
+        save = re.sub(r"[^A-Za-z0-9]", "", str(srv.get("name") or "")) or "Tofu"
         port = int(srv.get("port") or 27500)
         args = ("%s -batchmode -nographics -load %s Lunar -settings StartLocalHost true ServerVisible true "
                 "GamePort %d UpdatePort %d" % (args, save, port, port + 1)).strip()
@@ -185,9 +185,9 @@ PREFIX = {
     "565060": ("--galaxy-name avorion_galaxy", []),                                   # Avorion
     "294420": ("-quit -batchmode -nographics -configfile=serverconfig.xml -dedicated", []),  # 7 Days to Die
     "2089300": ("-log", [("-Port=", "{port}")]),                                       # Icarus
-    # Necesse: its own .bat opens the game in a second window and ends, so BaoBun thought it had
-    # crashed. BaoBun runs the game's Java itself; without -world it stops to ask which world.
-    "1169370": ("-jar Server.jar -nogui", [("-world ", "BaoBun"), ("-port ", "{port}")]),
+    # Necesse: its own .bat opens the game in a second window and ends, so Tofu thought it had
+    # crashed. Tofu runs the game's Java itself; without -world it stops to ask which world.
+    "1169370": ("-jar Server.jar -nogui", [("-world ", "Tofu"), ("-port ", "{port}")]),
 }
 
 
@@ -281,7 +281,7 @@ def _zomboid_has_admin(args: str) -> bool:
 def full_launcher(srv: dict, exe: str) -> str:
     """The program to really start. Project Zomboid's StartServer64.bat hands only its first
     two options to the game ("%1 %2") and then waits for a key press, so later options (port,
-    server name...) were lost and BaoBun couldn't see the server stop. This writes a copy next
+    server name...) were lost and Tofu couldn't see the server stop. This writes a copy next
     to it that passes every option on and doesn't wait - redone whenever the game's own file
     changes (game updates) - and returns it. Any other program is returned as it is."""
     import os
@@ -300,7 +300,7 @@ def full_launcher(srv: dict, exe: str) -> str:
         if "%*" not in new:
             return exe
         base, ext = os.path.splitext(exe)
-        copy = base + "-BaoBun" + ext
+        copy = base + "-Tofu" + ext
         try:
             with open(copy, "r", encoding="utf-8", errors="replace", newline="") as f:
                 same = f.read() == new

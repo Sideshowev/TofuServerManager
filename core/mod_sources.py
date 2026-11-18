@@ -1,15 +1,15 @@
 """Where each game gets its mods, and how a server turns them on.
 
-Every game in BaoBun's catalog maps to one *mod source*. The Mods tab (desktop
+Every game in Tofu's catalog maps to one *mod source*. The Mods tab (desktop
 and web) adapts to it:
 
-  vs_moddb     Vintage Story ModDB - BaoBun downloads into the data Mods folder
-  id_list      the game server downloads mods itself; BaoBun keeps the list of
+  vs_moddb     Vintage Story ModDB - Tofu downloads into the data Mods folder
+  id_list      the game server downloads mods itself; Tofu keeps the list of
                IDs and writes it where the game reads it (launch options or a
                config file). ARK: SA (CurseForge), ARK: SE, Arma Reforger,
                Project Zomboid, Space Engineers, Unturned, Don't Starve
                Together, Killing Floor 2, Garry's Mod (collection)
-  workshop     BaoBun downloads Steam Workshop items with SteamCMD and installs
+  workshop     Tofu downloads Steam Workshop items with SteamCMD and installs
                them the way the game needs: Arma 3 / DayZ (@folders, keys,
                -mod=), Conan Exiles (.pak + modlist.txt), Squad (Plugins/Mods)
   thunderstore Valheim and V Rising (BepInEx mods from thunderstore.io)
@@ -50,7 +50,7 @@ PROFILES = {
                "writer": "pz_ini", "label": "Steam Workshop",
                "add_hint": "Workshop ID or link. Add the Mod ID too if you know it: 2392709985:tsarslib",
                "note": "Written to WorkshopItems= and Mods= in the server's .ini. The server downloads them "
-                       "when it starts; BaoBun fills in Mod IDs it finds after that."},
+                       "when it starts; Tofu fills in Mod IDs it finds after that."},
     "108600": {"alias": "380870"},
     "298740": {"name": "Space Engineers", "source": "id_list", "site": "workshop", "workshop_appid": "244850",
                "writer": "se_cfg", "label": "Steam Workshop",
@@ -71,32 +71,32 @@ PROFILES = {
              "writer": "gmod_collection", "label": "Steam Workshop collection", "max_items": 1,
              "add_hint": "Workshop collection ID or link (make a collection with all your addons)",
              "note": "Garry's Mod servers download a Workshop collection (+host_workshop_collection)."},
-    # --- BaoBun downloads with SteamCMD ----------------------------------------
+    # --- Tofu downloads with SteamCMD ----------------------------------------
     "233780": {"name": "Arma 3", "source": "workshop", "workshop_appid": "107410", "installer": "bohemia",
                "label": "Steam Workshop", "needs_account": True,
-               "note": "BaoBun downloads each mod, links it into the server as @Name, copies its keys and "
+               "note": "Tofu downloads each mod, links it into the server as @Name, copies its keys and "
                        "writes -mod= / -serverMod= into the launch options. Workshop downloads need the "
                        "Steam login in Settings."},
     "223350": {"name": "DayZ", "source": "workshop", "workshop_appid": "221100", "installer": "bohemia",
                "label": "Steam Workshop", "needs_account": True,
-               "note": "BaoBun downloads each mod, links it into the server as @Name, copies its keys and "
+               "note": "Tofu downloads each mod, links it into the server as @Name, copies its keys and "
                        "writes -mod= / -serverMod= into the launch options. Workshop downloads need the "
                        "Steam login in Settings (an account that owns DayZ)."},
     "443030": {"name": "Conan Exiles", "source": "workshop", "workshop_appid": "440900", "installer": "conan",
                "label": "Steam Workshop",
-               "note": "BaoBun downloads each mod, copies its .pak into ConanSandbox/Mods and writes "
+               "note": "Tofu downloads each mod, copies its .pak into ConanSandbox/Mods and writes "
                        "modlist.txt (load order) and ServerModList (so players get the same mods)."},
     "403240": {"name": "Squad", "source": "workshop", "workshop_appid": "393380", "installer": "squad",
                "label": "Steam Workshop",
-               "note": "BaoBun downloads each mod into SquadGame/Plugins/Mods."},
+               "note": "Tofu downloads each mod into SquadGame/Plugins/Mods."},
     # --- other mod sites ---------------------------------------------------------
     "896660": {"name": "Valheim", "source": "thunderstore", "community": "valheim",
                "bepinex": "denikson-BepInExPack_Valheim", "label": "Thunderstore",
-               "note": "Mods run on BepInEx, which BaoBun installs with the first mod. Players need the "
+               "note": "Mods run on BepInEx, which Tofu installs with the first mod. Players need the "
                        "same client mods (r2modman / Thunderstore Mod Manager)."},
     "1829350": {"name": "V Rising", "source": "thunderstore", "community": "v-rising",
                 "bepinex": "BepInEx-BepInExPack_V_Rising", "label": "Thunderstore",
-                "note": "Server mods run on BepInEx, which BaoBun installs with the first mod. Game "
+                "note": "Server mods run on BepInEx, which Tofu installs with the first mod. Game "
                         "updates can break BepInEx until it's updated."},
     "258550": {"name": "Rust", "source": "umod", "label": "uMod (Oxide plugins)",
                "note": "Plugins need Oxide (umod.org) or Carbon installed on the server. They load "
@@ -105,7 +105,7 @@ PROFILES = {
                "note": "Plugins need Oxide (umod.org) installed on the server."},
     "minecraft": {"name": "Minecraft (Java)", "source": "modrinth", "label": "Modrinth",
                   "note": "Mods must match the server's loader and Minecraft version (set below if "
-                          "BaoBun can't tell). Players need the same client mods (not for plugins)."},
+                          "Tofu can't tell). Players need the same client mods (not for plugins)."},
     # --- plain folders ---------------------------------------------------------------
     "294420": {"name": "7 Days to Die", "source": "folder", "folder": "Mods", "label": "Mods folder",
                "note": "Install modlets by URL (zip) or copy them into the Mods folder. Server-side-only "
@@ -159,7 +159,7 @@ def profile_for(srv: dict) -> dict:
                 "note": "Bedrock add-ons need their packs added to the world's world_behavior_packs.json."}
     if srv.get("appId"):
         return {"source": "none", "label": "No mods",
-                "note": "BaoBun doesn't know how this game loads mods yet. Pick a mod source below "
+                "note": "Tofu doesn't know how this game loads mods yet. Pick a mod source below "
                         "(Steam Workshop download or a mods folder) if it has them."}
     return {"source": "none", "label": "No mods",
             "note": "Pick a mod source below if this server uses mods."}

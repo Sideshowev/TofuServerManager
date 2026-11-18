@@ -1,10 +1,10 @@
 """First-run setup: what the welcome walkthrough needs to know and save.
 
 The desktop walkthrough (ui/first_run.py) shows once, on a fresh install: it
-explains where BaoBun keeps its data, looks at this PC (cores, memory, free
+explains where Tofu keeps its data, looks at this PC (cores, memory, free
 space), and asks the few things that matter before the first server: where
 servers get installed, how many backups to keep and where to copy them, and
-whether BaoBun keeps the servers running in the background and starts with
+whether Tofu keeps the servers running in the background and starts with
 Windows. Discord, the web panel and the status page are offered, never forced.
 
 Nothing here assumes a particular PC: defaults come from this PC's drives and
@@ -145,12 +145,12 @@ def check_install_dir(path: str) -> Optional[str]:
         return "Use a full folder path (like D:\\GameServers)."
     try:
         os.makedirs(path, exist_ok=True)
-        probe = os.path.join(path, ".baobun-write-test")
+        probe = os.path.join(path, ".tofusm-write-test")
         with open(probe, "w") as f:
             f.write("ok")
         os.remove(probe)
     except OSError as e:
-        return "BaoBun can't write there (%s)." % (e.strerror or e)
+        return "Tofu can't write there (%s)." % (e.strerror or e)
     free = free_gb(path)
     if free is not None and free < 20:
         return "Only %.0f GB free there - game servers often need 10-100 GB each." % free
@@ -191,5 +191,5 @@ def apply(mgr, values: Dict[str, object]) -> List[str]:
         on = bool(values["watchdog"])
         mgr.set_setting("use_background_agent", on)
         done.append("Watchdog %s" % ("on: servers keep running when the window closes" if on else
-                                     "off: servers run from the BaoBun window"))
+                                     "off: servers run from the Tofu window"))
     return done

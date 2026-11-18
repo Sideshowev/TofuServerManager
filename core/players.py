@@ -1,7 +1,7 @@
 """Who is online, for games without a query protocol (Vintage Story, ...).
 
-Follows the server's console log (BaoBun's capture, which starts every run with a
-"==== BaoBun: starting" line) or else the game's own log, and replays join /
+Follows the server's console log (Tofu's capture, which starts every run with a
+"==== Tofu: starting" line) or else the game's own log, and replays join /
 leave lines from the start of the current run. Reads only new bytes each time.
 """
 
@@ -13,7 +13,8 @@ import threading
 import time
 from typing import Dict, List, Optional
 
-MARKER = b"==== BaoBun: starting"
+MARKER = b"==== Tofu: starting"
+OLD_MARKER = b"==== BaoBun: starting"          # logs written before the rename
 MAX_SCAN = 4 * 1024 * 1024
 
 
@@ -43,7 +44,7 @@ class LogPlayers:
                 with open(path, "rb") as f:
                     f.seek(start)
                     data = f.read()
-                cut = data.rfind(MARKER)
+                cut = max(data.rfind(MARKER), data.rfind(OLD_MARKER))
                 if cut >= 0:
                     data = data[cut:]
                 elif start > 0:
@@ -66,7 +67,7 @@ class LogPlayers:
     def _feed(st, data: bytes, joins, leaves):
         now = time.time()
         for raw in data.decode("utf-8", errors="replace").splitlines():
-            if MARKER.decode() in raw:
+            if MARKER.decode() in raw or OLD_MARKER.decode() in raw:
                 st["names"] = {}
                 continue
             hit = None

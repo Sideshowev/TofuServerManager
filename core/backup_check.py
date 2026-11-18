@@ -5,7 +5,7 @@ A backup nobody has opened isn't proven. Once a week (setting
 server and checks it the way a restore would use it:
 
 * every file in the zip reads back with the right checksum (zip CRC);
-* BaoBun's manifest is there and the zip holds world/config files;
+* Tofu's manifest is there and the zip holds world/config files;
 * SQLite worlds and databases inside (Vintage Story's .vcdbs, .db, .sqlite) are
   unpacked into a scratch folder and pass SQLite's own ``quick_check``;
 * it didn't shrink to less than half the size of the last good one (a sign the
@@ -65,17 +65,17 @@ def verify_zip(path: str, deep: bool = True, scratch: Optional[str] = None) -> d
                 problems.append("%s is damaged inside the zip" % bad)
             infos = [i for i in z.infolist() if not i.is_dir()]
             names = {i.filename for i in infos}
-            files = len([i for i in infos if i.filename != "baobun_backup.json"])
+            files = len([i for i in infos if i.filename not in ("tofusm_backup.json", "baobun_backup.json")])
             total = sum(i.file_size for i in infos)
-            if "baobun_backup.json" not in names:
-                problems.append("it has no BaoBun manifest (made by something else, or cut short)")
+            if "tofusm_backup.json" not in names and "baobun_backup.json" not in names:
+                problems.append("it has no Tofu manifest (made by something else, or cut short)")
             if files == 0:
                 problems.append("it has no world or config files in it")
             if deep and not bad:
                 dbs = [i for i in infos if i.filename.lower().endswith(SQLITE_EXT) and i.file_size > 0
                        and i.file_size < MAX_DB_CHECK_BYTES]
                 if dbs:
-                    work = tempfile.mkdtemp(prefix="baobun_check_", dir=scratch)
+                    work = tempfile.mkdtemp(prefix="tofusm_check_", dir=scratch)
                     try:
                         for i in dbs:
                             out = os.path.join(work, "db_%d" % len(os.listdir(work)))

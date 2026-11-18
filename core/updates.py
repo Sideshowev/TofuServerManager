@@ -1,13 +1,13 @@
-"""Is there a newer BaoBun? (for people who installed it with the installer)
+"""Is there a newer Tofu? (for people who installed it with the installer)
 
 Once a day the Watchdog asks GitHub for the newest release of the update
 repository (core/version.py UPDATE_REPO, or the "update_repo" setting) and
-remembers the answer in runtime/update_check.json. The desktop shows "BaoBun
+remembers the answer in runtime/update_check.json. The desktop shows "Tofu
 x.y is available" with a button that downloads the installer from that release
 and runs it; the web panel shows the notice with a link (installing needs
 someone at the PC). Nothing is downloaded or run without that button.
 
-The installer swaps the program file even while BaoBun runs (the old file is
+The installer swaps the program file even while Tofu runs (the old file is
 renamed out of the way), and the Watchdog then moves to the new version on its
 own when nobody is playing - the same way as deploy_to_host.bat.
 """
@@ -71,13 +71,13 @@ def cached(mgr) -> dict:
 
 def _get_json(url: str, timeout: float = 15.0):
     req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json",
-                                               "User-Agent": "BaoBun-update-check"})
+                                               "User-Agent": "TofuSM-update-check"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
 
 def pick_asset(release: dict) -> Optional[dict]:
-    """The Windows installer in a release (BaoBun-Setup-*.exe, else any .exe)."""
+    """The Windows installer in a release (TofuSM-Setup-*.exe, else any .exe - older BaoBun-Setup-*.exe too)."""
     assets = [a for a in release.get("assets") or [] if str(a.get("name", "")).lower().endswith(".exe")]
     setup = [a for a in assets if "setup" in a["name"].lower()]
     return (setup or assets or [None])[0]
@@ -118,7 +118,7 @@ def check(mgr, force: bool = False, fetch: Callable = None, now: Optional[float]
 def _download(url: str, dest: str, progress: Callable[[float], None] = None, timeout: float = 30.0) -> str:
     if not url.startswith(ALLOWED_HOSTS):
         raise RuntimeError("Refusing to download from %s" % url)
-    req = urllib.request.Request(url, headers={"User-Agent": "BaoBun-updater"})
+    req = urllib.request.Request(url, headers={"User-Agent": "TofuSM-updater"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         final = r.geturl()
         if not final.startswith(ALLOWED_HOSTS):
@@ -143,7 +143,7 @@ def download(mgr, info: Optional[dict] = None, progress: Callable[[float], None]
     info = info or cached(mgr)
     a = info.get("asset")
     if not info.get("newer") or not a:
-        raise RuntimeError("There's no newer BaoBun installer to download.")
+        raise RuntimeError("There's no newer Tofu installer to download.")
     folder = os.path.join(str(mgr.config_path.parent), "runtime", "downloads")
     os.makedirs(folder, exist_ok=True)
     name = re.sub(r"[^A-Za-z0-9_.-]", "_", a["name"])
@@ -168,7 +168,7 @@ def download(mgr, info: Optional[dict] = None, progress: Callable[[float], None]
 
 
 def run_installer(path: str, silent: bool = True) -> None:
-    """Start the installer (it relaunches BaoBun when it's done)."""
+    """Start the installer (it relaunches Tofu when it's done)."""
     import subprocess
     args = [path] + (["/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART"] if silent else [])
     subprocess.Popen(args, close_fds=True)
@@ -177,4 +177,4 @@ def run_installer(path: str, silent: bool = True) -> None:
 def banner_text(info: dict) -> Optional[str]:
     if not info.get("newer"):
         return None
-    return "BaoBun %s is available (you have %s)." % (info["latest"], info["current"])
+    return "Tofu %s is available (you have %s)." % (info["latest"], info["current"])

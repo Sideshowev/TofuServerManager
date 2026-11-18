@@ -1,4 +1,4 @@
-"""BaoBun web panel: control servers from any authorised PC with a browser.
+"""Tofu web panel: control servers from any authorised PC with a browser.
 
 Runs inside the background agent. Safe defaults:
   * Only answers requests from this PC and from Tailscale addresses
@@ -7,7 +7,7 @@ Runs inside the background agent. Safe defaults:
     The internet always gets "403".
   * Sign-in is "Log in with Discord" (core.web_auth); every action is checked
     against the user's role and written to the audit log as "web:<name>".
-  * Server programs, folders and BaoBun's own settings (Steam login, tokens)
+  * Server programs, folders and Tofu's own settings (Steam login, tokens)
     can't be changed from the web: servers are added from game presets only.
 
 Traffic inside Tailscale is already encrypted end to end.
@@ -135,7 +135,7 @@ class WebPanel:
 
         class Handler(BaseHTTPRequestHandler):
             protocol_version = "HTTP/1.1"
-            server_version = "BaoBun"
+            server_version = "Tofu"
 
             def log_message(self, *a):
                 pass
@@ -238,7 +238,7 @@ class WebPanel:
             return self._send(h, 403, _page("Not allowed", "<h1>Not allowed</h1><p>This panel only "
                               "answers this PC and devices on your Tailscale network%s.</p>"
                               % ("" if getattr(self, "allow_lan", False) else
-                                 " (the owner can also allow the home network in BaoBun \u2192 "
+                                 " (the owner can also allow the home network in Tofu \u2192 "
                                  "Web Panel)")), "text/html")
         url = urlparse(h.path)
         path = url.path
@@ -247,22 +247,22 @@ class WebPanel:
         if path == "/login":
             probs = self.auth.problems()
             if probs:
-                return self._send(h, 200, _page("BaoBun", "<h1>Web panel isn't set up yet</h1><p>The owner "
-                                  "needs to finish setup in BaoBun \u2192 Settings \u2192 Web Panel:</p><ul>"
+                return self._send(h, 200, _page("Tofu", "<h1>Web panel isn't set up yet</h1><p>The owner "
+                                  "needs to finish setup in Tofu \u2192 Settings \u2192 Web Panel:</p><ul>"
                                   + "".join("<li>%s</li>" % p for p in probs) + "</ul>"), "text/html")
             return self._redirect(h, self.auth.login_url())
         if path == "/auth/callback":
             q = parse_qs(url.query)
             if "error" in q:
-                return self._send(h, 200, _page("BaoBun", "<h1>Login cancelled</h1><a class='btn' href='/login'>"
+                return self._send(h, 200, _page("Tofu", "<h1>Login cancelled</h1><a class='btn' href='/login'>"
                                   "Try again</a>"), "text/html")
             try:
                 s = self.auth.complete_login(q.get("code", [""])[0], q.get("state", [""])[0])
             except PermissionError as e:
-                return self._send(h, 403, _page("BaoBun", "<h1>No access</h1><p>%s</p><a class='btn' "
+                return self._send(h, 403, _page("Tofu", "<h1>No access</h1><p>%s</p><a class='btn' "
                                   "href='/login'>Try again</a>" % html.escape(str(e))), "text/html")
             except Exception as e:
-                return self._send(h, 500, _page("BaoBun", "<h1>Login failed</h1><p>%s</p>" % html.escape(str(e)[:300])),
+                return self._send(h, 500, _page("Tofu", "<h1>Login failed</h1><p>%s</p>" % html.escape(str(e)[:300])),
                                   "text/html")
             self.log(f"[INFO] web panel: {s['name']} signed in ({s['role']})")
             cookie = "bb_session=%s; Path=/; HttpOnly; SameSite=Lax; Max-Age=%d" % (s["token"], 12 * 3600)
@@ -280,7 +280,7 @@ class WebPanel:
 
         if path in ("/", "/index.html"):
             if not sess:
-                return self._send(h, 200, _page("BaoBun", "<h1>BaoBun Control Panel</h1><p>Sign in with the "
+                return self._send(h, 200, _page("Tofu", "<h1>Tofu Server Manager</h1><p>Sign in with the "
                                   "Discord account you use in the server's guild.</p><a class='btn' "
                                   "href='/login'>Log in with Discord</a>"), "text/html")
             return self._send(h, 200, self._index(), "text/html",
@@ -385,7 +385,7 @@ class WebPanel:
             f = d / "index.html"
             if f.is_file():
                 return f.read_bytes()
-        return _page("BaoBun", "<h1>Panel files missing</h1><p>ui/web/index.html was not found.</p>")
+        return _page("Tofu", "<h1>Panel files missing</h1><p>ui/web/index.html was not found.</p>")
 
     SAFE_FIELDS = ("name", "type", "appId", "port", "queryPort", "launchArgs", "stopCommand",
                    "stopTimeout", "idleStopMinutes", "manualStart", "autoRestart", "maxRestarts",

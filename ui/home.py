@@ -319,7 +319,7 @@ class HomeView(ctk.CTkFrame):
         self.empty = ctk.CTkFrame(self.grid_frame, fg_color=theme["bg_card"], corner_radius=14)
         ctk.CTkLabel(self.empty, text="No servers yet", text_color=theme["text_light"],
                      font=("Bahnschrift SemiBold", 18, "bold")).pack(pady=(30, 4))
-        ctk.CTkLabel(self.empty, text="Pick a game, choose a folder, and BaoBun installs it for you.",
+        ctk.CTkLabel(self.empty, text="Pick a game, choose a folder, and Tofu installs it for you.",
                      text_color=theme["text_muted"]).pack()
         ctk.CTkButton(self.empty, text="+  Add your first server", height=40, corner_radius=10,
                       fg_color=theme["accent_blue"], command=on_add).pack(pady=(14, 6))

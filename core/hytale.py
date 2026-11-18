@@ -39,7 +39,7 @@ def resolve_java(srv: dict) -> str:
     found = pick_java(JAVA)
     if not found:
         raise RuntimeError("Hytale needs Java %d, which isn't installed. Use Install / Update on the server "
-                           "(BaoBun downloads it), install Temurin %d from adoptium.net, or set the Java path in "
+                           "(Tofu downloads it), install Temurin %d from adoptium.net, or set the Java path in "
                            "Edit Server." % (JAVA, JAVA))
     return found
 

@@ -1,4 +1,4 @@
-"""Steam Workshop mods that BaoBun downloads with SteamCMD and installs itself.
+"""Steam Workshop mods that Tofu downloads with SteamCMD and installs itself.
 
 Installers:
   bohemia  Arma 3 / DayZ - link the item into the server as @Name, copy its .bikey

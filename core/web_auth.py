@@ -31,7 +31,7 @@ from typing import Dict, Optional
 DISCORD_API = "https://discord.com/api/v10"
 AUTHORIZE_URL = "https://discord.com/oauth2/authorize"
 SESSION_TTL = 12 * 3600
-USER_AGENT = "DiscordBot (https://github.com/baobun, 1.0) BaoBunControlPanel"
+USER_AGENT = "DiscordBot (https://github.com/tofu-server-manager, 1.0) TofuServerManager"
 
 VIEW = {"server.status", "logs.since", "backup.list",
         "schedules.get", "server.get", "server.check_update", "games.list", "activity.list",

@@ -1,7 +1,7 @@
 """Game smoke test: does each game really install, start and show its settings?
 
 Run on a PC with plenty of free disk space (run_game_smoke_test.bat). For each
-game it, in a separate test copy of BaoBun (your real servers, settings and
+game it, in a separate test copy of Tofu (your real servers, settings and
 backups are never touched):
 
   1. adds the server and installs it (SteamCMD / the game's own download),
@@ -52,7 +52,7 @@ def pick_games(presets, wanted=None, include_account=False, everything=False):
         if (not p.get("popular") and not everything) or name in SKIP:
             continue
         if everything and not p.get("appId") and not p.get("popular"):
-            continue          # not on SteamCMD: BaoBun can't download it to test
+            continue          # not on SteamCMD: Tofu can't download it to test
         if p.get("appId") and p.get("anonymous_login") is False and not include_account:
             continue
         out.append(name)
@@ -63,7 +63,7 @@ def default_dir():
     from core.first_run import drives
     ds = drives()
     base = ds[0]["path"] if ds else str(Path.home())
-    return os.path.join(base, "BaoBunSmokeTest")
+    return os.path.join(base, "TofuSmokeTest")
 
 
 def free_gb(path):
@@ -88,7 +88,7 @@ def tail_log(mgr, sid, lines=30):
 NAME_KEYS = ("servername", "server_name", "hostname", "sessionname", "session_name", "servertitle",
              "server_title", "serverdisplayname", "name")
 OUTSIDE_SKIP = {"temp", "microsoft", "google", "mozilla", "packages", "nvidia", "nvidia corporation", "pip",
-                "baobun", "claude", "anthropic", "discord", "steam", "crashdumps", "d3dscache", "npm-cache",
+                "tofu", "claude", "anthropic", "discord", "steam", "crashdumps", "d3dscache", "npm-cache",
                 "programs", "code", "spotify", "comms", "connecteddevicesplatform", "intel", "amd", "nuget"}
 CONFIG_EXT = {".ini", ".json", ".cfg", ".xml", ".yaml", ".yml", ".toml", ".properties", ".txt", ".conf", ".lua",
               ".sav", ".db"}
@@ -206,7 +206,7 @@ def essentials_check(mgr, sid, wait, log):
         return out
     stamp = int(time.time()) % 10000
     old_players = str(targets["players"].get("value") or "").strip() if "players" in targets else ""
-    want = {"name": "BaoBun Check %d" % stamp, "password": "check%04dpw" % stamp,
+    want = {"name": "Tofu Check %d" % stamp, "password": "check%04dpw" % stamp,
             "players": "5" if old_players != "5" else "4"}     # small: some games cap at 6 or 8
     log("  essentials check: " + ", ".join(sorted(targets)))
     try:
@@ -292,7 +292,7 @@ def settings_check(mgr, sid, wait, log):
         return {"result": "no server-name setting found"}
     file_id, field_id, key, old, path = found
     out = {"file": path, "key": key, "old": old}
-    new = "BaoBun Check %d" % (int(time.time()) % 10000)
+    new = "Tofu Check %d" % (int(time.time()) % 10000)
     log("  settings check: %s in %s -> %r" % (key, path, new))
     try:
         try:
@@ -423,7 +423,7 @@ def test_game(mgr, api, name, wait, keep, log):
             if state == "ready" and st.get("playerCount") is None:
                 opened = {int(str(x).split("/")[0]) for x in res["listening_ports"]}
                 res["ready_by"] = "port" if opened & set(res["expected_ports"]) else \
-                    "time only (none of the ports BaoBun expects is open)"
+                    "time only (none of the ports Tofu expects is open)"
         except Exception:
             pass
         if state != "ready" or not st.get("isRunning"):
@@ -476,10 +476,10 @@ def test_game(mgr, api, name, wait, keep, log):
 
 def write_report(path_md, results):
     ok = [r for r in results if r.get("result") == "ok"]
-    lines = ["# BaoBun game smoke test", "",
+    lines = ["# Tofu game smoke test", "",
              "%d games tested, %d started and were ready. Generated %s." % (
                  len(results), len(ok), time.strftime("%Y-%m-%d %H:%M")), "",
-             "| Game | Support | Install | Start | Ready after | Settings BaoBun knows (exist) | Files found | Essentials |",
+             "| Game | Support | Install | Start | Ready after | Settings Tofu knows (exist) | Files found | Essentials |",
              "|---|---|---|---|---|---|---|---|"]
     for r in results:
         lines.append("| %s | %s | %s | %s | %s | %s | %d | %s |" % (
@@ -527,7 +527,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--games", help="comma-separated game names (default: popular games)")
     ap.add_argument("--with-account", action="store_true", help="also games that need a Steam account")
-    ap.add_argument("--all", action="store_true", help="every game in the list BaoBun can download, not just "
+    ap.add_argument("--all", action="store_true", help="every game in the list Tofu can download, not just "
                                                         "the popular ones (many hours)")
     ap.add_argument("--dir", help="where to install the test servers")
     ap.add_argument("--wait", type=int, default=240, help="seconds to wait for each server to be ready")
@@ -537,14 +537,14 @@ def main():
     ap.add_argument("--no-settings-check", action="store_true", help="skip changing the server name and "
                                                                        "restarting to check settings stick")
     ap.add_argument("--failed", action="store_true", help="test again only the games that didn't pass last time "
-                                                           "(not ones BaoBun can't download)")
+                                                           "(not ones Tofu can't download)")
     a = ap.parse_args()
     global SETTINGS_CHECK
     SETTINGS_CHECK = not a.no_settings_check
 
     home = ROOT / "smoke_test_data"
     home.mkdir(exist_ok=True)
-    os.environ["BAOBUN_HOME"] = str(home)      # a separate BaoBun: real servers are never touched
+    os.environ["TOFUSM_HOME"] = str(home)      # a separate Tofu: real servers are never touched
     from core.engine import build_engine
     from core.game_catalog import GAME_PRESETS
     eng = build_engine(role="agent", base_dir=home)

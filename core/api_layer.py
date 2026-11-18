@@ -1,4 +1,4 @@
-"""BaoBun API layer: one action-based interface over the shared engine.
+"""Tofu API layer: one action-based interface over the shared engine.
 
 Every caller (the localhost agent API, the Discord bot, scripts) goes through
 ``ApiLayer.process(action, params)``. Handlers delegate to the single
@@ -443,7 +443,7 @@ class ApiLayer:
     def _handle_update_now(self, params):
         fn = getattr(self, "on_update", None)
         if fn is None:
-            raise ApiError("not_supported", "Only the Watchdog (BaoBun's background service) can update BaoBun")
+            raise ApiError("not_supported", "Only the Watchdog (Tofu's background service) can update Tofu")
         try:
             return fn(reason="asked by %s" % params.get("user", "an admin"))
         except RuntimeError as e:
@@ -454,8 +454,8 @@ class ApiLayer:
         sid = self._sid(params)
         info = connect_info(self.mgr, sid, lookup_public=False)
         if not info["lan_ips"] or not info["ports"]:
-            raise ApiError("no_ports", "BaoBun doesn't know this server's ports or this PC's address")
-        r = upnp_forward(info["ports"], info["lan_ips"][0], label="BaoBun " + (info["name"] or sid),
+            raise ApiError("no_ports", "Tofu doesn't know this server's ports or this PC's address")
+        r = upnp_forward(info["ports"], info["lan_ips"][0], label="Tofu " + (info["name"] or sid),
                          remove=bool(params.get("remove")))
         self.mgr._audit("port_forward_remove" if params.get("remove") else "port_forward", sid,
                         user=params.get("user", "api"), ok=r.get("ok"))
@@ -552,7 +552,7 @@ class ApiLayer:
 
     def _handle_alerts_test(self, params):
         if self.alerts is None:
-            raise ApiError("not_supported", "Alerts run in the Watchdog (BaoBun's background service)")
+            raise ApiError("not_supported", "Alerts run in the Watchdog (Tofu's background service)")
         return self.alerts.test()
 
     def _handle_web_reload(self, params):
@@ -819,7 +819,7 @@ class ApiLayer:
         from core import game_installers as gi
         k = gi.kind(srv)
         if k is None:
-            raise ApiError("not_supported", "BaoBun can't download this game - copy its files in by hand")
+            raise ApiError("not_supported", "Tofu can't download this game - copy its files in by hand")
         if self.mgr.is_running(sid):
             raise ApiError("server_running", "Stop the server first")
         if self.mgr._states.get(sid) == "updating":

@@ -96,7 +96,7 @@ SETTINGS_TOKEN_KEY = "discord_bot_token"
 
 def bot_token(base_dir, config: dict = None) -> str:
     """The bot token to use: discord_config.json first (older setups), otherwise the
-    one pasted into BaoBun's Discord bot window (kept encrypted in settings.json)."""
+    one pasted into Tofu's Discord bot window (kept encrypted in settings.json)."""
     tok = discord_token(config or {})
     if tok:
         return tok
@@ -147,7 +147,7 @@ def migrate_discord_config(path) -> bool:
             cfg["token"] = ""
             cfg["_token_note"] = ("The bot token is stored encrypted in token_protected (only this Windows "
                                   "user can read it). To change it, paste the new token into \"token\"; "
-                                  "BaoBun encrypts it on the next start.")
+                                  "Tofu encrypts it on the next start.")
             changed = True
         except Exception as e:
             print(f"[WARN] could not encrypt the Discord token: {e}")

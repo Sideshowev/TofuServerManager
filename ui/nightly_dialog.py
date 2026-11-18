@@ -1,5 +1,5 @@
 """Desktop "Nightly restart" settings: restart the server PC every night, bring back
-the servers people use, and start BaoBun at boot (core/nightly.py, core/boot_task.py)."""
+the servers people use, and start Tofu at boot (core/nightly.py, core/boot_task.py)."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def open_nightly_dialog(app, theme):
         return lbl
 
     heading("Nightly restart", top=6)
-    note("Every night BaoBun warns players (%s minutes before), stops every server so it saves, backs up "
+    note("Every night Tofu warns players (%s minutes before), stops every server so it saves, backs up "
          "the worlds and restarts Windows - that clears memory leaks in the games and Windows itself. "
          "When the PC is back, only the servers people played on lately start again; the rest sleep until "
          "someone presses Start on Discord or here." % ", ".join(str(m) for m in cfg["warn"]))
@@ -65,18 +65,18 @@ def open_nightly_dialog(app, theme):
     days_var = ctk.StringVar(value=str(cfg["days"]))
     ctk.CTkEntry(row2, textvariable=days_var, width=50).pack(side="left", padx=8)
     ctk.CTkLabel(row2, text="days", text_color=t["text_light"]).pack(side="left")
-    note("The same rule decides which servers start whenever BaoBun starts. Servers set to Manual start "
+    note("The same rule decides which servers start whenever Tofu starts. Servers set to Manual start "
          "never start on their own.")
     err = note("", t["danger"])
 
     heading("If it ran now")
     preview_lbl = note("Checking...")
 
-    heading("Start BaoBun when the PC turns on")
+    heading("Start Tofu when the PC turns on")
     note("Needed for the nightly restart: without it the servers only come back once someone signs in to "
-         "Windows. BaoBun adds a Windows scheduled task that starts it at boot as your Windows user (one Windows "
+         "Windows. Tofu adds a Windows scheduled task that starts it at boot as your Windows user (one Windows "
          "admin prompt).\n\u2022 Simple: no password stored, but it can't open network folders (\\\\PC\\folder).\n"
-         "\u2022 With network access: Windows asks for your password once in its own window (BaoBun never sees "
+         "\u2022 With network access: Windows asks for your password once in its own window (Tofu never sees "
          "it) - needed when backups are copied to another PC or a server lives on a network folder.")
     boot_row = ctk.CTkFrame(body, fg_color="transparent")
     boot_row.pack(fill="x", padx=12, pady=(4, 2))
@@ -103,11 +103,11 @@ def open_nightly_dialog(app, theme):
             boot_lbl.configure(text="Only available on Windows.")
             return
         if ok:
-            boot_lbl.configure(text="\u2705  On - BaoBun starts at boot" + (" (with network access)." if mode == "password"
+            boot_lbl.configure(text="\u2705  On - Tofu starts at boot" + (" (with network access)." if mode == "password"
                                                                      else " (no network folders)."),
                                text_color=t["status_online"])
         else:
-            boot_lbl.configure(text="Off - BaoBun starts when you sign in.", text_color=t["text_light"])
+            boot_lbl.configure(text="Off - Tofu starts when you sign in.", text_color=t["text_light"])
         boot_btn.configure(state="normal", command=lambda: setup(False))
         net_btn.configure(state="normal", command=lambda: setup(True))
         rm_btn.configure(state="normal" if ok else "disabled", command=remove)
@@ -188,7 +188,7 @@ def open_nightly_dialog(app, theme):
         mgr.set_setting("smart_boot_days", days)
         msg = "Nightly restart %s" % (("on at %02d:%02d" % (h, m)) if on_var.get() else "off")
         if on_var.get() and state["boot"] is False:
-            msg += " - also set up 'Start BaoBun when the PC turns on', or servers wait for a sign-in"
+            msg += " - also set up 'Start Tofu when the PC turns on', or servers wait for a sign-in"
         app._show_status(msg)
         err.configure(text="")
         load_preview()

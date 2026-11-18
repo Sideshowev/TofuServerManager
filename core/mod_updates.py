@@ -109,7 +109,7 @@ def pending(mgr) -> Dict[str, dict]:
 # checking
 # --------------------------------------------------------------------------- #
 def check(mgr, mm=None, log: Callable[[str], None] = print) -> Dict[str, dict]:
-    """Look for updates on every server that BaoBun updates mods for.
+    """Look for updates on every server that Tofu updates mods for.
     {server_id: {"name", "mods": [{"key", "name", "from", "to"}], "pinned": [names]}}"""
     from core.mods import ModManager
     mm = mm or ModManager(mgr)
@@ -287,7 +287,7 @@ def on_crash(mgr, server_id: str, notify: Optional[Callable[[str, str], None]] =
         mgr._write_registry(server_id, mod_rollback=rec)
         if notify:
             notify("⚠️ %s crashed after its mods updated" % name,
-                   "Updated: %s. BaoBun had no copy of the old mods to put back (the folder was too big) - "
+                   "Updated: %s. Tofu had no copy of the old mods to put back (the folder was too big) - "
                    "check the console, and pin or remove the mod that broke it." % ", ".join(rec.get("names") or []))
         return False
     aside = os.path.join(str(mgr.config_path.parent), "backups", server_id,

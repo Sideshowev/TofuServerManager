@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel — Smart Boot Logic Module
+Tofu Server Manager — Smart Boot Logic Module
 
 Intelligent server startup decisions based on:
 - Recent activity history (from ActivityTracker)  
@@ -12,7 +12,7 @@ Boot Decision Rules:
 3. Admin can override via Discord buttons or manual start in GUI
 
 This module is called during app initialization to determine which servers 
-should be automatically started when the BaoBun Control Panel launches.
+should be automatically started when the Tofu Server Manager launches.
 """
 
 import json

@@ -1,9 +1,9 @@
-"""Essentials for games BaoBun has no hand-made settings page for.
+"""Essentials for games Tofu has no hand-made settings page for.
 
 Most games name their important settings alike - server name, password, admin
 password, max players, port, PvP, public listing, description - just spelled
 differently (ServerName, server_name, hostname, MaxPlayers, max-players ...).
-This finds them in the server's settings files (the files BaoBun knows for the
+This finds them in the server's settings files (the files Tofu knows for the
 game first, then the ones found in its folder, newest from the game's first
 start first) and offers them as a simple Essentials page. Saving writes them back
 through the normal settings editor (core/config_forms.py), which keeps the file's
@@ -68,7 +68,7 @@ def get(mgr, server_id: str) -> dict:
     items = find(mgr, server_id)
     if not items:
         return {"supported": False, "fields": [],
-                "note": "BaoBun doesn't have quick settings for this game, and didn't spot the usual ones (server "
+                "note": "Tofu doesn't have quick settings for this game, and didn't spot the usual ones (server "
                         "name, password, max players...) in its settings files - use All settings. Many games "
                         "write their settings files on their first start."}
     fields = []
@@ -88,7 +88,7 @@ def get(mgr, server_id: str) -> dict:
         fields.append(f)
     files = sorted({it["file_path"] for it in items})
     return {"supported": True, "auto": True, "fields": fields,
-            "note": "Found in %s. BaoBun picked these out automatically - check them in All settings if a value "
+            "note": "Found in %s. Tofu picked these out automatically - check them in All settings if a value "
                     "looks off." % ", ".join(files)}
 
 

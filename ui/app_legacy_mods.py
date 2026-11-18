@@ -1,4 +1,4 @@
-"""Older Vintage Story / Workshop mod windows (kept for their menu entries). Part of the desktop app (BaoBunApp in app.py)."""
+"""Older Vintage Story / Workshop mod windows (kept for their menu entries). Part of the desktop app (TofuApp in app.py)."""
 # flake8: noqa
 import threading
 

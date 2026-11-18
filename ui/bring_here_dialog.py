@@ -26,7 +26,7 @@ class BringHereWindow(ctk.CTkToplevel):
         self.job = None
 
         ctk.CTkLabel(self, text="Set servers up again on this PC from their backup copies - for when the old PC "
-                                "died, or you're moving to a new one. BaoBun installs each game and puts the "
+                                "died, or you're moving to a new one. Tofu installs each game and puts the "
                                 "newest world back.", anchor="w", justify="left", wraplength=640,
                      text_color=t["text_light"]).pack(fill="x", padx=18, pady=(16, 6))
         self._path_row("Backup copies are in", self.folder, self._pick_folder)

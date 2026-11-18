@@ -215,7 +215,7 @@ def reboot_windows(delay: int = REBOOT_DELAY) -> bool:
         return False
     try:
         r = subprocess.run(["shutdown", "/r", "/t", str(int(delay)), "/d", "p:0:0",
-                            "/c", "BaoBun nightly restart - game servers come back by themselves."],
+                            "/c", "Tofu nightly restart - game servers come back by themselves."],
                            capture_output=True, text=True, timeout=30,
                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         return r.returncode == 0

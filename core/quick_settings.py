@@ -181,7 +181,7 @@ GAMES: Dict[str, dict] = {
         ("Name", "World name", "text", ("ini", "MoriaServerConfig.ini", "World", "Name")),
         ("OptionalPassword", "Password", "password", ("ini", "MoriaServerConfig.ini", "Main", "OptionalPassword")),
     ]},
-    "2465200": {"note": "Saved to dedicatedserver.cfg in the server's data folder (BaoBun makes it if it isn't "
+    "2465200": {"note": "Saved to dedicatedserver.cfg in the server's data folder (Tofu makes it if it isn't "
                         "there). Up to 8 players.", "fields": [
         ("ServerName", "Server name", "text", ("json", "{sotf}", "ServerName")),
         ("Password", "Password", "password", ("json", "{sotf}", "Password")),
@@ -224,7 +224,7 @@ GAMES: Dict[str, dict] = {
         ("ServerMaxPlayers", "Max players", "int", ("settings_arg", "ServerMaxPlayers")),
     ]},
     # any Source engine server (srcds: CS:S, TF2, L4D2, HL2DM, mods ...) and CS2
-    "source": {"note": "Saved to the game's cfg/server.cfg (BaoBun makes the file if the game didn't ship one) "
+    "source": {"note": "Saved to the game's cfg/server.cfg (Tofu makes the file if the game didn't ship one) "
                        "and the launch options.", "fields": [
         ("hostname", "Server name", "text", ("cfg", "{srccfg}", "hostname")),
         ("sv_password", "Password", "password", ("cfg", "{srccfg}", "sv_password")),
@@ -292,7 +292,7 @@ def _resolve(srv: dict, path: str) -> str:
         if not name:
             sd = os.path.join(d, "Servers")
             dirs = os.listdir(sd) if os.path.isdir(sd) else []
-            name = dirs[0] if len(dirs) == 1 else "BaoBun"
+            name = dirs[0] if len(dirs) == 1 else "Tofu"
         path = path.replace("{unturned}", os.path.join(d, "Servers", name))
     if "{dst}" in path:
         root = get_arg(args, "persistent_storage_root") or os.path.join(documents_dir(), "Klei")
@@ -382,7 +382,7 @@ def first_json(srv: dict):
     """The settings file a game needs before it can start at all, for the two games that
     don't make a usable one themselves. None for every other game."""
     app = ALIASES.get(str(srv.get("appId") or ""), str(srv.get("appId") or ""))
-    name = str(srv.get("name") or "BaoBun server")
+    name = str(srv.get("name") or "Tofu server")
     if app == "2465200":             # Sons of the Forest stops after writing its own default
         port = int(srv.get("port") or 8766)
         return {"IpAddress": "0.0.0.0", "GamePort": port, "QueryPort": 27016, "BlobSyncPort": 9700,
@@ -521,7 +521,7 @@ def _make_space_engineers_cfg(srv: dict, path: str) -> bool:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(SE_FIRST_CFG % {"port": int(srv.get("port") or 27016),
-                                 "name": escape(str(srv.get("name") or "BaoBun server")),
+                                 "name": escape(str(srv.get("name") or "Tofu server")),
                                  "world": escape(os.path.join(worlds, world))})    # full path: a relative one isn't found
     return True
 
@@ -650,7 +650,7 @@ def write_value(srv, where, value, typ):
                 args = " ".join(parts)
             else:
                 raise ValueError("The launch options don't start with a map (e.g. TheIsland_WP?listen), "
-                                 "so BaoBun can't add %s. Add the map first in Settings." % key)
+                                 "so Tofu can't add %s. Add the map first in Settings." % key)
         return ("args", args)
     if kind == "settings_arg":             # "-settings Key value Key value ..." at the end of the line
         value = str(value).strip()
@@ -740,7 +740,7 @@ def write_value(srv, where, value, typ):
         else:
             end = text.rstrip().rfind("</")
             if end < 0:
-                raise ValueError("%s isn't in a form BaoBun understands" % os.path.basename(path))
+                raise ValueError("%s isn't in a form Tofu understands" % os.path.basename(path))
             text = text[:end] + "  " + new + "\n" + text[end:]
         shutil.copy2(path, path + ".bak")
         with open(path, "w", encoding="utf-8") as f:
@@ -757,7 +757,7 @@ def write_value(srv, where, value, typ):
         else:
             r = re.search(r"<[A-Za-z][\w.-]*", text[text.find("?>") + 2 if "?>" in text else 0:])
             if not r:
-                raise ValueError("%s isn't in a form BaoBun understands" % os.path.basename(path))
+                raise ValueError("%s isn't in a form Tofu understands" % os.path.basename(path))
             at = (text.find("?>") + 2 if "?>" in text else 0) + r.end()
             text = text[:at] + " %s=%s" % (where[2], quoteattr(str(value))) + text[at:]
         shutil.copy2(path, path + ".bak")
@@ -806,7 +806,7 @@ def write_value(srv, where, value, typ):
 
 # --------------------------------------------------------------------------- #
 def max_players(srv: dict) -> Optional[int]:
-    """The "Max players" value from the game's own settings, when BaoBun knows where it is."""
+    """The "Max players" value from the game's own settings, when Tofu knows where it is."""
     key = game_key(srv)
     spec = GAMES.get(key) if key else None
     for f in (spec or {}).get("fields", []):

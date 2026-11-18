@@ -1,4 +1,4 @@
-"""BaoBun Control Panel - core layer.
+"""Tofu Server Manager - core layer.
 
 Submodules are imported on demand (``from core.api_layer import ApiLayer``) so
 that one optional dependency missing (e.g. psutil, toml) can't stop the whole

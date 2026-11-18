@@ -1,7 +1,7 @@
 """Discord alerts: crashes, crash loops, failed updates/backups, high RAM, low disk.
 
 Runs in the background agent. Alerts go to Discord in one of two ways:
-  * through the BaoBun bot, if it is running (channel ``alert_channel_id`` in
+  * through the Tofu bot, if it is running (channel ``alert_channel_id`` in
     discord_config.json, else its log channel, else its panel channel), or
   * through a Discord webhook URL (Settings > Alerts), which needs no bot.
 
@@ -118,12 +118,12 @@ class AlertCenter:
         return url if valid_webhook(url) else ""
 
     def post_webhook(self, url: str, title: str, text: str, color: int) -> bool:
-        body = json.dumps({"username": "BaoBun", "allowed_mentions": {"parse": []},
+        body = json.dumps({"username": "Tofu", "allowed_mentions": {"parse": []},
                            "embeds": [{"title": title[:250], "description": text[:3900],
                                        "color": color, "timestamp": time.strftime(
                                            "%Y-%m-%dT%H:%M:%SZ", time.gmtime())}]}).encode("utf-8")
         req = urllib.request.Request(url, data=body, headers={
-            "Content-Type": "application/json", "User-Agent": "BaoBunControlPanel"})
+            "Content-Type": "application/json", "User-Agent": "TofuServerManager"})
         try:
             with urllib.request.urlopen(req, timeout=15) as r:
                 return 200 <= r.status < 300
@@ -136,7 +136,7 @@ class AlertCenter:
         has_hook = bool(self._webhook_url())
         if not (has_bot or has_hook):
             return {"sent": False, "reason": "No Discord bot is running and no webhook URL is set."}
-        ok = self._deliver("BaoBun test alert", "Alerts are working. You'll get a message like this "
+        ok = self._deliver("Tofu test alert", "Alerts are working. You'll get a message like this "
                            "when a server crashes, an update or backup fails, or RAM/disk runs low.",
                            COLORS["info"])
         return {"sent": ok, "via": "bot" if has_bot else "webhook"}
@@ -154,12 +154,12 @@ class AlertCenter:
                    f"Exit code {info.get('exit_code')}, ran for {_dur(up)}."
             srv = self.mgr.get_server(server_id) or {}
             if srv.get("autoRestart"):
-                text += " BaoBun will restart it."
+                text += " Tofu will restart it."
             self.notify("crash", server_id, f"⚠️ {name} crashed", text)
         elif event == "gave_up":
             text = (f"**Why:** {reason}\n{fix}\n" if reason else "") + \
                    f"It crashed {info.get('restarts')} times in a row, so auto-restart is paused. " \
-                   "Start it again from BaoBun once it's fixed."
+                   "Start it again from Tofu once it's fixed."
             self.notify("gave_up", server_id, f"\U0001F6D1 {name} keeps crashing", text)
         elif event == "update_failed":
             self.notify("update_failed", server_id, f"⚠️ Update failed: {name}",

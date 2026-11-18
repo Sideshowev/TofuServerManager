@@ -1,12 +1,12 @@
-"""How well BaoBun knows each game - shown in the game picker so nobody expects
-more than BaoBun can do.
+"""How well Tofu knows each game - shown in the game picker so nobody expects
+more than Tofu can do.
 
-"full":  BaoBun knows the game's real settings files and/or has its Essentials
+"full":  Tofu knows the game's real settings files and/or has its Essentials
          view, how it must be launched, and (where it has them) players and
          console commands - it has been set up for this game on purpose.
-"basic": BaoBun installs it and runs it, finds settings files by searching the
+"basic": Tofu installs it and runs it, finds settings files by searching the
          server folder, and watches it like any other server - but nothing in
-         BaoBun was written for this game specifically, so the Settings tab is a
+         Tofu was written for this game specifically, so the Settings tab is a
          best guess and some games may need launch options added by hand.
 
 A game moves to "full" by adding it to core/quick_settings.py (Essentials),
@@ -22,28 +22,28 @@ from typing import Dict
 SPECIAL = {"vintage-story", "minecraft", "hytale"}        # own installers and settings
 ARK = {"2430930", "376030"}
 LABEL = {"full": "Fully supported", "basic": "Basic support"}
-HELP = {"full": "BaoBun knows this game's settings and how to run it.",
-        "basic": "BaoBun installs and runs it, but its settings are found by searching the server folder - "
+HELP = {"full": "Tofu knows this game's settings and how to run it.",
+        "basic": "Tofu installs and runs it, but its settings are found by searching the server folder - "
                  "some may need setting by hand."}
 
 # Games the smoke test (tools/game_smoke_test.py, Nov 2026) could not get working, and why -
 # shown in the game picker so nobody finds out the hard way. Remove a game when a later run passes.
-_NO_PROGRAM = ("BaoBun's test installed it but couldn't find its server program - you may have to pick the "
+_NO_PROGRAM = ("Tofu's test installed it but couldn't find its server program - you may have to pick the "
                "program yourself in Edit Server.")
-_LINUX_ONLY = "Steam gave BaoBun only the Linux version of this server, which can't run on Windows."
-_CRASHED = "It stopped right after starting in BaoBun's test, and it isn't known why yet - it may not work."
+_LINUX_ONLY = "Steam gave Tofu only the Linux version of this server, which can't run on Windows."
+_CRASHED = "It stopped right after starting in Tofu's test, and it isn't known why yet - it may not work."
 KNOWN_ISSUES = {
     "ASKA": _CRASHED, "Military Conflict: Vietnam": _CRASHED, "Out of Reach": _CRASHED, "Sunkenland": _CRASHED,
-    "Synergy": "It stopped right after starting in BaoBun's test - it seems to need Half-Life 2 files the "
+    "Synergy": "It stopped right after starting in Tofu's test - it seems to need Half-Life 2 files the "
                "server download doesn't include.",
     "BlazeRush": "It needs the Steam app running on this PC - it isn't a true stand-alone server.",
     "Brickadia": "It needs a hosting token from your Brickadia account before it will start.",
-    "Don't Starve Together": "It needs a server token from your Klei account - BaoBun tells you where to get it.",
-    "Risk of Rain 2": "Steam gave no game files in BaoBun's test - it may need a Steam account that owns the game.",
+    "Don't Starve Together": "It needs a server token from your Klei account - Tofu tells you where to get it.",
+    "Risk of Rain 2": "Steam gave no game files in Tofu's test - it may need a Steam account that owns the game.",
     "D.I.P.R.I.P.": _NO_PROGRAM,
     "Pavlov": "Steam has no Windows version of this server - it only runs on Linux.",
     "The Front": _LINUX_ONLY, "Astro Colony": _LINUX_ONLY,
-    "Nuclear Dawn": "Steam gave no game files in BaoBun's test - it may need a Steam account that owns the game.",
+    "Nuclear Dawn": "Steam gave no game files in Tofu's test - it may need a Steam account that owns the game.",
 }
 
 

@@ -7,7 +7,7 @@
   (meta.fabricmc.net), Forge and NeoForge (their installers, run with
   --installServer). Java is downloaded too when the PC doesn't have the right one.
 
-Progress goes to <server folder>/install.log as "BaoBun: <phase>, progress: N"
+Progress goes to <server folder>/install.log as "Tofu: <phase>, progress: N"
 lines, which the wizard and the web panel read like SteamCMD's output.
 """
 
@@ -64,7 +64,7 @@ class Progress:
             try:
                 os.makedirs(directory, exist_ok=True)
                 with open(self.path, "w", encoding="utf-8") as f:
-                    f.write("BaoBun installer started %s\n" % time.strftime("%Y-%m-%d %H:%M:%S"))
+                    f.write("Tofu installer started %s\n" % time.strftime("%Y-%m-%d %H:%M:%S"))
             except OSError:
                 self.path = None
 
@@ -74,7 +74,7 @@ class Progress:
             return
         self._t = now
         self.last = (phase, pct)
-        line = "BaoBun: %s, progress: %.1f" % (phase, pct if pct is not None else 0.0)
+        line = "Tofu: %s, progress: %.1f" % (phase, pct if pct is not None else 0.0)
         if note:
             line += " (" + note + ")"
         self.log(line)
@@ -234,7 +234,7 @@ def vs_pick(releases: List[dict], version: Optional[str]) -> dict:
 
 def vs_install_state(srv: dict) -> str:
     """"vanilla" (official server files), "custom" (e.g. a Stratum build, which
-    BaoBun never overwrites) or "empty" (nothing installed yet)."""
+    Tofu never overwrites) or "empty" (nothing installed yet)."""
     d = srv.get("directory") or ""
     exe = os.path.basename(str(srv.get("executable") or ""))
     vanilla = os.path.isfile(os.path.join(d, "VintagestoryServer.exe"))
@@ -245,12 +245,12 @@ def vs_install_state(srv: dict) -> str:
     return "empty" if folder_is_empty(d) else "custom"
 
 
-# what BaoBun itself may have put in a server folder before anything was installed
+# what Tofu itself may have put in a server folder before anything was installed
 _OWN_FILES = {"logs", "install.log", "steamcmd_install.log", "start.bat", "backups", "data", "desktop.ini"}
 
 
 def folder_is_empty(d: str) -> bool:
-    """True if a folder doesn't exist yet or holds nothing but BaoBun's own files.
+    """True if a folder doesn't exist yet or holds nothing but Tofu's own files.
     Installers refuse anything else, so they never unpack over someone's files."""
     if not d:
         return False
@@ -274,7 +274,7 @@ def install_vintage_story(srv: dict, version: Optional[str] = None, channel: str
         raise InstallError("The server has no folder.")
     if vs_install_state(srv) == "custom":
         raise InstallError("This folder already has other files in it (a custom build or launcher?), so "
-                           "BaoBun won't unpack the official server over them. Pick an empty folder to "
+                           "Tofu won't unpack the official server over them. Pick an empty folder to "
                            "install a new server.")
     progress = progress or Progress(d)
     progress("checking versions", 0)
@@ -396,7 +396,7 @@ def install_minecraft(srv: dict, flavor: str = "vanilla", version: Optional[str]
     if flavor not in {f["id"] for f in MC_FLAVORS}:
         raise InstallError("Unknown Minecraft type: %s" % flavor)
     if not folder_is_empty(d) and not _is_mc_folder(d):
-        raise InstallError("This folder already has other files in it, so BaoBun won't put a Minecraft "
+        raise InstallError("This folder already has other files in it, so Tofu won't put a Minecraft "
                            "server there. Pick an empty folder.")
     progress = progress or Progress(d)
     progress("checking versions", 0)
@@ -494,7 +494,7 @@ def install_minecraft(srv: dict, flavor: str = "vanilla", version: Optional[str]
     eula = os.path.join(d, "eula.txt")
     if accept_eula:
         with open(eula, "w", encoding="utf-8") as f:
-            f.write("# Accepted in BaoBun (https://aka.ms/MinecraftEULA) %s\neula=true\n"
+            f.write("# Accepted in Tofu (https://aka.ms/MinecraftEULA) %s\neula=true\n"
                     % time.strftime("%Y-%m-%d %H:%M:%S"))
     notes = []
     if java_ok and flavor not in ("forge", "neoforge"):

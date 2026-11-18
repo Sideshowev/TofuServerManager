@@ -1,12 +1,12 @@
 """
-BaoBun Control Panel — Background Agent
+Tofu Server Manager — Background Agent
 
 The agent is the single owner of server processes. It keeps servers running
 when the window is closed, restarts them after crashes, runs scheduled
 backups/restarts/updates, tracks player activity for smart boot, and serves a
 localhost API that the desktop app (and Discord bot) use to control servers.
 
-Run:  python baobun_agent.py        (or BaoBunCP.exe --agent)
+Run:  python tofusm_agent.py        (or TofuSM.exe --agent)
 Only one agent runs at a time; a second copy exits immediately.
 """
 
@@ -106,7 +106,7 @@ def save_schedule_runs(runs: dict):
     atomic_write_json(SCHEDULE_RUNS_PATH, runs)
 
 
-class BaoBunAgent:
+class TofuSMAgent:
     """Background process guardian for managed servers."""
 
     def __init__(self):
@@ -141,7 +141,7 @@ class BaoBunAgent:
 
     # -- lifecycle ---------------------------------------------------------
     def start(self):
-        agent_log(f"BaoBun agent starting (PID {os.getpid()})")
+        agent_log(f"Tofu agent starting (PID {os.getpid()})")
         from core.local_api import LocalApiServer
         self.api_server = LocalApiServer(self.engine.api, BASE_DIR)
         self.engine.api.on_shutdown = self.shutdown
@@ -193,14 +193,14 @@ class BaoBunAgent:
                          args=(lambda: self.mgr.get_setting("watch_host", "") or "", notify, self._stop),
                          kwargs={"log": agent_log}, daemon=True, name="watch-host").start()
 
-    # -- BaoBun updating itself ------------------------------------------------
+    # -- Tofu updating itself ------------------------------------------------
     def _self_update_loop(self):
         from core import self_update
         msg = self_update.note_version(BASE_DIR, self.updater.started)
         if msg:
             agent_log("[INFO] " + msg)
             if not self._stop.wait(timeout=90):    # let the Discord bot connect first
-                self._notify("BaoBun updated", msg)
+                self._notify("Tofu updated", msg)
         while not self._stop.wait(timeout=120):
             try:
                 st = self.updater.check()
@@ -218,16 +218,16 @@ class BaoBunAgent:
                 agent_log(f"[WARN] self-update check: {e}")
 
     def apply_update(self, reason="asked from the panel"):
-        """Hand over to the newly deployed BaoBun; game servers keep running."""
+        """Hand over to the newly deployed Tofu; game servers keep running."""
         from core import self_update
         st = self.updater.check()
         if not st.get("ready"):
-            raise RuntimeError("There's no newer BaoBun on this PC - deploy one first.")
-        agent_log(f"[INFO] switching to the new BaoBun build ({reason})")
-        self._notify("Updating BaoBun", "The server PC is switching to the new BaoBun build (%s). Game servers keep "
+            raise RuntimeError("There's no newer Tofu on this PC - deploy one first.")
+        agent_log(f"[INFO] switching to the new Tofu build ({reason})")
+        self._notify("Updating Tofu", "The server PC is switching to the new Tofu build (%s). Game servers keep "
                      "running; the panel and Discord buttons are back in about a minute." % reason)
         if not self_update.restart_agent(BASE_DIR):
-            raise RuntimeError("Only the installed BaoBunCP.exe can update itself.")
+            raise RuntimeError("Only the installed TofuSM.exe can update itself.")
         threading.Thread(target=lambda: (time.sleep(1.0), self.shutdown(stop_servers=False)), daemon=True).start()
         return {"restarting": True}
 
@@ -237,7 +237,7 @@ class BaoBunAgent:
             from core.web_panel import WebPanel
             self.web_panel = WebPanel(self.engine, BASE_DIR, log=agent_log)
             if self.web_panel.start() is None:
-                agent_log("[INFO] web panel is off (turn it on in BaoBun > Web Panel)")
+                agent_log("[INFO] web panel is off (turn it on in Tofu > Web Panel)")
         except OSError as e:
             agent_log(f"[WARN] web panel could not start (port in use?): {e}")
         except Exception as e:
@@ -305,7 +305,7 @@ class BaoBunAgent:
     def shutdown(self, stop_servers: bool = True):
         if self._stop.is_set():
             return
-        agent_log("BaoBun agent stopping" + (" (stopping servers)" if stop_servers else " (servers left running)"))
+        agent_log("Tofu agent stopping" + (" (stopping servers)" if stop_servers else " (servers left running)"))
         if self.tracker is not None:
             self.tracker.stop()
         if stop_servers:
@@ -338,7 +338,7 @@ class BaoBunAgent:
                 return
 
     def _new_version_loop(self):
-        """Once a day: is a newer BaoBun published? (core/updates.py; off when no
+        """Once a day: is a newer Tofu published? (core/updates.py; off when no
         update repository is set). Tells the alert channel once per version."""
         from core import updates
         if self._stop.wait(timeout=600):
@@ -350,7 +350,7 @@ class BaoBunAgent:
                     if info.get("newer") and self.mgr.get_setting("update_told", "") != info["latest"]:
                         self.mgr.set_setting("update_told", info["latest"])
                         self.alerts.notify("new_version", None, "🆕 " + updates.banner_text(info),
-                                           "Open BaoBun on the server PC and press Update"
+                                           "Open Tofu on the server PC and press Update"
                                            + (" - what's new: %s" % info["page"] if info.get("page") else "."),
                                            level="info", force=True)
             except Exception as e:
@@ -359,7 +359,7 @@ class BaoBunAgent:
                 return
 
     def _links_loop(self):
-        """Linked PCs: answer a linked BaoBun while that's turned on (following setting
+        """Linked PCs: answer a linked Tofu while that's turned on (following setting
         changes), and keep the list of servers on the PCs linked here fresh."""
         from core import linked_pcs
         server, current = None, None
@@ -794,9 +794,9 @@ def main():
     _route_output_to_log()
     from core.local_api import AgentClient
     if AgentClient.discover(BASE_DIR) is not None:
-        agent_log("[INFO] another BaoBun agent is already running; exiting")
+        agent_log("[INFO] another Tofu agent is already running; exiting")
         return
-    agent = BaoBunAgent()
+    agent = TofuSMAgent()
     try:
         agent.run()
     finally:

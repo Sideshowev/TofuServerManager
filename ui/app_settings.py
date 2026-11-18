@@ -1,4 +1,4 @@
-"""Settings, schedules and help windows. Part of the desktop app (BaoBunApp in app.py)."""
+"""Settings, schedules and help windows. Part of the desktop app (TofuApp in app.py)."""
 # flake8: noqa
 import json
 import time
@@ -78,7 +78,7 @@ class SettingsDialogsMixin:
         ).pack(anchor="w", padx=10, pady=(0, 4))
         ctk.CTkLabel(
             form, text="Restart the server PC every night, bring back the servers people use, and start "
-            "BaoBun when the PC turns on (no sign-in needed).",
+            "Tofu when the PC turns on (no sign-in needed).",
             anchor="w", justify="left", wraplength=560, text_color=THEME["text_muted"],
         ).pack(fill="x", padx=10, pady=(0, 6))
 
@@ -164,7 +164,7 @@ class SettingsDialogsMixin:
         mirror_var = ctk.StringVar(value=str(self.manager.get_setting("backup_mirror_dir", "") or ""))
         mrow = ctk.CTkFrame(form, fg_color="transparent")
         mrow.pack(fill="x", padx=10, pady=(0, 4))
-        ctk.CTkEntry(mrow, textvariable=mirror_var, placeholder_text="e.g. E:/BaoBun backups or \\\\NAS\\backups").pack(
+        ctk.CTkEntry(mrow, textvariable=mirror_var, placeholder_text="e.g. E:/Tofu backups or \\\\NAS\\backups").pack(
             side="left", fill="x", expand=True)
 
         def browse_mirror():
@@ -182,7 +182,7 @@ class SettingsDialogsMixin:
 
         def test_mirror():
             r = self.manager.test_mirror(mirror_var.get().strip())
-            mirror_lbl.configure(text=("\u2705 BaoBun can write there (%.1f GB free)." % r["free_gb"]) if r.get("ok")
+            mirror_lbl.configure(text=("\u2705 Tofu can write there (%.1f GB free)." % r["free_gb"]) if r.get("ok")
                                  else "\u274C Can't write there: " + str(r.get("error")),
                                  text_color=THEME["status_online"] if r.get("ok") else THEME["danger"])
         ctk.CTkButton(mrow, text="Test", width=60, fg_color=THEME["border"], command=test_mirror).pack(
@@ -215,7 +215,7 @@ class SettingsDialogsMixin:
         ctk.CTkButton(form, text="Run the setup walkthrough again...", command=self.show_first_run,
                       fg_color=THEME["border"]).pack(anchor="w", padx=10, pady=(0, 4))
         from core.version import VERSION
-        ctk.CTkButton(form, text="BaoBun %s - check for updates" % VERSION,
+        ctk.CTkButton(form, text="Tofu %s - check for updates" % VERSION,
                       command=lambda: self._check_new_version(force=True),
                       fg_color=THEME["border"]).pack(anchor="w", padx=10, pady=(0, 4))
         # ---- UI scaling ----
@@ -436,7 +436,7 @@ class SettingsDialogsMixin:
     # ------------------------------------------------------------------ #
     def show_help_dialog(self):
         dlg = ctk.CTkToplevel(self)
-        dlg.title("BaoBun Control Panel - Getting Started")
+        dlg.title("Tofu Server Manager - Getting Started")
         dlg.geometry("700x600")
         dlg.grab_set()
         dlg.transient(self)
@@ -452,7 +452,7 @@ class SettingsDialogsMixin:
 
         sections = [
             ("Welcome", [
-                para("BaoBun Control Panel manages many dedicated game servers from one window."),
+                para("Tofu Server Manager manages many dedicated game servers from one window."),
                 para("Each server gets its own install subfolder, so settings and configs never mix between games."),
                 note("New to hosting? Work through the sections below top to bottom."),
             ]),
@@ -462,7 +462,7 @@ class SettingsDialogsMixin:
                 bullet("Give it a name, then pick a Game Preset."),
                 note("The preset auto-fills the port, Steam app ID, and executable for you."),
                 bullet("Choose a parent folder."),
-                note("BaoBun creates a subfolder named after your server inside it."),
+                note("Tofu creates a subfolder named after your server inside it."),
                 bullet("Click Add Server, then Install Game to download the files."),
             ]),
             ("Game presets & installing", [
@@ -480,8 +480,8 @@ class SettingsDialogsMixin:
                 bullet("Remove deletes the entry while keeping its subfolder on disk."),
             ]),
             ("Watchdog", [
-                para("The Watchdog is BaoBun's background service: it keeps working when this window is closed."),
-                bullet("Keeps servers alive after you close the BaoBun window."),
+                para("The Watchdog is Tofu's background service: it keeps working when this window is closed."),
+                bullet("Keeps servers alive after you close the Tofu window."),
                 bullet("Auto-restarts a server if it crashes."),
                 bullet("Runs your scheduled tasks on a 30-second tick."),
                 note("The Watchdog button at the top shows whether it's on (green) and turns it on or off."),
@@ -523,7 +523,7 @@ class SettingsDialogsMixin:
             ("Discord bot", [
                 para("An optional bot lets people start servers from chat."),
                 bullet("Settings > Discord bot: paste the bot token and press Invite the bot."),
-                bullet("In Discord, type /baobun-setup to pick channels and who may start servers."),
+                bullet("In Discord, type /tofu-setup to pick channels and who may start servers."),
                 bullet("Anyone allowed can START; only admins (server owner, Manage Server) can STOP."),
                 note("This prevents griefing from non-admin users."),
             ]),
@@ -541,7 +541,7 @@ class SettingsDialogsMixin:
                 bullet("Default install folder - where new servers go."),
                 bullet("steamcmd.exe path - location of your SteamCMD binary."),
                 bullet("Steam login - for purchase-required games."),
-                bullet("Run at startup - launch BaoBun when you sign in."),
+                bullet("Run at startup - launch Tofu when you sign in."),
             ]),
         ]
         for title, items in sections:

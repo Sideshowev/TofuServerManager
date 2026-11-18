@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel - Database Layer
+Tofu Server Manager - Database Layer
 
 SQLite-based persistent storage for:
 - Server metrics history (CPU, RAM, players, etc.)
@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 
 
 class DatabaseLayer:
-    """Thread-safe SQLite database layer for BaoBun."""
+    """Thread-safe SQLite database layer for Tofu."""
 
     def __init__(self, db_path: str | Path):
         self.db_path = Path(db_path)

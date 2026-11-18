@@ -150,8 +150,8 @@ def quiet_widgets() -> int:
     """Make CTkLabel / CTkButton skip configure() calls that change nothing.
     customtkinter redraws on every configure, and the status refresh sets the
     same texts and colours every few seconds. Returns how many classes were
-    changed (0 if customtkinter isn't there or BAOBUN_NO_QUIET_WIDGETS is set)."""
-    if os.environ.get("BAOBUN_NO_QUIET_WIDGETS"):
+    changed (0 if customtkinter isn't there or TOFUSM_NO_QUIET_WIDGETS is set)."""
+    if os.environ.get("TOFUSM_NO_QUIET_WIDGETS"):
         return 0
     try:
         import customtkinter as ctk
@@ -159,10 +159,10 @@ def quiet_widgets() -> int:
         return 0
     done = 0
     for cls in (getattr(ctk, "CTkLabel", None), getattr(ctk, "CTkButton", None)):
-        if cls is None or getattr(cls, "_baobun_quiet", False):
+        if cls is None or getattr(cls, "_tofusm_quiet", False):
             continue
         cls.configure = _quiet(cls.configure)
-        cls._baobun_quiet = True
+        cls._tofusm_quiet = True
         done += 1
     return done
 

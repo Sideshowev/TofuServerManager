@@ -1,7 +1,7 @@
 """Add Server wizard: pick a game -> name & folder -> (in-game settings) -> review & install.
 
 Sensible defaults everywhere (folder, free ports) and a live SteamCMD progress
-bar. Games whose server name, password and max players BaoBun can set for sure
+bar. Games whose server name, password and max players Tofu can set for sure
 (core/first_settings.py) get one more screen asking for them. The old full form
 stays available via "Advanced form".
 """
@@ -205,13 +205,13 @@ class AddServerWizard(ctk.CTkToplevel):
             ctk.CTkLabel(self.body, text="Known problem: " + self._issue(game), anchor="w", justify="left",
                          wraplength=600, text_color=t["warning"]).pack(fill="x", padx=16, pady=(10, 0))
         if getattr(self, "_support", {}).get(game) == "basic":
-            ctk.CTkLabel(self.body, text="Basic support: BaoBun installs and runs %s, but nothing in BaoBun was made "
+            ctk.CTkLabel(self.body, text="Basic support: Tofu installs and runs %s, but nothing in Tofu was made "
                                          "for it yet - its settings are found by searching the server folder, and "
                                          "some may need setting by hand." % game, anchor="w", justify="left",
                          wraplength=600, text_color=t["warning"]).pack(fill="x", padx=16, pady=(10, 0))
-        label("Server name (shown in BaoBun and on Discord)")
+        label("Server name (shown in Tofu and on Discord)")
         ctk.CTkEntry(self.body, textvariable=self.name_var, height=34).pack(fill="x", padx=16)
-        label("Install into this folder (BaoBun makes a subfolder named after the server)")
+        label("Install into this folder (Tofu makes a subfolder named after the server)")
         row = ctk.CTkFrame(self.body, fg_color="transparent")
         row.pack(fill="x", padx=16)
         ctk.CTkEntry(row, textvariable=self.base_var, height=34).pack(side="left", fill="x", expand=True)
@@ -281,11 +281,11 @@ class AddServerWizard(ctk.CTkToplevel):
             self._first = {}
             self.show_review()
 
-    # -- step 3 (only for games whose settings BaoBun can set for sure) ---------------
+    # -- step 3 (only for games whose settings Tofu can set for sure) ---------------
     def show_game_settings(self):
         t = self.theme
         self._reset(self.game + " - in the game", 3)
-        ctk.CTkLabel(self.body, text="What players see when they look for your server. BaoBun writes these into "
+        ctk.CTkLabel(self.body, text="What players see when they look for your server. Tofu writes these into "
                                      "%s's own settings - you can change them later in the server's Settings "
                                      "tab." % self.game, anchor="w", justify="left", wraplength=600,
                      text_color=t["text_muted"]).pack(fill="x", padx=16, pady=(14, 0))
@@ -365,7 +365,7 @@ class AddServerWizard(ctk.CTkToplevel):
 
     @staticmethod
     def _web_download(p: dict):
-        """"vintage-story" / "minecraft" when BaoBun can download this game itself."""
+        """"vintage-story" / "minecraft" when Tofu can download this game itself."""
         try:
             from core import game_installers as gi
             k = gi.kind({"type": p.get("type"), "executable": p.get("executable") or ""})
@@ -545,7 +545,7 @@ class AddServerWizard(ctk.CTkToplevel):
         if installed:
             msg = "The game is installed. Start it now, or later from its card."
             if entry.get("firstSettings"):
-                msg += ("\n\n%s makes its settings file the first time it starts. BaoBun then restarts it once, "
+                msg += ("\n\n%s makes its settings file the first time it starts. Tofu then restarts it once, "
                         "when nobody is playing, to put in what you chose." % self.game)
         elif entry.get("appId"):
             msg = "Click Install / Update on the server when you're ready to download it."

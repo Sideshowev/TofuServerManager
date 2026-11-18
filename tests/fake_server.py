@@ -1,4 +1,4 @@
-"""A tiny stand-in game server used by the BaoBun tests.
+"""A tiny stand-in game server used by the Tofu tests.
 
 Modes:  normal  - reads console commands until /stop or quit
         crash   - exits with code 3 after half a second

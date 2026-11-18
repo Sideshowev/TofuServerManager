@@ -20,8 +20,8 @@ OUT = ROOT / "game_profiles" / "SMOKE_SUMMARY.md"
 REVIEWED = {
     "Don't Starve Together": ("Starts now (it has to be started from its bin64 folder), but lets nobody in "
                               "without a Klei server token.",
-                              "BaoBun refuses to start it without the token and says where to get it. Next: a "
-                              "place in BaoBun to paste the token."),
+                              "Tofu refuses to start it without the token and says where to get it. Next: a "
+                              "place in Tofu to paste the token."),
     "Risk of Rain 2": ("Steam finishes without giving any game files (an empty depot).",
                        "Unknown whether a Steam account that owns the game gets the files. Until that's "
                        "tested it shouldn't be marked fully supported."),
@@ -34,7 +34,7 @@ REVIEWED = {
              "Not looked into yet. Likely needs to be started from another folder, or its real program is "
              "a different file."),
     "Dystopia": ("Source mod: \"Unable to find gameinfo.txt\".",
-                 "Needs -game <its folder>; BaoBun's automatic -game only looks one folder deep. Not fixed."),
+                 "Needs -game <its folder>; Tofu's automatic -game only looks one folder deep. Not fixed."),
     "Synergy": ("Source mod: file system fails to start.",
                 "Probably needs Half-Life 2 content that the server download doesn't include. Not confirmed."),
     "Military Conflict: Vietnam": ("Exits with code 1 and writes nothing at all.", "Unknown."),
@@ -49,7 +49,7 @@ REVIEWED = {
     "Eden Star": ("Steam couldn't write the game files (code 8).",
                   "Earlier run said \"No subscription\": it needs a Steam account that owns the game."),
 }
-EXE_NOT_FOUND = ("Installed, but BaoBun couldn't find the server program.",
+EXE_NOT_FOUND = ("Installed, but Tofu couldn't find the server program.",
                  "Look at what the install contains and set the program in the game list. Not done yet.")
 SHORT = {"works": "works", "kept (not checkable)": "kept", "game ignores it": "IGNORED",
          "game rewrote it": "REWRITTEN", "save failed": "can't save", "setting not found afterwards": "lost"}
@@ -73,10 +73,10 @@ def main():
          "(with log ends) is `logs/game_smoke_report.md`." % time.strftime("%Y-%m-%d %H:%M"), "",
          "## In short", "",
          "- **%d games tested, %d installed, started and stayed up.**" % (len(res), len(ok)),
-         "- %d of those opened a port BaoBun expects (or answered a player query) - confirmed up." % len(by_port),
-         "- %d were up on ports BaoBun doesn't know about - BaoBun's port list for them is wrong or missing."
+         "- %d of those opened a port Tofu expects (or answered a player query) - confirmed up." % len(by_port),
+         "- %d were up on ports Tofu doesn't know about - Tofu's port list for them is wrong or missing."
          % len(other_ports),
-         "- %d kept running but BaoBun saw no open port after two minutes - **not confirmed**: still loading, "
+         "- %d kept running but Tofu saw no open port after two minutes - **not confirmed**: still loading, "
          "or quietly not working." % len(silent),
          "- %d did not work (below)." % len(bad), ""]
 
@@ -86,10 +86,10 @@ def main():
           "- **works** - the game kept it and players see it (checked with the Steam server query)",
           "- **kept** - the game kept it in its settings; this game doesn't answer the query, so it couldn't "
           "be checked from outside",
-          "- **IGNORED** - saved, but the game showed something else: BaoBun is writing to the wrong place",
+          "- **IGNORED** - saved, but the game showed something else: Tofu is writing to the wrong place",
           "- **REWRITTEN** - the game threw the value away when it started",
-          "- **can't save** - BaoBun couldn't write it (reasons below the table)",
-          "- `-` - BaoBun doesn't know where this game keeps it", "",
+          "- **can't save** - Tofu couldn't write it (reasons below the table)",
+          "- `-` - Tofu doesn't know where this game keeps it", "",
           "| Game | Essentials | Server name | Password | Max players |", "|---|---|---|---|---|"]
     ess = sorted((r for r in res if (r.get("essentials_check") or {}).get("fields")), key=lambda r: r["game"])
     for r in ess:
@@ -106,14 +106,14 @@ def main():
         L += ["", "Why some couldn't be saved:", ""] + errs
         L += ["", "(The ARK \"server name\" lines are the test's fault: its test name has a space in it. "
               "The ARK password / max players lines are real: a new ARK server has no map in its launch "
-              "options yet. Arma Reforger and Conan Exiles are real too: the settings file BaoBun writes to "
+              "options yet. Arma Reforger and Conan Exiles are real too: the settings file Tofu writes to "
               "doesn't exist even after the first start.)"]
     none = sorted(r["game"] for r in ok if not (r.get("essentials_check") or {}).get("fields"))
     L += ["", "**No server name, password or max players known at all (%d games that run):** %s" % (
         len(none), ", ".join(none)), ""]
 
-    L += ["## Up, but on ports BaoBun doesn't expect", "",
-          "| Game | Open ports | BaoBun expected |", "|---|---|---|"]
+    L += ["## Up, but on ports Tofu doesn't expect", "",
+          "| Game | Open ports | Tofu expected |", "|---|---|---|"]
     for r in sorted(other_ports, key=lambda r: r["game"]):
         L.append("| %s | %s | %s |" % (r["game"], ", ".join(r.get("listening_ports") or [])[:90],
                                        ", ".join(map(str, r.get("expected_ports") or [])) or "nothing"))

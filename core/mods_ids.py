@@ -1,4 +1,4 @@
-"""Mods the game server downloads itself: BaoBun keeps an ordered list of IDs per
+"""Mods the game server downloads itself: Tofu keeps an ordered list of IDs per
 server (``modList`` in servers.json) and writes it where each game reads it."""
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 from core.mods_common import ModError, add_flag, appdata, dedupe, documents_dir, first_existing, get_arg, http_json, ini_get, ini_set, lenient_json, rel_or_abs, set_arg, steam_details, user_home, workshop_id, _read_lines, _write_lines
 
-MARK = "-- managed by BaoBun (edit mods in BaoBun's Mods tab)"
+MARK = "-- managed by Tofu (edit mods in Tofu's Mods tab)"
 
 
 # --------------------------------------------------------------------------- #
@@ -169,7 +169,7 @@ class PzIni(Writer):
         ini_set(p, None, "Mods", ";".join(mods))
         missing = [i["id"] for i in on if not i.get("mod_ids")]
         if missing:
-            return ("No Mod ID yet for %s - the server downloads them on its next start, then BaoBun "
+            return ("No Mod ID yet for %s - the server downloads them on its next start, then Tofu "
                     "fills them in (or type them in)." % ", ".join(missing))
         return None
 
@@ -220,7 +220,7 @@ class SeCfg(Writer):
         else:
             text = re.sub(r"(</MyConfigDedicated[^>]*>)", "  " + block + "\n\\1", text, count=1)
         _backup_write_text(p, text)
-        return ("Existing worlds keep their own mod list in Sandbox_config.sbc - BaoBun updated the "
+        return ("Existing worlds keep their own mod list in Sandbox_config.sbc - Tofu updated the "
                 "server config; check the world's list too.")
 
     def where(self, srv):
@@ -235,7 +235,7 @@ class UnturnedJson(Writer):
         if not name:
             sd = os.path.join(d, "Servers")
             dirs = [x for x in os.listdir(sd)] if os.path.isdir(sd) else []
-            name = dirs[0] if len(dirs) == 1 else "BaoBun"
+            name = dirs[0] if len(dirs) == 1 else "Tofu"
         return os.path.join(d, "Servers", name, "WorkshopDownloadConfig.json")
 
     def read(self, srv):
@@ -295,7 +295,7 @@ class DstLua(Writer):
             body = [MARK, "return {"] + ['  ["workshop-%s"] = { enabled = true },' % x for x in on] + ["}"]
             _write_lines(mo, body)
         if skipped:
-            return ("modoverrides.lua in %s was written by hand, so BaoBun left it alone - enable the "
+            return ("modoverrides.lua in %s was written by hand, so Tofu left it alone - enable the "
                     "mods there (\"workshop-<id>\" = { enabled = true })." % " and ".join(skipped))
         return None
 

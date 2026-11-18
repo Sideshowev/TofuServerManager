@@ -1,6 +1,6 @@
 """ARK clusters: keep every map in step so nobody loses creatures or items.
 
-A cluster is every server with the same ``clusterId`` (BaoBun's ARK Cluster
+A cluster is every server with the same ``clusterId`` (Tofu's ARK Cluster
 setup). Players upload creatures, items and survivors on one map and download them
 on another. Things go wrong when the maps don't match:
 
@@ -15,7 +15,7 @@ check() lists these with a fix, fix() applies one, preflight() quietly puts a ma
 mod list back in line right before it starts.
 
 Games settings (Game.ini / GameUserSettings.ini) live in each install folder, so
-maps sharing one install already share them; with several installs BaoBun writes
+maps sharing one install already share them; with several installs Tofu writes
 the same settings into every one of them.
 
 Different rules per map: separate() gives one map its own copy of the install

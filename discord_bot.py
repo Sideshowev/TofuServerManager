@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel - Discord bot
+Tofu Server Manager - Discord bot
 
 Lets your friends run the game servers from Discord:
 
@@ -10,7 +10,7 @@ Lets your friends run the game servers from Discord:
   everyone - /servers, /status, /start, /players, /join, /mods, /notify, /stats,
              /event, /events, /help
   admins   - /stop, /restart, /say, /access, /backup, /restore, /logs, /update, /checkup,
-             /baobun-setup
+             /tofu-setup
 * game nights: /event posts "let's play" with I'm in / Can't make it buttons, pings
   everyone going 30 minutes before, wakes the server and says when it starts
 * "ping me" (/notify): a DM when a server is up, or when someone joins it
@@ -51,7 +51,7 @@ from core import discord_events as EV
 from core import discord_extras as X
 from core.discord_status import status_lines
 
-ALERT_FOOTER = "BaoBun alert"
+ALERT_FOOTER = "Tofu alert"
 UI_PURGE_LIMIT = 200
 ROW_SIZE = 4
 SERVERS_PER_MESSAGE = ROW_SIZE * 5
@@ -375,7 +375,7 @@ async def _watch_ready(interaction, sid, name):
         join = await asyncio.to_thread(L.join_text, mgr, sid, _show_address)
         text = "✅ %s **%s** is ready! %s" % (user.mention, name, join)
     elif state == "failed":
-        text = "❌ %s **%s** didn't start - an admin can check the console in BaoBun." % (user.mention, name)
+        text = "❌ %s **%s** didn't start - an admin can check the console in Tofu." % (user.mention, name)
     else:
         text = "⏳ %s **%s** is still starting after %d minutes - it may be updating or loading a big " \
                "world." % (user.mention, name, READY_TIMEOUT // 60)
@@ -456,9 +456,11 @@ def _event_view(ev):
     view = discord.ui.View(timeout=None)
     if ev.get("cancelled"):
         return view
-    yes = discord.ui.Button(style=discord.ButtonStyle.success, label="I'm in", custom_id="baobun:ev:in:" + ev["id"])
+    # events posted before the rename keep their old button ids, or their buttons would stop working
+    pre = ev.get("cid") or "baobun"
+    yes = discord.ui.Button(style=discord.ButtonStyle.success, label="I'm in", custom_id=pre + ":ev:in:" + ev["id"])
     no = discord.ui.Button(style=discord.ButtonStyle.secondary, label="Can't make it",
-                           custom_id="baobun:ev:out:" + ev["id"])
+                           custom_id=pre + ":ev:out:" + ev["id"])
     eid = ev["id"]
 
     async def rsvp(interaction, going):
@@ -621,7 +623,7 @@ async def _notify_changes(client, prev_up, statuses, prev_players, snap, names):
 # --------------------------------------------------------------------------- #
 def _status_embed(mgr, statuses):
     lines = status_lines(mgr, statuses, _show_address)
-    embed = discord.Embed(title="BaoBun servers", description="\n".join(lines)[:4000] or "No servers yet.",
+    embed = discord.Embed(title="Tofu servers", description="\n".join(lines)[:4000] or "No servers yet.",
                           color=0xE6C87E, timestamp=datetime.now(timezone.utc))
     embed.set_footer(text="Press a button to start a server · /help for commands")
     return embed
@@ -630,7 +632,7 @@ def _status_embed(mgr, statuses):
 def _make_button(st, row):
     label, style, disabled = L.button_spec(st)
     btn = discord.ui.Button(style=getattr(discord.ButtonStyle, style), label=label, disabled=disabled,
-                            custom_id="baobun:toggle:" + str(st["id"]), row=row)
+                            custom_id="tofu:toggle:" + str(st["id"]), row=row)
     sid = st["id"]
 
     async def callback(interaction):
@@ -649,7 +651,7 @@ def _build_grid_view(servers):
 async def _on_button(interaction, sid):
     mgr = get_server_manager()
     if mgr is None:
-        await interaction.response.send_message("BaoBun isn't ready yet - try again in a minute.", ephemeral=True)
+        await interaction.response.send_message("Tofu isn't ready yet - try again in a minute.", ephemeral=True)
         return
     await interaction.response.defer(ephemeral=True, thinking=True)
     st, _ = await _status_of(mgr, sid)
@@ -880,7 +882,7 @@ def _setup_commands(client):
     async def resolve(interaction, text):
         mgr = get_server_manager()
         if mgr is None:
-            await interaction.followup.send("BaoBun isn't ready yet - try again in a minute.", ephemeral=True)
+            await interaction.followup.send("Tofu isn't ready yet - try again in a minute.", ephemeral=True)
             return None, None
         servers = _visible(mgr, await asyncio.to_thread(mgr.get_all_statuses))
         srv, cands = L.find_server(servers, text)
@@ -894,7 +896,7 @@ def _setup_commands(client):
     async def servers_cmd(interaction):
         mgr = get_server_manager()
         if mgr is None:
-            await interaction.response.send_message("BaoBun isn't ready yet.", ephemeral=True)
+            await interaction.response.send_message("Tofu isn't ready yet.", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
         statuses = _visible(mgr, await asyncio.to_thread(mgr.get_all_statuses))
@@ -1010,7 +1012,7 @@ def _setup_commands(client):
     async def status_cmd(interaction):
         mgr = get_server_manager()
         if mgr is None:
-            await interaction.response.send_message("BaoBun isn't ready yet.", ephemeral=True)
+            await interaction.response.send_message("Tofu isn't ready yet.", ephemeral=True)
             return
         await interaction.response.defer()
         statuses = _visible(mgr, await asyncio.to_thread(mgr.get_all_statuses))
@@ -1292,7 +1294,7 @@ def _setup_commands(client):
         text = await asyncio.to_thread(X.checkup_text, mgr, {s["id"] for s in statuses})
         await interaction.followup.send(text, ephemeral=True)
 
-    @tree.command(name="baobun-setup", description="Set up the bot: channels and roles (admins)")
+    @tree.command(name="tofu-setup", description="Set up the bot: channels and roles (admins)")
     @app_commands.describe(panel_channel="Where the server buttons go", activity_channel="Who started what, joins",
                            alert_channel="Crashes and problems", event_channel="Game nights",
                            admin_role="Can stop/restart servers and use admin commands",
@@ -1351,7 +1353,7 @@ def _load_config():
                     "show_join_address": False, "start_cooldown_seconds": 20, "max_running": 0,
                     "announce_players": True, "announce_activity": True, "notify_ready": True}
         path.write_text(json.dumps(template, indent=2), encoding="utf-8")
-        print("[INFO] Created discord_config.json template (channels and roles can also be set with /baobun-setup).")
+        print("[INFO] Created discord_config.json template (channels and roles can also be set with /tofu-setup).")
         return template
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -1407,7 +1409,7 @@ def _make_client(token):
 
     @client.event
     async def on_ready():
-        print("[INFO] BaoBun Discord bot connected as %s" % client.user)
+        print("[INFO] Tofu Discord bot connected as %s" % client.user)
         if not state["synced"]:
             state["synced"] = True
             for g in client.guilds:
@@ -1477,7 +1479,7 @@ def start_bot(app_instance=None):
     global _raw_config
     _raw_config = dict(raw)
     mgr = get_server_manager()
-    try:      # channels / roles chosen with /baobun-setup (kept in settings, not in discord_config.json)
+    try:      # channels / roles chosen with /tofu-setup (kept in settings, not in discord_config.json)
         raw = X.merged_config(raw, X.setup_values(mgr)) if mgr is not None else raw
     except Exception:
         pass
@@ -1494,7 +1496,7 @@ def start_bot(app_instance=None):
             try:
                 client.run(token, log_handler=None)
             except discord.LoginFailure:
-                print("[ERROR] Discord login failed - the bot token is wrong or was reset (paste it again in BaoBun: Settings > Discord bot)")
+                print("[ERROR] Discord login failed - the bot token is wrong or was reset (paste it again in Tofu: Settings > Discord bot)")
                 return
             except discord.PrivilegedIntentsRequired as e:
                 print("[ERROR] Discord: %s" % e)
@@ -1508,7 +1510,7 @@ def start_bot(app_instance=None):
             _stop.wait(delay)
 
     global _thread
-    _thread = threading.Thread(target=run_bot, daemon=True, name="baobun-discord")
+    _thread = threading.Thread(target=run_bot, daemon=True, name="tofu-discord")
     _thread.start()
     print("[INFO] Discord bot thread started.")
 
@@ -1518,7 +1520,7 @@ _thread = None
 
 def restart_bot(app_instance=None, wait: float = 20.0) -> bool:
     """Reconnect with the current token and settings (after the token was changed in
-    BaoBun's Discord bot window). True when a token is set and the bot is starting."""
+    Tofu's Discord bot window). True when a token is set and the bot is starting."""
     stop_bot()
     t = _thread
     if t is not None and t.is_alive():

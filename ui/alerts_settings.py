@@ -26,15 +26,15 @@ def open_alerts_dialog(app, theme):
             fill="x", padx=10, pady=pady)
 
     ctk.CTkLabel(form, text="Discord alerts", font=("Bahnschrift SemiBold", 18, "bold")).pack(pady=(12, 0))
-    label("Get a Discord message when something goes wrong, even when nobody is looking at BaoBun. "
-          "Alerts are sent by the Watchdog (BaoBun's background service).", muted=True)
+    label("Get a Discord message when something goes wrong, even when nobody is looking at Tofu. "
+          "Alerts are sent by the Watchdog (Tofu's background service).", muted=True)
 
     on_var = ctk.BooleanVar(value=mgr.get_setting("alerts_enabled", True) is not False)
     ctk.CTkCheckBox(form, text="Send alerts", variable=on_var,
                     fg_color=theme["accent_blue"]).pack(anchor="w", padx=10, pady=(12, 0))
 
     label("Where to send them", bold=True, pady=(16, 0))
-    label("If the BaoBun Discord bot is running, alerts go to its channel (set alert_channel_id in "
+    label("If the Tofu Discord bot is running, alerts go to its channel (set alert_channel_id in "
           "discord_config.json for a separate channel). Without the bot, paste a webhook: Discord "
           "channel > Edit Channel > Integrations > Webhooks > New Webhook > Copy Webhook URL.", muted=True)
     has_hook = bool(mgr.get_setting("alert_webhook_url", ""))

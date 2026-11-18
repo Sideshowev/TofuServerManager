@@ -2,7 +2,7 @@
 
 Paste the bot token (kept encrypted in settings.json, never shown again), invite
 the bot to your Discord server with one button, then pick channels and roles in
-Discord with /baobun-setup. An older discord_config.json token keeps working
+Discord with /tofu-setup. An older discord_config.json token keeps working
 and is never changed here.
 """
 
@@ -84,7 +84,7 @@ def open_discord_bot_dialog(app, theme):
 
     heading("Run your servers from Discord", top=4)
     note("The bot posts a control panel where friends can see and start servers, sends crash and backup alerts, "
-         "and handles game-night events, mod lists and stats. It runs inside BaoBun - nothing to host.")
+         "and handles game-night events, mod lists and stats. It runs inside Tofu - nothing to host.")
 
     heading("1. Make a bot")
     note("In the Discord developer portal: New Application > give it a name > Bot > Reset Token > Copy. "
@@ -125,7 +125,7 @@ def open_discord_bot_dialog(app, theme):
     if src == "settings":
         def remove():
             mgr.set_setting(S.SETTINGS_TOKEN_KEY, "")
-            state.configure(text="Token removed. The bot stops when BaoBun or the Watchdog restarts.",
+            state.configure(text="Token removed. The bot stops when Tofu or the Watchdog restarts.",
                             text_color=t["text_muted"])
         ctk.CTkButton(row, text="Remove", width=80, fg_color="transparent", border_width=1,
                       border_color=t["border"], command=remove).pack(side="left")
@@ -149,9 +149,9 @@ def open_discord_bot_dialog(app, theme):
     show_invite()
 
     heading("4. Pick channels in Discord")
-    note("In your Discord server type /baobun-setup and choose the control panel channel, where alerts and the "
+    note("In your Discord server type /tofu-setup and choose the control panel channel, where alerts and the "
          "activity feed go, and who may start servers. The Discord server's owner and anyone with Manage Server "
-         "count as BaoBun admins. Everything else can be changed there later.")
+         "count as Tofu admins. Everything else can be changed there later.")
     ctk.CTkButton(dlg, text="Close", fg_color="transparent", border_width=1, border_color=t["border"],
                   command=dlg.destroy).pack(side="right", padx=16, pady=(0, 14))
     return dlg

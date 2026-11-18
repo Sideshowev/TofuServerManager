@@ -180,7 +180,7 @@ class SettingsPanel(ctk.CTkFrame):
         if not form_files:
             self.file_var.set(labels[0])
             self._clear_scroll()
-            self.all_note.configure(text="BaoBun didn't find any settings files for this server. Some games (like "
+            self.all_note.configure(text="Tofu didn't find any settings files for this server. Some games (like "
                                          "Valheim) keep their settings in the launch options - see Essentials. Others "
                                          "write them on their first start - start it once, stop it, then come back.")
         else:

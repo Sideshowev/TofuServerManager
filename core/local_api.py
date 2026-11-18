@@ -2,10 +2,10 @@
 
 The agent listens on 127.0.0.1 only, on a random port, and requires a random
 token. Both are written to runtime/agent.json, which only local users who can
-read the BaoBun folder can see.
+read the Tofu folder can see.
 
 Request:  POST /api   {"action": "server.start", "params": {...}}
-          header  X-BaoBun-Token: <token>
+          header  X-TofuSM-Token: <token>
 Response: the ApiResponse dict ({"success": bool, "data": ..., "error": ...})
 """
 
@@ -62,7 +62,8 @@ class LocalApiServer:
             def do_POST(self):
                 if self.path != "/api":
                     return self._reply(404, {"success": False, "error": "not found"})
-                if not secrets.compare_digest(self.headers.get("X-BaoBun-Token", ""), token):
+                got = self.headers.get("X-TofuSM-Token") or self.headers.get("X-BaoBun-Token") or ""
+                if not secrets.compare_digest(got, token):
                     return self._reply(403, {"success": False, "error": "bad token"})
                 try:
                     length = int(self.headers.get("Content-Length") or 0)
@@ -130,7 +131,8 @@ class AgentClient:
         body = json.dumps({"action": action, "params": params or {}}).encode("utf-8")
         req = urllib.request.Request(
             f"http://{self.host}:{self.port}/api", data=body, method="POST",
-            headers={"Content-Type": "application/json", "X-BaoBun-Token": self.token},
+            # both spellings: an agent still running the old version understands the old one
+            headers={"Content-Type": "application/json", "X-TofuSM-Token": self.token, "X-BaoBun-Token": self.token},
         )
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -141,4 +143,4 @@ class AgentClient:
             except Exception:
                 return {"success": False, "error": f"agent HTTP {e.code}"}
         except Exception as e:
-            return {"success": False, "error": f"Could not reach the Watchdog (BaoBun's background service): {e}"}
+            return {"success": False, "error": f"Could not reach the Watchdog (Tofu's background service): {e}"}

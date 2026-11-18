@@ -165,15 +165,22 @@ def pick_port(preferred: Optional[int], taken: Iterable[int], step: int = 2,
 # --------------------------------------------------------------------------- #
 def firewall_rule_name(server_name: str) -> str:
     safe = re.sub(r'["\r\n]', "", server_name or "server").strip()
-    return "BaoBun - " + safe
+    return "Tofu - " + safe
+
+
+def _old_rule_name(server_name: str) -> str:
+    return "BaoBun - " + re.sub(r'["\r\n]', "", server_name or "server").strip()
 
 
 def firewall_commands(server_name: str, exe: Optional[str], ports: Iterable[int]) -> List[str]:
     """netsh commands that (re)create inbound allow rules for one server:
     one for the server program itself, and TCP+UDP rules for its ports."""
     name = firewall_rule_name(server_name)
+    old = _old_rule_name(server_name)
     cmds = [f'netsh advfirewall firewall delete rule name="{name}"',
-            f'netsh advfirewall firewall delete rule name="{name} (ports)"']
+            f'netsh advfirewall firewall delete rule name="{name} (ports)"',
+            f'netsh advfirewall firewall delete rule name="{old}"',          # made before the rename
+            f'netsh advfirewall firewall delete rule name="{old} (ports)"']
     if exe:
         cmds.append(f'netsh advfirewall firewall add rule name="{name}" dir=in action=allow '
                     f'program="{exe}" enable=yes profile=any')
@@ -190,13 +197,15 @@ def firewall_rule_exists(server_name: str) -> Optional[bool]:
     """True/False on Windows (no admin needed); None if it can't be checked."""
     if os.name != "nt":
         return None
-    name = firewall_rule_name(server_name)
-    try:
-        out = subprocess.run(["netsh", "advfirewall", "firewall", "show", "rule", f"name={name}"],
-                             capture_output=True, text=True, timeout=15, creationflags=_NO_WINDOW)
-    except Exception:
-        return None
-    return out.returncode == 0 and name.lower() in (out.stdout or "").lower()
+    for name in (firewall_rule_name(server_name), _old_rule_name(server_name)):     # old rules still count
+        try:
+            out = subprocess.run(["netsh", "advfirewall", "firewall", "show", "rule", f"name={name}"],
+                                 capture_output=True, text=True, timeout=15, creationflags=_NO_WINDOW)
+        except Exception:
+            return None
+        if out.returncode == 0 and name.lower() in (out.stdout or "").lower():
+            return True
+    return False
 
 
 def run_elevated(commands: List[str]) -> bool:
@@ -205,7 +214,7 @@ def run_elevated(commands: List[str]) -> bool:
     if os.name != "nt" or not commands:
         return False
     import ctypes
-    fd, script = tempfile.mkstemp(prefix="baobun_fw_", suffix=".cmd")
+    fd, script = tempfile.mkstemp(prefix="tofusm_fw_", suffix=".cmd")
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write("@echo off\r\n")
         for c in commands:
@@ -218,7 +227,7 @@ def run_elevated(commands: List[str]) -> bool:
 # --------------------------------------------------------------------------- #
 # SteamCMD progress
 # --------------------------------------------------------------------------- #
-_PROGRESS_RE = re.compile(r"(?:Update state \(0x[0-9a-fA-F]+\)|BaoBun:) ([A-Za-z0-9 ,.\-]+?), progress: ([0-9.]+)")
+_PROGRESS_RE = re.compile(r"(?:Update state \(0x[0-9a-fA-F]+\)|Tofu:|BaoBun:) ([A-Za-z0-9 ,.\-]+?), progress: ([0-9.]+)")
 
 
 def parse_steamcmd_progress(text: str) -> Tuple[Optional[float], Optional[str]]:

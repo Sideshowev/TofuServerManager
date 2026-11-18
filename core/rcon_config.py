@@ -2,13 +2,13 @@
 
 Several popular servers (ARK, Palworld, Conan Exiles, Squad, V Rising, and the
 BattlEye games Arma 3, DayZ and Arma Reforger) ignore
-commands typed into their console window, so BaoBun's console, quick commands,
+commands typed into their console window, so Tofu's console, quick commands,
 in-game warnings and clean stops go over RCON for them. Others (Minecraft,
 Project Zomboid, Source games) read the console fine; RCON is then only used
-when the console isn't attached (e.g. the server was started outside BaoBun).
+when the console isn't attached (e.g. the server was started outside Tofu).
 
 info(srv) reads the port/password from the game's own config (or the launch
-options) - nothing is stored by BaoBun. Profiles are keyed by Steam App ID,
+options) - nothing is stored by Tofu. Profiles are keyed by Steam App ID,
 plus "minecraft".
 """
 

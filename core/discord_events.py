@@ -164,7 +164,7 @@ class EventStore:
                 raise ValueError("There are already %d upcoming events - cancel some first." % MAX_EVENTS)
             eid = uuid.uuid4().hex[:10]
             ev = {"id": eid, "title": title, "when": float(when), "creator": int(creator_id),
-                  "creator_name": str(creator_name)[:60], "channel": int(channel_id or 0), "message": 0,
+                  "creator_name": str(creator_name)[:60], "channel": int(channel_id or 0), "message": 0, "cid": "tofu",
                   "server_id": server_id, "server_name": server_name, "auto_start": bool(auto_start and server_id),
                   "going": [int(creator_id)], "not_going": [], "reminded": False, "woke": False,
                   "announced": False, "created": now}

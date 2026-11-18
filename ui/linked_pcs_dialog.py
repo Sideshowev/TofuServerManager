@@ -1,7 +1,7 @@
 """Desktop "Linked PCs" window (core/linked_pcs.py).
 
-Top: let another BaoBun control this PC (switch, pairing code to copy, firewall).
-Bottom: the other PCs this BaoBun controls (add with a pairing code, test, remove).
+Top: let another Tofu control this PC (switch, pairing code to copy, firewall).
+Bottom: the other PCs this Tofu controls (add with a pairing code, test, remove).
 """
 
 from __future__ import annotations
@@ -34,12 +34,12 @@ def open_linked_pcs_dialog(app, theme):
         lbl.pack(fill="x", padx=12, pady=(0, 4))
         return lbl
 
-    heading("One BaoBun for all your PCs", top=4)
-    note("Servers always run on the PC they're installed on, with its own BaoBun. Link the PCs and this BaoBun - "
+    heading("One Tofu for all your PCs", top=4)
+    note("Servers always run on the PC they're installed on, with its own Tofu. Link the PCs and this Tofu - "
          "its window, web panel and Discord bot - shows and controls the servers on all of them.")
 
     # ------------------------------------------------------------ this PC
-    heading("Let another BaoBun control this PC")
+    heading("Let another Tofu control this PC")
     cfg = LP.host_config(mgr)
     on_var = ctk.BooleanVar(value=cfg["enabled"])
     ctk.CTkSwitch(body, text="Allow it (home network and Tailscale only, port %d)" % cfg["port"], variable=on_var,
@@ -66,7 +66,7 @@ def open_linked_pcs_dialog(app, theme):
                 side="left", padx=10, pady=6)
             ctk.CTkButton(row, text="Copy code", width=96, fg_color=t["accent_blue"],
                           command=lambda c=code: copy(c)).pack(side="right", padx=6)
-        note("The code is a password for this PC - share it only with your own BaoBun.", t["warning"],
+        note("The code is a password for this PC - share it only with your own Tofu.", t["warning"],
              parent=host_box)
         row = ctk.CTkFrame(host_box, fg_color="transparent")
         row.pack(fill="x", padx=12, pady=(2, 6))
@@ -104,7 +104,7 @@ def open_linked_pcs_dialog(app, theme):
     show_host()
 
     # ------------------------------------------------------------ other PCs
-    heading("PCs this BaoBun controls")
+    heading("PCs this Tofu controls")
     pcs_box = ctk.CTkFrame(body, fg_color="transparent")
     pcs_box.pack(fill="x")
 
@@ -122,7 +122,7 @@ def open_linked_pcs_dialog(app, theme):
                 info = "checking…"
                 col = t["text_muted"]
             elif p.get("ok"):
-                info = "online · %d server%s, %d running · BaoBun %s" % (
+                info = "online · %d server%s, %d running · Tofu %s" % (
                     p["servers"], "" if p["servers"] == 1 else "s", p["running"], p.get("version") or "?")
                 col = t["status_online"]
             else:
@@ -164,7 +164,7 @@ def open_linked_pcs_dialog(app, theme):
     row.pack(fill="x", padx=12, pady=(2, 2))
     code_var = ctk.StringVar(value="")
     name_var = ctk.StringVar(value="")
-    ctk.CTkEntry(row, textvariable=code_var, show="•", width=330, placeholder_text="baobun://…").pack(side="left")
+    ctk.CTkEntry(row, textvariable=code_var, show="•", width=330, placeholder_text="tofu://…").pack(side="left")
     ctk.CTkEntry(row, textvariable=name_var, width=140, placeholder_text="name (optional)").pack(side="left", padx=6)
     add_msg = note("")
 

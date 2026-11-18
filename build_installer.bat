@@ -1,10 +1,10 @@
 @echo off
-REM BaoBun - build the Windows installer: build\installer\BaoBun-Setup-<version>.exe
+REM Tofu - build the Windows installer: build\installer\TofuSM-Setup-<version>.exe
 REM Needs Inno Setup 6 (free) - installed automatically with winget the first time.
 REM The version comes from core\version.py - bump it there before a release.
 REM Publish the installer and its .sha256 file on a GitHub release of the repository
 REM named in core\version.py (UPDATE_REPO) and installed copies offer the update.
-title Build the BaoBun installer
+title Build the Tofu installer
 if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"
 if not defined PYTHON (where py >nul 2>&1 && set "PYTHON=py -3")
 if not defined PYTHON set "PYTHON=python"
@@ -48,15 +48,15 @@ if errorlevel 1 (
 )
 
 >>"%STEPS%" echo exe built - making the installer
-echo Making the installer for BaoBun %VER%...
-"%ISCC%" /Q "/DMyAppVersion=%VER%" installer\BaoBun.iss > logs\installer.log 2>&1
+echo Making the installer for Tofu %VER%...
+"%ISCC%" /Q "/DMyAppVersion=%VER%" installer\TofuSM.iss > logs\installer.log 2>&1
 if errorlevel 1 (
   echo INSTALLER FAILED - see logs\installer.log
   powershell -NoProfile -Command "Get-Content logs\installer.log -Tail 20"
   goto end
 )
-set OUT=build\installer\BaoBun-Setup-%VER%.exe
-powershell -NoProfile -Command "(Get-FileHash '%OUT%' -Algorithm SHA256).Hash.ToLower() + '  BaoBun-Setup-%VER%.exe' | Set-Content -Encoding ascii '%OUT%.sha256'"
+set OUT=build\installer\TofuSM-Setup-%VER%.exe
+powershell -NoProfile -Command "(Get-FileHash '%OUT%' -Algorithm SHA256).Hash.ToLower() + '  TofuSM-Setup-%VER%.exe' | Set-Content -Encoding ascii '%OUT%.sha256'"
 set RESULT=0
 >>"%STEPS%" echo installer OK
 echo.

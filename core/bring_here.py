@@ -2,7 +2,7 @@
 
 When the PC that runs a server dies (or you're moving to a new one), every
 server whose backups were copied to the second backup folder can be set up
-again on any PC running BaoBun:
+again on any PC running Tofu:
 
 1. scan(folder)  - look in a backup-copy folder (the "Also copy backups to"
    folder: another drive, a NAS, a shared folder on another PC). Each server
@@ -134,7 +134,8 @@ def _safe_name(name: str) -> str:
 def _manifest(zip_path: str) -> dict:
     try:
         with zipfile.ZipFile(zip_path) as z:
-            return json.loads(z.read("baobun_backup.json"))
+            names = z.namelist()
+            return json.loads(z.read("tofusm_backup.json" if "tofusm_backup.json" in names else "baobun_backup.json"))
     except Exception:
         return {}
 
@@ -173,7 +174,7 @@ def _scan(folder: str, mine_ids: set, mine_names: set) -> List[dict]:
                     "newest": zips[0]["name"], "newest_time": zips[0]["mtime"],
                     "game": _game_label(srv), "here": sub in mine_ids or (name in mine_names),
                     "can_bring": srv is not None,
-                    "why_not": None if srv else "made by an older BaoBun - make one new backup on the old PC, "
+                    "why_not": None if srv else "made by an older Tofu - make one new backup on the old PC, "
                                                 "or add the server here and use Restore"})
     return out
 
@@ -192,7 +193,7 @@ def _game_label(srv: Optional[dict]) -> str:
 
 def scan(mgr, folder: Optional[str] = None, timeout: float = 15.0) -> dict:
     """{"folder", "servers": [...]} or {"folder", "error"}. Looked up with a time
-    limit, so an offline PC or NAS can't freeze BaoBun."""
+    limit, so an offline PC or NAS can't freeze Tofu."""
     folder = (folder or mgr.get_setting("backup_mirror_dir", "") or "").strip()
     if not folder:
         return {"folder": "", "error": "Pick the folder the backups were copied to."}
@@ -337,7 +338,7 @@ def bring(mgr, entry: dict, base_dir: str, backup: Optional[str] = None, dir_mem
     from core import game_installers as gi
     k = gi.kind(srv)
     if k is None:
-        notes.append("BaoBun can't download this game - copy its server files into %s." % p["directory"])
+        notes.append("Tofu can't download this game - copy its server files into %s." % p["directory"])
     elif _norm(p["directory"]) in installed:
         pass                                     # another map of the same install
     else:

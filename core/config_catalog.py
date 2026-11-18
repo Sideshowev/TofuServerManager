@@ -160,7 +160,7 @@ MC = _merge(
         "pause-when-empty-seconds": ("Pause the server when empty for (seconds)", "0 = never pause.", I, _x(min=0)),
     }),
     _build("Remote admin", {
-        "enable-rcon": ("Turn on RCON", "Lets BaoBun send commands when the console isn't attached.", B),
+        "enable-rcon": ("Turn on RCON", "Lets Tofu send commands when the console isn't attached.", B),
         "rcon.port": ("RCON port", None, I, _x(min=1, max=65535, default=25575)),
         "rcon.password": ("RCON password", None, P),
         "enable-query": ("Turn on the query port", None, B),
@@ -239,7 +239,7 @@ PAL = _merge(
         "bIsUseBackupSaveData": ("Keep backup saves", None, B),
     }),
     _build("Remote admin", {
-        "RCONEnabled": ("Turn on RCON", "BaoBun needs this for warnings, saves and clean stops.", B),
+        "RCONEnabled": ("Turn on RCON", "Tofu needs this for warnings, saves and clean stops.", B),
         "RCONPort": ("RCON port", None, I, _x(min=1, max=65535, default=25575)),
         "RESTAPIEnabled": ("Turn on the REST API", None, B),
         "RESTAPIPort": ("REST API port", None, I, _x(min=1, max=65535, default=8212)),
@@ -316,7 +316,7 @@ ARK_GUS = _merge(
         "OxygenSwimSpeedStatMultiplier": _mult("Swim speed from oxygen", group="Combat & survival"),
     }, ARK_SS),
     _build("Remote admin", {
-        "RCONEnabled": ("Turn on RCON", "BaoBun needs this for warnings, saves and clean stops.", B),
+        "RCONEnabled": ("Turn on RCON", "Tofu needs this for warnings, saves and clean stops.", B),
         "RCONPort": ("RCON port", None, I, _x(min=1, max=65535, default=27020)),
         "RCONServerGameLogBuffer": ("RCON log buffer (lines)", None, I, _x(min=0)),
     }, ARK_SS),

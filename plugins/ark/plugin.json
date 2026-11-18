@@ -3,7 +3,7 @@
   "name": "ARK: Survival Ascended / Evolved",
   "version": "1.0.0",
   "description": "ARK cluster plugin with multi-map support, custom maps, and boost profiles",
-  "author": "BaoBun",
+  "author": "Tofu",
   "game_name": "ARK: Survival Ascended",
   "game_id": "2430930",
   "capabilities": [
@@ -17,5 +17,5 @@
     "cluster"
   ],
   "dependencies": ["steamcmd"],
-  "min_baobun_version": "1.0.0"
+  "min_app_version": "1.0.0"
 }

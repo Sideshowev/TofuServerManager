@@ -13,7 +13,7 @@ files) plus how many ports in a row the game uses ("span": Valheim uses
 * fix_all(mgr)        - move servers off each other's ports (running ones stay put)
 * start_check(mgr, srv) - blockers / warnings before a server starts
 
-Ports marked "local" (RCON, telnet, REST API) are only used by BaoBun on this PC,
+Ports marked "local" (RCON, telnet, REST API) are only used by Tofu on this PC,
 so they are never opened in the firewall or forwarded.
 """
 
@@ -140,7 +140,7 @@ def _bare_set(args: str, key: str, value) -> str:
 
 
 def _ark_get(args: str, key: str) -> Optional[str]:
-    """ARK reads ports as -Port=7777 or ?Port=7777 on the map - BaoBun's cluster maps use -flags."""
+    """ARK reads ports as -Port=7777 or ?Port=7777 on the map - Tofu's cluster maps use -flags."""
     m = re.search(r"(?i)(?:^|\s)-%s=(\S+)" % re.escape(key), args or "")
     if m:
         return m.group(1)
@@ -204,8 +204,8 @@ def write_port(srv: dict, where, port: int):
 # --------------------------------------------------------------------------- #
 def rows(mgr, srv: dict) -> List[dict]:
     """[{role, label, port, span, local, source, writable}] - source is "set" (in the
-    game's settings), "pending" (BaoBun will write it once the config file exists),
-    "default" (the game's default) or "baobun" (only known from BaoBun's own fields)."""
+    game's settings), "pending" (Tofu will write it once the config file exists),
+    "default" (the game's default) or "tofu" (only known from Tofu's own fields)."""
     sp = spec(srv)
     pending = srv.get("portsPending") or {}
     out = []
@@ -216,23 +216,23 @@ def rows(mgr, srv: dict) -> List[dict]:
                 port, source = _int(pending.get(r["role"])), "pending"
             if port is None and r["role"] == "game" and _int(srv.get("port")) and r["where"][0] not in (
                     "launch", "ark_url", "ark", "bare"):
-                # file-based setting we couldn't read (file missing / share offline): trust BaoBun's field
-                port, source = _int(srv.get("port")), "baobun"
+                # file-based setting we couldn't read (file missing / share offline): trust Tofu's field
+                port, source = _int(srv.get("port")), "tofu"
             if port is None:
                 port, source = r["default"], "default"
             out.append({"role": r["role"], "label": r["label"], "port": port, "span": r["span"],
                         "local": r["local"], "source": source, "writable": True})
         return out
-    # games without a spec: what BaoBun knows (Edit Server port, -Port= style options)
+    # games without a spec: what Tofu knows (Edit Server port, -Port= style options)
     seen = set()
     if _int(srv.get("port")):
         p = _int(srv.get("port"))
         out.append({"role": "game", "label": "Game", "port": p, "span": 2 if srv.get("appId") else 1,
-                    "local": False, "source": "baobun", "writable": False})
+                    "local": False, "source": "tofu", "writable": False})
         seen.add(p)
     if _int(srv.get("queryPort")) and _int(srv.get("queryPort")) not in seen:
         out.append({"role": "query", "label": "Query", "port": _int(srv.get("queryPort")), "span": 1,
-                    "local": False, "source": "baobun", "writable": False})
+                    "local": False, "source": "tofu", "writable": False})
         seen.add(_int(srv.get("queryPort")))
     args = srv.get("launchArgs") or ""
     for label, rx in (("Game", r"(?i)[-?&]Port=(\d+)"), ("Query", r"(?i)[-?&]QueryPort=(\d+)"),
@@ -481,7 +481,7 @@ def fix_all(mgr, user: str = "system", check_os: bool = True) -> dict:
             continue
         if not spec(s):
             skipped.append({"id": s["id"], "name": s.get("name"),
-                            "reason": "BaoBun doesn't know where this game keeps its ports - change them by hand"})
+                            "reason": "Tofu doesn't know where this game keeps its ports - change them by hand"})
             taken |= mine
             continue
         try:
@@ -501,7 +501,7 @@ def fix_all(mgr, user: str = "system", check_os: bool = True) -> dict:
 # start-time check
 # --------------------------------------------------------------------------- #
 def start_check(mgr, srv: dict, check_os: bool = True) -> dict:
-    """{"block": [text], "warn": [text]} - block when a running BaoBun server owns
+    """{"block": [text], "warn": [text]} - block when a running Tofu server owns
     one of this server's ports; warn when some other program does."""
     block, warn = [], []
     my = rows(mgr, srv)
@@ -537,7 +537,7 @@ def start_check(mgr, srv: dict, check_os: bool = True) -> dict:
 
 
 def _rcon_state(srv: dict) -> Optional[str]:
-    """"on" / "off" for games that need RCON for commands (and BaoBun can set it up), else None."""
+    """"on" / "off" for games that need RCON for commands (and Tofu can set it up), else None."""
     try:
         from core import rcon_config, rcon_setup
         prof = rcon_config.profile(srv)

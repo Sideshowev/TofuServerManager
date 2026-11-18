@@ -1,5 +1,5 @@
-"""Desktop "new BaoBun version" window (core/updates.py): what's new, then
-Download and install - the installer replaces BaoBun and starts it again."""
+"""Desktop "new Tofu version" window (core/updates.py): what's new, then
+Download and install - the installer replaces Tofu and starts it again."""
 
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ def open_update_dialog(app, theme, info=None):
     mgr = app.manager
     info = info or updates.cached(mgr)
     dlg = ctk.CTkToplevel(app)
-    dlg.title("Update BaoBun")
+    dlg.title("Update Tofu")
     dlg.transient(app)
     app.center_window(dlg, 560, 480, fit=True)
-    ctk.CTkLabel(dlg, text="BaoBun %s" % (info.get("latest") or "?"), anchor="w",
+    ctk.CTkLabel(dlg, text="Tofu %s" % (info.get("latest") or "?"), anchor="w",
                  font=("Bahnschrift SemiBold", 19, "bold"), text_color=t["text_light"]).pack(fill="x", padx=18,
                                                                                             pady=(16, 2))
     ctk.CTkLabel(dlg, text="You have %s. Your servers, settings and backups stay as they are." % info["current"],
@@ -28,7 +28,7 @@ def open_update_dialog(app, theme, info=None):
     notes.pack(fill="both", expand=True, padx=16, pady=10)
     notes.insert("1.0", info.get("notes") or "No notes for this version.")
     notes.configure(state="disabled")
-    status = ctk.CTkLabel(dlg, text="Game servers keep running. BaoBun closes, updates and opens again; the "
+    status = ctk.CTkLabel(dlg, text="Game servers keep running. Tofu closes, updates and opens again; the "
                                     "Watchdog moves to the new version when nobody is playing.",
                           anchor="w", justify="left", wraplength=520, text_color=t["text_muted"])
     status.pack(fill="x", padx=18)

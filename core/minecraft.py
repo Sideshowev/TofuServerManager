@@ -3,7 +3,7 @@ server jar, and the Server List Ping that reports players.
 
 A Minecraft server is "server.jar" (vanilla/Paper/Fabric) or, for Forge and
 NeoForge 1.17+, a run.bat that points Java at an argument file. Windows can't
-run either directly, so BaoBun builds the java command itself:
+run either directly, so Tofu builds the java command itself:
 
     java -Xms1024M -Xmx4096M [javaArgs] -jar server.jar nogui
     java -Xmx4096M @user_jvm_args.txt @libraries/.../win_args.txt nogui
@@ -131,7 +131,7 @@ def _major(v: str) -> Optional[int]:
 
 
 def find_javas(extra: Optional[List[str]] = None) -> List[dict]:
-    """Java installs on this PC: [{"path", "major"}] (BaoBun's own downloads first)."""
+    """Java installs on this PC: [{"path", "major"}] (Tofu's own downloads first)."""
     name = _java_exe_name()
     cands: List[str] = list(extra or [])
     cands += glob.glob(os.path.join(java_runtime_dir(), "*", "bin", name))
@@ -202,7 +202,7 @@ def java_download_info(major: int) -> dict:
 
 
 def ensure_java(required: int, progress=None) -> str:
-    """A java.exe for this major version, downloading Temurin into BaoBun's
+    """A java.exe for this major version, downloading Temurin into Tofu's
     runtime folder when the PC has none."""
     found = pick_java(required)
     if found:
@@ -277,7 +277,7 @@ def resolve_java(srv: dict) -> str:
     if not found:
         raise RuntimeError(
             "This Minecraft server needs Java %d, which isn't installed. Use Install / Update on the "
-            "server (BaoBun downloads Java for you) or install Temurin %d from adoptium.net." % (need, need))
+            "server (Tofu downloads Java for you) or install Temurin %d from adoptium.net." % (need, need))
     return found
 
 

@@ -1,4 +1,4 @@
-"""Desktop smoke test: really opens BaoBun's windows with customtkinter and closes
+"""Desktop smoke test: really opens Tofu's windows with customtkinter and closes
 them again. It catches the mistakes the engine tests can't see (a wrong option
 name, mixing pack and grid, a typo in a button's callback setup) - it needs a
 desktop, so it runs on Windows (selftest.bat / run_tests.bat) and is skipped on a
@@ -23,7 +23,7 @@ try:
     import customtkinter as ctk
 
     class FakeApp(ctk.CTk):
-        """Just enough of BaoBunApp for the windows to open."""
+        """Just enough of TofuApp for the windows to open."""
         manager = None
         engine = None
         selected_server_id = "vs"
@@ -284,7 +284,7 @@ class DesktopSmokeTests(unittest.TestCase):
                      "bring_servers_here", "show_first_run", "show_discord_bot_dialog",
                      "show_players_dialog", "show_update_dialog",
                      "show_linked_pcs_dialog"):
-            self.assertTrue(hasattr(app.BaoBunApp, name), name)
+            self.assertTrue(hasattr(app.TofuApp, name), name)
 
 
 if __name__ == "__main__":

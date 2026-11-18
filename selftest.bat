@@ -1,7 +1,7 @@
 @echo off
-REM BaoBun Control Panel - self test. Runs the engine tests with fake servers in
+REM Tofu Server Manager - self test. Runs the engine tests with fake servers in
 REM temporary folders; your real servers and settings are not touched.
-title BaoBun self test
+title Tofu self test
 REM Finds Python on any PC: the "py" launcher that comes with python.org Python,
 REM else "python" on PATH. Set PYTHON yourself first to use a specific one.
 if not defined PYTHON if exist "%~dp0find_python.bat" call "%~dp0find_python.bat"

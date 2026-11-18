@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BaoBun Control Panel</title>
+<title>Tofu Server Manager</title>
 <link rel="icon" href="/favicon.png">
 <style>
 :root{
@@ -202,7 +202,7 @@ body.operator .mgr-only{display:none!important}
 </head>
 <body>
 <header>
-  <img src="/logo.png" alt="" class="logo" onerror="this.remove()"><h1>BaoBun Control Panel</h1>
+  <img src="/logo.png" alt="" class="logo" onerror="this.remove()"><h1>Tofu Server Manager</h1>
   <span class="sp"></span>
   <div class="chip" id="me"><span class="av"></span><span><span id="me-name">…</span><br><span class="role" id="me-role"></span></span></div>
   <button class="ghost" onclick="location.href='/logout'">Log out</button>
@@ -381,13 +381,13 @@ body.operator .mgr-only{display:none!important}
 <div class="modal" id="m-ports"><div class="sheet small" style="width:min(820px,100%)">
   <div class="sh"><h2>Ports</h2><button class="ghost" onclick="closeModal('m-ports')">Close</button></div>
   <div class="body">
-    <p class="note" style="margin-top:0">Every server needs its own ports - lots of games all default to 7777 or 27015. RCON ports are only used by BaoBun on the server PC: they are never opened in the firewall or forwarded on your router.</p>
+    <p class="note" style="margin-top:0">Every server needs its own ports - lots of games all default to 7777 or 27015. RCON ports are only used by Tofu on the server PC: they are never opened in the firewall or forwarded on your router.</p>
     <div id="pt-banner"></div>
     <div id="pt-list" class="note">Loading…</div>
   </div>
 </div></div>
 <div id="toast"></div>
-<div id="offline">Lost contact with BaoBun on the server PC - retrying…</div>
+<div id="offline">Lost contact with Tofu on the server PC - retrying…</div>
 
 <script>
 "use strict";
@@ -473,7 +473,7 @@ function renderGrid(){
       stats = parts.join("   ") || "Running"; }
     else if(st.installed===false && !BUSY.includes(s)) stats = "Game files not installed yet";
     else if(st.exeMissing && !BUSY.includes(s)) stats = "Can't find "+st.exeMissing+" - check the program in the desktop app";
-    else if(s==="unreachable") stats = `Can't reach ${st.pcName} - is it on, with BaoBun's Watchdog running?`;
+    else if(s==="unreachable") stats = `Can't reach ${st.pcName} - is it on, with Tofu's Watchdog running?`;
     else stats = s==="crashed" ? (st.crashHelp&&st.crashHelp.length ? "Stopped: "+st.crashHelp[0].title : `Stopped unexpectedly (exit code ${st.exitCode})`) : BUSY.includes(s) ? (STATE[s]+"…") : (srv.manualStart?"Ready to start · manual start":"Ready to start");
     c.querySelector(".stats").textContent = stats;
     c.querySelector(".stats").title = (st.players||[]).length ? "Online: "+st.players.map(p=>p.name).join(", ") : "";
@@ -549,7 +549,7 @@ async function loadActivity(){
   try{ const rows = (await act("activity.list",{limit:25})).activity || [];
     const nice = {server_start:"started",server_stop:"stopped",server_crash:"crashed",backup_create:"backed up",backup_restore:"restored a backup of",
       console_command:"sent a command to",settings_change:"changed settings of",schedule_change:"changed schedules of",server_update:"updated",server_add:"added",server_remove:"removed",mods_install:"installed a mod on",backup_download:"downloaded a backup of",game_settings:"changed game settings of",port_forward:"forwarded router ports for",port_forward_remove:"removed router forwards for",mods_update:"updated mods on",mods_option:"changed mod options of",mods_remove:"removed a mod from",mods_enable:"turned on a mod on",mods_disable:"turned off a mod on",mods_pin:"kept a mod at its version on",mods_unpin:"let a mod update again on",mods_rollback:"rolled back mods on",firewall_open:"opened the firewall for"};
-    $("activity").innerHTML = rows.length ? rows.map(r=>{ const who = r.user_id==="system"?"BaoBun":r.user_id.replace(/^(web|discord):/,"");
+    $("activity").innerHTML = rows.length ? rows.map(r=>{ const who = r.user_id==="system"?"Tofu":r.user_id.replace(/^(web|discord):/,"");
       const t = new Date(r.timestamp*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
       return `<div class="act"><span class="t">${t}</span><b>${esc(who)}</b> ${esc(nice[r.action]||r.action)} ${esc(r.server||"")}</div>`; }).join("") : "Nothing yet.";
   }catch(e){ $("activity").textContent = "Activity unavailable."; }
@@ -567,26 +567,26 @@ async function loadHost(){
   const list = a => a.length ? a.map(x=>`${esc(x.name)} <span class="note">(${esc(x.why)})</span>`).join(", ") : "none";
   box.innerHTML = `
     <h3 style="margin:0 0 6px">Nightly restart</h3>
-    <p class="note" style="margin-top:0">Every night BaoBun warns players (${n.warn.join(", ")} min before), stops every server so it saves, backs up and restarts Windows. Afterwards only servers people played on in the last few days come back.</p>
+    <p class="note" style="margin-top:0">Every night Tofu warns players (${n.warn.join(", ")} min before), stops every server so it saves, backs up and restarts Windows. Afterwards only servers people played on in the last few days come back.</p>
     <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-on", n.enabled)}<span>Restart the server PC every night at</span>
       <input id="hs-time" value="${esc(n.time)}" style="width:90px" ${dis}><span class="note">(e.g. 05:00 or 5am - server PC's clock)</span></div>
     <div class="row wrap" style="gap:12px;align-items:center;margin-top:10px">${sw("hs-backup", n.backup)}<span>Back up the worlds first</span></div>
     <div class="row wrap" style="gap:8px;align-items:center;margin-top:10px"><span>Bring back servers with players in the last</span><input id="hs-days" type="number" min="1" max="60" value="${n.days}" style="width:70px" ${dis}><span>days</span></div>
-    ${r.boot_task===false&&n.enabled?`<div class="help" style="margin-top:10px">BaoBun doesn't start by itself when the server PC boots yet, so servers wait until someone signs in. Set up "Start BaoBun when the PC turns on" in BaoBun on the server PC (Settings → Nightly restart) - it needs a Windows admin prompt there.</div>`:""}
+    ${r.boot_task===false&&n.enabled?`<div class="help" style="margin-top:10px">Tofu doesn't start by itself when the server PC boots yet, so servers wait until someone signs in. Set up "Start Tofu when the PC turns on" in Tofu on the server PC (Settings → Nightly restart) - it needs a Windows admin prompt there.</div>`:""}
     <p class="note" style="margin-top:10px"><b>If it ran now</b> - comes back: ${list(p.bring_back)}. Stays asleep: ${list(p.sleeping)}.<br>Next restart: ${n.enabled?hsWhen(p.next_run):"off"}${p.last&&p.last.at?" · last one: "+hsWhen(p.last.at)+(p.last.rebooted?"":" (servers only)"):""}</p>
     <h3 style="margin:18px 0 6px">Backups on another PC</h3>
-    <p class="note" style="margin-top:0">Every backup is also copied here (another drive, or a shared folder on another PC like <code>\\\\BACKUP-PC\\BaoBun-backups</code>). Blank = off.</p>
-    <div class="row" style="gap:8px"><input id="hs-mirror" class="grow" value="${esc(r.backup_mirror_dir)}" placeholder="e.g. \\\\BACKUP-PC\\BaoBun-backups" ${dis}>${admin?'<button class="ghost small" id="hs-mtest">Test</button>':""}</div>
+    <p class="note" style="margin-top:0">Every backup is also copied here (another drive, or a shared folder on another PC like <code>\\\\BACKUP-PC\\TofuSM-backups</code>). Blank = off.</p>
+    <div class="row" style="gap:8px"><input id="hs-mirror" class="grow" value="${esc(r.backup_mirror_dir)}" placeholder="e.g. \\\\BACKUP-PC\\TofuSM-backups" ${dis}>${admin?'<button class="ghost small" id="hs-mtest">Test</button>':""}</div>
     <p class="note" id="hs-mres">${r.mirror_status&&r.mirror_status.ok===false?"⚠ Last copy failed: "+esc(r.mirror_status.error||""):r.mirror_status&&r.mirror_status.ok?"Last copy: "+hsWhen(r.mirror_status.last)+" ✓":""}</p>
-    ${r.boot_mode==="s4u"&&/^(\\\\|\/\/)/.test(r.backup_mirror_dir)?`<div class="help">BaoBun starts at boot without network access, so copies to a shared folder fail after a restart. On the server PC: Settings → Nightly restart → "Set up with network access".</div>`:""}
-    <h3 style="margin:18px 0 6px">BaoBun updates</h3>
+    ${r.boot_mode==="s4u"&&/^(\\\\|\/\/)/.test(r.backup_mirror_dir)?`<div class="help">Tofu starts at boot without network access, so copies to a shared folder fail after a restart. On the server PC: Settings → Nightly restart → "Set up with network access".</div>`:""}
+    <h3 style="margin:18px 0 6px">Tofu updates</h3>
     <p class="note" style="margin-top:0" id="hs-ver"></p>
-    <p class="note" style="margin-top:0">When a new BaoBun is deployed to the server PC${u&&u.running_text?" (running build from "+esc(u.running_text)+")":""}:</p>
+    <p class="note" style="margin-top:0">When a new Tofu is deployed to the server PC${u&&u.running_text?" (running build from "+esc(u.running_text)+")":""}:</p>
     <select id="hs-upd" style="max-width:420px" ${dis}><option value="when_idle">Switch by itself when nobody is playing</option><option value="manual">Only when someone clicks Switch now</option></select>
     ${u&&u.ready?`<p class="note">A newer build (${esc(u.built_text||"")}) is waiting.${admin?' <button class="go small" id="hs-sw">Switch now</button>':""}</p>`:`<p class="note">It's up to date.</p>`}
     <h3 style="margin:18px 0 6px">PC-down alerts</h3>
     <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-hb", r.heartbeat_enabled)}<span>Let another PC check that the server PC is alive (port 8791)</span></div>
-    <p class="note">The watching itself is set up in BaoBun on your other PC (Settings → PC-down alerts). Turning this on or off applies after BaoBun restarts.</p>
+    <p class="note">The watching itself is set up in Tofu on your other PC (Settings → PC-down alerts). Turning this on or off applies after Tofu restarts.</p>
     <h3 style="margin:18px 0 6px">Public status page</h3>
     <p class="note" style="margin-top:0">A read-only page friends can open without logging in: which servers are up, players, the address to join and the mod list. No buttons, passwords or folders on it. It runs on its own port, separate from this panel.</p>
     <div class="row wrap" style="gap:12px;align-items:center">${sw("hs-sp", sp.enabled)}<span>Turn on the status page on port</span><input id="hs-spport" type="number" min="1024" max="65535" value="${sp.port}" style="width:90px" ${dis}></div>
@@ -595,20 +595,20 @@ async function loadHost(){
     <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Page title</span><input id="hs-sptitle" class="grow" value="${esc(sp.title)}" ${dis}></div>
     <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Address players type</span><input id="hs-spaddr" class="grow" value="${esc(sp.address)}" placeholder="blank = this PC's public IP, e.g. play.example.com" ${dis}></div>
     <div class="row wrap" style="gap:8px;align-items:center;margin-top:8px"><span style="min-width:150px">Discord invite</span><input id="hs-spinv" class="grow" value="${esc(sp.invite)}" placeholder="https://discord.gg/..." ${dis}></div>
-    ${sp.enabled?`<p class="note">Open it at <a href="http://${esc(location.hostname)}:${sp.port}/" target="_blank" rel="noopener">http://${esc(location.hostname)}:${sp.port}/</a>${sp.public?"":" (home network and Tailscale)"}. Windows Firewall needs a rule for the port - BaoBun on the server PC can add it (Web Panel window).</p>`:""}
+    ${sp.enabled?`<p class="note">Open it at <a href="http://${esc(location.hostname)}:${sp.port}/" target="_blank" rel="noopener">http://${esc(location.hostname)}:${sp.port}/</a>${sp.public?"":" (home network and Tailscale)"}. Windows Firewall needs a rule for the port - Tofu on the server PC can add it (Web Panel window).</p>`:""}
     ${admin?`<h3 style="margin:18px 0 6px">Something not working?</h3><p class="note" style="margin-top:0">Download a diagnostics zip - logs, settings and status with passwords, tokens and internet addresses removed - to share when asking for help. <a class="ghost small" href="/api/diagnostics" download>Download diagnostics</a></p>`:""}
     ${admin?`<div class="row" style="margin-top:14px"><span class="grow"></span><button class="primary" id="hs-save">Save</button></div>`:`<p class="note">Only admins can change these.</p>`}`;
   $("hs-upd").value = r.self_update;
   act("app.version",{}).then(v=>{ const el=$("hs-ver"); if(!el) return;
-    el.innerHTML = `This is BaoBun ${esc(v.current)}.` + (v.newer?` <b>${esc(v.latest)} is available</b> - install it from BaoBun on the server PC.`:v.enabled?" It's the newest version.":"")
+    el.innerHTML = `This is Tofu ${esc(v.current)}.` + (v.newer?` <b>${esc(v.latest)} is available</b> - install it from Tofu on the server PC.`:v.enabled?" It's the newest version.":"")
       + (admin&&v.enabled?' <button class="ghost small" id="hs-vchk">Check now</button>':"");
-    if($("hs-vchk")) $("hs-vchk").onclick = async()=>{ try{ const c = await act("app.update_check",{}); toast(c.error?"Couldn't check: "+c.error:c.newer?"BaoBun "+c.latest+" is available":"It's the newest version", 6000); }catch(e){ toast(e.message,6000); } };
+    if($("hs-vchk")) $("hs-vchk").onclick = async()=>{ try{ const c = await act("app.update_check",{}); toast(c.error?"Couldn't check: "+c.error:c.newer?"Tofu "+c.latest+" is available":"It's the newest version", 6000); }catch(e){ toast(e.message,6000); } };
   }).catch(()=>{});
-  if($("hs-sw")) $("hs-sw").onclick = async()=>{ if(!confirm("Switch to the new BaoBun now? Game servers keep running.")) return;
+  if($("hs-sw")) $("hs-sw").onclick = async()=>{ if(!confirm("Switch to the new Tofu now? Game servers keep running.")) return;
     try{ await act("agent.update_now",{}); toast("Switching - back in about a minute", 8000); closeModal("m-host"); }catch(e){ toast("Failed: "+e.message, 7000); } };
   if(!admin) return;
   $("hs-mtest").onclick = async()=>{ $("hs-mres").textContent = "Checking…";
-    try{ const t = await act("host.mirror_test",{path:$("hs-mirror").value.trim()}); $("hs-mres").textContent = t.ok ? `✓ BaoBun can write there (${t.free_gb} GB free).` : "✕ Can't write there: "+(t.error||""); }
+    try{ const t = await act("host.mirror_test",{path:$("hs-mirror").value.trim()}); $("hs-mres").textContent = t.ok ? `✓ Tofu can write there (${t.free_gb} GB free).` : "✕ Can't write there: "+(t.error||""); }
     catch(e){ $("hs-mres").textContent = "✕ "+e.message; } };
   $("hs-save").onclick = async()=>{
     const values = {nightly_restart_enabled:$("hs-on").checked, nightly_restart_time:$("hs-time").value.trim(), nightly_backup:$("hs-backup").checked,
@@ -620,26 +620,26 @@ async function loadHost(){
     try{ await act("host.settings_save",{values}); toast("Saved server PC settings"); loadHost(); }catch(e){ toast("Failed: "+e.message, 7000); } };
 }
 
-/* ---------- BaoBun self-update ---------- */
+/* ---------- Tofu self-update ---------- */
 async function loadSelfUpdate(){
   let r; try{ r = await act("agent.update_status",{}); }catch(e){ return; }
   const bar = $("su-bar");
   if(!r.ready){
     let v = {}; try{ v = await act("app.version",{}); }catch(e){}
     if(v.newer){ bar.hidden = false; bar.style.display = "flex";
-      bar.innerHTML = `<div style="flex:1"><b>BaoBun ${esc(v.latest)} is available</b> (the server PC has ${esc(v.current)}). Install it from BaoBun on the server PC - press the blue "BaoBun ${esc(v.latest)}" button at the top.${v.page?` <a href="${esc(v.page)}" target="_blank" rel="noopener">What's new</a>`:""}</div>`; return; }
+      bar.innerHTML = `<div style="flex:1"><b>Tofu ${esc(v.latest)} is available</b> (the server PC has ${esc(v.current)}). Install it from Tofu on the server PC - press the blue "Tofu ${esc(v.latest)}" button at the top.${v.page?` <a href="${esc(v.page)}" target="_blank" rel="noopener">What's new</a>`:""}</div>`; return; }
     bar.hidden = true; bar.style.display = "none"; return; }
   bar.hidden = false; bar.style.display = "flex";
   const lost = (r.console_servers||[]).length ? ` ${r.console_servers.map(esc).join(", ")} will lose their console window until restarted.` : "";
   const auto = r.policy==="when_idle" ? " It switches by itself when nobody is playing" + ((r.console_servers||[]).length?" and those servers are stopped":"") + ", or at the nightly restart." : "";
-  bar.innerHTML = `<div style="flex:1"><b>A newer BaoBun is on the server PC</b> (built ${esc(r.built_text||"")}).${auto}${lost}</div>${ROLE==="admin"?'<button class="go small" id="su-go">Switch now</button>':""}`;
-  if($("su-go")) $("su-go").onclick = async()=>{ if(!confirm("Switch to the new BaoBun now? Game servers keep running; this page reconnects in about a minute.")) return;
+  bar.innerHTML = `<div style="flex:1"><b>A newer Tofu is on the server PC</b> (built ${esc(r.built_text||"")}).${auto}${lost}</div>${ROLE==="admin"?'<button class="go small" id="su-go">Switch now</button>':""}`;
+  if($("su-go")) $("su-go").onclick = async()=>{ if(!confirm("Switch to the new Tofu now? Game servers keep running; this page reconnects in about a minute.")) return;
     try{ await act("agent.update_now",{}); toast("Switching - back in about a minute", 8000); bar.hidden = true; bar.style.display="none"; }catch(e){ toast("Failed: "+e.message, 7000); } };
 }
 
 /* ---------- ports ---------- */
 let PT = null;
-const PT_SRC = {default:"game default", pending:"set on next start", baobun:"from Edit Server", set:""};
+const PT_SRC = {default:"game default", pending:"set on next start", tofu:"from Edit Server", set:""};
 function openPorts(){ openModal("m-ports"); loadPorts(); }
 async function loadPorts(){
   try{ PT = await act("ports.plan",{}); }catch(e){ $("pt-list").textContent = "Couldn't read ports: "+e.message; return; }
@@ -662,8 +662,8 @@ function renderPorts(edit){
       : (s.rcon==="off"?`<button class="small" data-rcon="${esc(s.id)}">Turn on RCON</button>`:"")
         + (s.known ? (editing?`<button class="primary small" data-save="${esc(s.id)}">Save</button><button class="ghost small" data-cancel>Cancel</button>`:`<button class="ghost small" data-edit="${esc(s.id)}">Change</button>`) : "");
     return `<div class="pt-srv" id="pt-${esc(s.id)}"><div class="hd"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:${s.running?"var(--ok)":"var(--off)"}"></span><b>${esc(s.name)}</b>${btns}</div>
-      ${rows?`<table><tbody>${rows}</tbody></table>`:`<div class="note">BaoBun doesn't know this game's ports - set the game port in its Settings.</div>`}
-      ${s.rows.length&&!s.known?`<div class="note">BaoBun only knows the port from its Settings for this game - change it in the game's own settings too.</div>`:""}
+      ${rows?`<table><tbody>${rows}</tbody></table>`:`<div class="note">Tofu doesn't know this game's ports - set the game port in its Settings.</div>`}
+      ${s.rows.length&&!s.known?`<div class="note">Tofu only knows the port from its Settings for this game - change it in the game's own settings too.</div>`:""}
       <div data-out></div></div>`; }).join("") || `<div class="note">No servers yet.</div>`;
   const L = $("pt-list");
   L.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>renderPorts(b.dataset.edit));
@@ -736,11 +736,11 @@ function renderArkHealth(r){
   const maps = r.maps.map(m=>`<tr><td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${m.running?"var(--ok)":"var(--off)"};margin-right:6px"></span><b>${esc(m.name)}</b></td><td class="note">${esc(m.map)}</td><td class="note">${m.mods.length} mod${m.mods.length===1?"":"s"}</td><td class="note">${esc(m.save_dir||"")}</td><td class="note">${m.own_install?"own install folder":""}${m.job&&m.job.state==="copying"?" copying… "+Math.round(m.job.pct||0)+"%":""}</td></tr>`).join("");
   const me = r.maps.find(m=>m.id===CUR), job = me&&me.job;
   const sep = !r.cluster||!me ? "" : me.own_install ? `<p class="note">${esc(me.name)} has its own install folder, so it can have its own creatures, loot and rules - pick <b>This map only</b> above those tabs.</p>`
-    : `<div class="ak-iss tip" style="margin-top:12px"><span class="dot"></span><div style="flex:1"><div class="t">Different creatures, loot or rules on ${esc(me.name)}?</div><div class="f">ARK keeps one set of settings per install folder, and this map shares its folder with other maps. BaoBun can copy the install so ${esc(me.name)} gets its own (same game, mods and world), and points every map at one shared cluster folder so uploads keep working both ways. The map has to be stopped; the copy takes a while and needs as much free disk space as the install.</div></div>${admin?`<button class="small" id="ak-sep" ${job&&job.state==="copying"?"disabled":""}>Give it its own folder…</button>`:""}</div>`;
+    : `<div class="ak-iss tip" style="margin-top:12px"><span class="dot"></span><div style="flex:1"><div class="t">Different creatures, loot or rules on ${esc(me.name)}?</div><div class="f">ARK keeps one set of settings per install folder, and this map shares its folder with other maps. Tofu can copy the install so ${esc(me.name)} gets its own (same game, mods and world), and points every map at one shared cluster folder so uploads keep working both ways. The map has to be stopped; the copy takes a while and needs as much free disk space as the install.</div></div>${admin?`<button class="small" id="ak-sep" ${job&&job.state==="copying"?"disabled":""}>Give it its own folder…</button>`:""}</div>`;
   const jobtxt = !job ? "" : job.state==="copying" ? `<p class="note">Copying the install for ${esc(me.name)}… ${Math.round(job.pct||0)}%</p>` : job.state==="failed" ? `<p class="note" style="color:var(--bad)">Copy failed: ${esc(job.error||"")}</p>` : job.note ? `<p class="note">${esc(job.note)}</p>` : "";
   body.innerHTML = `${iss}<h3 style="font-size:13px;color:var(--muted);margin:16px 0 6px">${r.cluster?"MAPS IN CLUSTER "+esc(r.cluster):"SERVER"}</h3>
     <table class="ak-maps" style="width:100%;border-collapse:collapse"><tbody>${maps}</tbody></table>
-    ${r.cluster?`<p class="note">Cluster mods: ${r.mods&&r.mods.length?esc(r.mods.join(", ")):"none"} - change them in the Mods tab (it updates every map). Before a map starts BaoBun puts this list back on it, so a creature can't vanish because one map is missing a mod.</p>`:""}
+    ${r.cluster?`<p class="note">Cluster mods: ${r.mods&&r.mods.length?esc(r.mods.join(", ")):"none"} - change them in the Mods tab (it updates every map). Before a map starts Tofu puts this list back on it, so a creature can't vanish because one map is missing a mod.</p>`:""}
     ${r.installs.length>1?`<p class="note">Install folders: ${r.installs.map(esc).join(" · ")}</p>`:""}${sep}${jobtxt}`;
   if(job&&job.state==="copying") AK.jobT = setTimeout(()=>{ if(AK.view==="health") loadArk(); }, 2500);
   const sb = $("ak-sep"); if(sb) sb.onclick = async()=>{ let p;
@@ -819,7 +819,7 @@ function akItemName(cls){ const hit = AK.cat.items.find(i=>i.cls===cls); return 
 function akCrateCard(r, admin){
   const d = document.createElement("div"); d.className = "ak-crate";
   if(r.advanced){
-    d.innerHTML = `<div class="hd"><b>${esc(r.crate_name||r.crate)}</b><span class="pill">hand-written</span>${admin?`<button class="ghost small" data-del>Remove</button>`:""}</div><p class="note">This one has a custom layout BaoBun can't show as a list. It's kept exactly as it is.</p><code style="font-size:11px;word-break:break-all;color:var(--muted)">${esc((r.raw||"").slice(0,400))}${(r.raw||"").length>400?"…":""}</code>`;
+    d.innerHTML = `<div class="hd"><b>${esc(r.crate_name||r.crate)}</b><span class="pill">hand-written</span>${admin?`<button class="ghost small" data-del>Remove</button>`:""}</div><p class="note">This one has a custom layout Tofu can't show as a list. It's kept exactly as it is.</p><code style="font-size:11px;word-break:break-all;color:var(--muted)">${esc((r.raw||"").slice(0,400))}${(r.raw||"").length>400?"…":""}</code>`;
   } else {
     const dis = admin ? "" : "disabled";
     d.innerHTML = `<div class="hd"><b>${esc(r.crate_name||r.crate)}</b>
@@ -909,7 +909,7 @@ function renderManageHead(){
     : !pl.length ? (st.playerCount ? `${st.playerCount} player(s) online` : "Nobody online right now.")
     : "Online now: " + pl.map(p=>`<b style="color:var(--text)">${esc(p.name)}</b> <span>(${up(Date.now()/1000-(p.since||Date.now()/1000))})</span>`).join(" · ");
   $("c-cmd").disabled = $("c-send").disabled = !st.consoleAvailable;
-  $("c-note").textContent = st.isRunning && !st.consoleAvailable ? (st.consoleHint || "The console isn't available for this server right now (restart it from BaoBun to get it back).") : st.consoleVia==="rcon" ? "Commands go over RCON." : "";
+  $("c-note").textContent = st.isRunning && !st.consoleAvailable ? (st.consoleHint || "The console isn't available for this server right now (restart it from Tofu to get it back).") : st.consoleVia==="rcon" ? "Commands go over RCON." : "";
 }
 $("mg-restart").onclick = async () => { const st=S.statuses.find(s=>s.id===CUR); if(!st||!confirm(`Restart ${st.name}?`)) return;
   toast("Restarting "+st.name+"…"); try{ await act("server.restart",{server_id:CUR}); toast("Restarted "+st.name); }catch(e){ toast("Failed: "+e.message,6000); } refresh(); };
@@ -1016,7 +1016,7 @@ async function loadSchedules(){
       ${k!=="backup"&&k!=="message"?`<div><label>Warn players (minutes before)</label><input id="s-${k}-warn" value="${esc((c.warn_minutes||[10,5,1]).join(", "))}"></div>
       <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="s-${k}-skip" ${c.skip_if_players?"checked":""}> Wait while players are online</label></div>`:""}</div>
       <div class="row" style="margin-top:10px"><button class="primary" onclick="saveSchedule('${k}')">Save</button></div></div>`; }).join("")
-    + `<p class="note">Schedules run in BaoBun\'s Watchdog on the server PC.</p>`;
+    + `<p class="note">Schedules run in Tofu\'s Watchdog on the server PC.</p>`;
 }
 async function saveSchedule(k){
   const mode=$(`s-${k}-mode`).value, val=$(`s-${k}-val`).value;
@@ -1061,7 +1061,7 @@ $("st-update").onclick = async () => { if(!confirm("Update now? Running servers 
   catch(e){ $("st-note").textContent="Failed: "+e.message; } refresh(); };
 $("st-install").onclick = async () => { const srv=S.servers[CUR]||{}; if(!srv.appId){ openInstall(CUR); return; } try{ await act("server.install",{server_id:CUR}); toast("Downloading game files… the card shows Updating until it's done."); }catch(e){ toast("Failed: "+e.message,6000); } refresh(); };
 $("st-remove").onclick = async () => { const st=S.statuses.find(s=>s.id===CUR);
-  if(!st || !confirm(`Remove ${st.name} from BaoBun? Its files on disk are NOT deleted.`)) return;
+  if(!st || !confirm(`Remove ${st.name} from Tofu? Its files on disk are NOT deleted.`)) return;
   try{ await act("server.remove",{server_id:CUR}); toast("Removed "+st.name); closeManage(); refresh(); }catch(e){ toast("Failed: "+e.message,6000); } };
 
 /* config files */
@@ -1142,7 +1142,7 @@ function renderMods(checked){
     if(v!==null) modAct("mods.set_field",{mod:m.key, field:f, value:v}, "Saving…"); });
   document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ const srv = S.servers[CUR]||{};
     const msg = isArk(srv) ? "Remove this mod?\n\nARK deletes every creature, item and building from a mod when the map starts without it - "+(srv.clusterId?"on every map in the cluster":"on this server")+". Uploaded creatures and items from it are lost too."
-      : "Remove this mod? Nothing is deleted - files go to BaoBun's backups folder.";
+      : "Remove this mod? Nothing is deleted - files go to Tofu's backups folder.";
     if(confirm(msg)) modAct("mods.remove",{mod:b.dataset.rm},"Removing…"); });
   renderModOptions(d.options||[]);
 }
@@ -1152,7 +1152,7 @@ function renderModOptions(opts){
     const input = o.type==="select" ? `<select data-opt="${esc(o.key)}">${o.choices.map(c=>`<option value="${esc(c[0])}" ${c[0]===(o.value||"")?"selected":""}>${esc(c[1])}</option>`).join("")}</select>`
       : `<div class="row"><input class="grow" data-opt="${esc(o.key)}" value="${esc(o.value||"")}" placeholder="${esc(o.placeholder||"")}"><button data-optsave="${esc(o.key)}">Save</button></div>`;
     return `<div><label>${esc(o.label)}</label>${input}</div>`; }).join("") + `</div>`
-    + (opts.some(o=>o.type==="secret") ? `<p class="note">API keys can only be set in BaoBun on the server PC.</p>` : "") + `</div>`;
+    + (opts.some(o=>o.type==="secret") ? `<p class="note">API keys can only be set in Tofu on the server PC.</p>` : "") + `</div>`;
   box.querySelectorAll("select[data-opt]").forEach(el=>el.onchange=()=>modAct("mods.set_option",{key:el.dataset.opt, value:el.value},"Saving…"));
   box.querySelectorAll("[data-optsave]").forEach(b=>b.onclick=()=>{ const el=box.querySelector(`input[data-opt="${b.dataset.optsave}"]`); modAct("mods.set_option",{key:b.dataset.optsave, value:el.value},"Saving…"); });
 }
@@ -1227,7 +1227,7 @@ async function openModDetails(m){
   $("mm-head").innerHTML = `${iconHtml(Object.assign({}, m, d))}<div style="min-width:0"><h2>${esc(d.name||m.name)}</h2><div class="by">${d.author?"by "+esc(d.author)+" · ":""}⬇ ${compact(d.downloads)}${d.follows?" · ♥ "+compact(d.follows):""}${d.updated?" · updated "+esc(String(d.updated).slice(0,10)):""}</div></div>`;
   const r = d.release; let compat = "";
   if(r){ const ok = r.match==="exact" || r.match==="minor", unknown = r.match==="unknown_version"||r.match==="unknown";
-    compat = `<div class="compat ${ok?"ok":unknown?"":"warn"}">${ok?"✓ Works with your server"+(d.game_version?" ("+esc(d.game_version)+")":""):unknown?"Couldn't tell which game version your server runs.":"⚠ No release for your server's version"+(d.game_version?" ("+esc(d.game_version)+")":"")+" - the newest one may not load."}${r.version?" · BaoBun would install version "+esc(r.version):""}${(r.for||[]).length?" · made for "+r.for.slice(0,4).map(esc).join(", "):""}</div>`; }
+    compat = `<div class="compat ${ok?"ok":unknown?"":"warn"}">${ok?"✓ Works with your server"+(d.game_version?" ("+esc(d.game_version)+")":""):unknown?"Couldn't tell which game version your server runs.":"⚠ No release for your server's version"+(d.game_version?" ("+esc(d.game_version)+")":"")+" - the newest one may not load."}${r.version?" · Tofu would install version "+esc(r.version):""}${(r.for||[]).length?" · made for "+r.for.slice(0,4).map(esc).join(", "):""}</div>`; }
   const side = d.side==="server"?"Server only":d.side==="client"?"Client only (players install it)":d.side==="both"?"Server and players (players get it automatically when they join)":"";
   const shots = (d.images||[]).length ? `<div class="mshots">${d.images.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" data-full="${esc(u)}">`).join("")}</div>` : "";
   const shotSet = new Set(d.images||[]);
@@ -1271,7 +1271,7 @@ async function loadAllSettings(){
   const id = CUR; $("af-body").innerHTML = "<p class=note>Loading…</p>"; $("af-note").textContent = "";
   let files; try{ files = (await act("config.form_files",{server_id:id})).files || []; }catch(e){ $("af-body").innerHTML = `<p class=note>${esc(e.message)}</p>`; return; }
   if(id!==CUR) return;
-  if(!files.length){ $("af-file").innerHTML = ""; $("af-body").innerHTML = "<p class=note>BaoBun didn't find any settings files for this server yet. Most games write them on their first start.</p>"; return; }
+  if(!files.length){ $("af-file").innerHTML = ""; $("af-body").innerHTML = "<p class=note>Tofu didn't find any settings files for this server yet. Most games write them on their first start.</p>"; return; }
   $("af-file").innerHTML = files.map(f=>`<option value="${esc(f.id)}">${esc(f.known?f.label+" ("+f.path.split("/").pop()+")":f.path)}${f.exists?"":" - not created yet"}</option>`).join("");
   $("af-file").onchange = () => openSettingsFile($("af-file").value);
   openSettingsFile(files[0].id);
@@ -1380,7 +1380,7 @@ async function loadHistory(){
   const st=[]; if(d.avg_cpu!=null) st.push("avg CPU "+d.avg_cpu+"%"); if(d.peak_ram) st.push("peak RAM "+fmtMB(d.peak_ram)); if(d.ram_trend) st.push(d.ram_trend); if(d.peak_players!=null) st.push("peak "+d.peak_players+" players");
   $("h-stats").textContent = st.join(" · ");
   box.innerHTML = "";
-  chart(box, "CPU", d, p=>p.cpu, v=>Math.round(v)+"%", "No data yet - BaoBun records usage once a minute while the server runs.");
+  chart(box, "CPU", d, p=>p.cpu, v=>Math.round(v)+"%", "No data yet - Tofu records usage once a minute while the server runs.");
   chart(box, "RAM", d, p=>p.ram, fmtMB, "");
   chart(box, "Players", d, p=>p.players, v=>String(Math.round(v)), "This game doesn't report players (or the server wasn't running).");
 }
@@ -1424,7 +1424,7 @@ function renderGames(){ const q=$("a-search").value.trim().toLowerCase();
   $("a-cats").querySelectorAll("[data-cat]").forEach(c=>c.onclick=()=>{ ACAT=c.dataset.cat; $("a-search").value=""; renderGames(); });
   const inCat = g => q || ACAT==="all" || (ACAT==="popular" ? g.popular : (g.category||"other")===ACAT);
   const list = GAMES.filter(g=>g.name!=="Custom / Other" && inCat(g) && (!q||g.name.toLowerCase().includes(q)||(g.description||"").toLowerCase().includes(q))).sort((a,b)=>{ const r=g=>!q?0:g.name.toLowerCase().startsWith(q)?0:g.name.toLowerCase().split(/\W+/).some(w=>w.startsWith(q))?1:2; return r(a)-r(b) || a.name.localeCompare(b.name); }).slice(0,200);
-  $("a-games").innerHTML = list.map(g=>`<button class="gamebtn ${PICK===g.name?"sel":""}" data-n="${esc(g.name)}">${esc(g.name)}<small>${g.appId?"Steam download"+(g.anonymous_login===false?" · needs Steam account":""):g.download?"one-click download":g.manual?"files from the game's own site":"copy files in by hand"}${g.support==="basic"?' · <span title="BaoBun installs and runs it, but its settings are found by searching the server folder - some may need setting by hand.">basic support</span>':""}${g.issue?' · <span title="'+esc(g.issue)+'">known problem</span>':""}</small></button>`).join("") || "<p class=note>No match.</p>";
+  $("a-games").innerHTML = list.map(g=>`<button class="gamebtn ${PICK===g.name?"sel":""}" data-n="${esc(g.name)}">${esc(g.name)}<small>${g.appId?"Steam download"+(g.anonymous_login===false?" · needs Steam account":""):g.download?"one-click download":g.manual?"files from the game's own site":"copy files in by hand"}${g.support==="basic"?' · <span title="Tofu installs and runs it, but its settings are found by searching the server folder - some may need setting by hand.">basic support</span>':""}${g.issue?' · <span title="'+esc(g.issue)+'">known problem</span>':""}</small></button>`).join("") || "<p class=note>No match.</p>";
   document.querySelectorAll(".gamebtn").forEach(b=>b.onclick=()=>pick(b.dataset.n)); }
 $("a-search").oninput = renderGames;
 // Restore on another PC: servers set up again here from the backup-copy folder
@@ -1433,7 +1433,7 @@ async function openBring(){
   closeModal("m-add"); openModal("m-bring");
   const box = $("br-body"); box.innerHTML = '<p class="note">Looking in the backup-copy folder…</p>';
   let r; try{ r = await act("servers.bring_scan",{}); }catch(e){ box.innerHTML = `<p class="note">${esc(e.message)}</p>`; return; }
-  const intro = `<p class="note" style="margin-top:0">Set servers up again on this PC from their backup copies. BaoBun installs each game and puts the newest world back, into ${esc(r.base)}.</p>`;
+  const intro = `<p class="note" style="margin-top:0">Set servers up again on this PC from their backup copies. Tofu installs each game and puts the newest world back, into ${esc(r.base)}.</p>`;
   if(r.error){ box.innerHTML = intro+`<p class="note">${esc(r.error)}</p><p class="note">It looks in the "Also copy backups to" folder (Server PC settings). On a new PC, set it to the folder the old PC copied its backups to.</p>`; return; }
   if(!r.servers.length){ box.innerHTML = intro+`<p class="note">No server backups in ${esc(r.folder)}.</p>`; return; }
   box.innerHTML = intro + r.servers.map(e=>`<label class="check" style="align-items:flex-start;margin-top:8px"><input type="checkbox" data-key="${esc(e.key)}" ${e.can_bring&&!e.here?"checked":""} ${e.can_bring?"":"disabled"}> <span><b>${esc(e.name)}</b> <span class="note">${e.can_bring?esc(e.game||"")+" · newest backup "+new Date(e.newest_time*1000).toLocaleString()+(e.here?" · already on this PC":""):esc(e.why_not)}</span></span></label>`).join("")
@@ -1456,8 +1456,8 @@ async function bringPoll(){
 }
 $("a-bring").onclick = openBring;
 function pick(n){ PICK=n; const g=GAMES.find(x=>x.name===n); renderGames(); $("a-details").hidden=false; $("a-name").value=n; $("a-port").value=g.port||"";
-  const fs = g.first_settings||[];   // server name / password / max players, for games where BaoBun can set them for sure
-  $("a-first").innerHTML = !fs.length ? "" : `<p class="note" style="margin:14px 0 0">In the game - what players see. BaoBun writes these into the game's own settings; change them later under Game settings.</p>`
+  const fs = g.first_settings||[];   // server name / password / max players, for games where Tofu can set them for sure
+  $("a-first").innerHTML = !fs.length ? "" : `<p class="note" style="margin:14px 0 0">In the game - what players see. Tofu writes these into the game's own settings; change them later under Game settings.</p>`
     + fs.map(f=>`<label>${esc(f.label)}${f.required?" (needed)":""}</label><input data-first="${esc(f.key)}" ${f.kind==="players"?'type="number" min="1" max="1000"':'type="text"'} autocomplete="off" value="${f.kind==="name"?esc(n):""}">${f.help?`<p class="note" style="margin:2px 0 0">${esc(f.help)}</p>`:""}`).join("");
   $("a-install").parentElement.style.display = g.download ? "" : "none";
   $("a-install-l").textContent = g.download==="minecraft" ? "Then choose a Minecraft type and download it" : "Download it now";
@@ -1487,10 +1487,10 @@ async function openInstall(sid){
   $("i-version-wrap").hidden = o.kind==="hytale"; $("i-signin").style.display="none";
   $("i-hy").style.display = o.kind==="hytale" ? "" : "none";
   $("i-info").textContent = o.kind==="hytale"
-    ? "BaoBun gets Java 25 and runs Hytale's own downloader. The first time, a sign-in link and code show up here - open it, sign in with your Hytale account and enter the code (BaoBun never sees your password). Settings, worlds and mods in the folder are kept on updates."+(o.signedIn?"":" After it's installed, start the server and use 'Sign the server in' once.")
+    ? "Tofu gets Java 25 and runs Hytale's own downloader. The first time, a sign-in link and code show up here - open it, sign in with your Hytale account and enter the code (Tofu never sees your password). Settings, worlds and mods in the folder are kept on updates."+(o.signedIn?"":" After it's installed, start the server and use 'Sign the server in' once.")
     : o.kind==="minecraft"
-    ? "BaoBun downloads the server and the right Java for it. Switching type or version keeps your world, but back it up first - worlds don't go back to older versions."
-    : (o.state==="vanilla" ? `Installed: ${o.installedVersion||"unknown"}. Installing again updates the game files; worlds, mods and settings are kept.` : o.state==="custom" ? "This server runs a custom build - BaoBun won't overwrite it." : "Downloads the official server from vintagestory.at.");
+    ? "Tofu downloads the server and the right Java for it. Switching type or version keeps your world, but back it up first - worlds don't go back to older versions."
+    : (o.state==="vanilla" ? `Installed: ${o.installedVersion||"unknown"}. Installing again updates the game files; worlds, mods and settings are kept.` : o.state==="custom" ? "This server runs a custom build - Tofu won't overwrite it." : "Downloads the official server from vintagestory.at.");
   $("i-flavor-wrap").hidden = o.kind!=="minecraft";
   $("i-eula-wrap").hidden = !(o.kind==="minecraft" && o.needsEula); $("i-eula").checked = false;
   if(o.kind==="minecraft") $("i-flavor").innerHTML = (o.flavors||MCFLAVORS).map(f=>`<option value="${esc(f.id)}" ${f.id===o.flavor?"selected":""}>${esc(f.label)}</option>`).join("");

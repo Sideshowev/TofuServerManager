@@ -1,11 +1,11 @@
-# BaoBun Control Panel
+# Tofu Server Manager
 
 A native Windows desktop app for managing all your game servers from one place —
 Vintage Story (standalone), SteamCMD games, and custom executables.
 
 ## Run it
 
-- **Prebuilt executable:** double-click `dist\BaoBunCP.exe`
+- **Prebuilt executable:** double-click `dist\TofuSM.exe`
 - **From source (dev):** run `start.bat`
 
 The executable and its config files (`servers.json`, `discord_config.json`) live
@@ -13,8 +13,8 @@ together in `dist\`. Keep those `.json` files next to the exe so settings persis
 
 ## How it runs your servers
 
-BaoBun has one engine (`ServerManager`) and one owner of server processes: the
-**Watchdog** - BaoBun's background service (`baobun_agent.py`, or `BaoBunCP.exe --agent`). The
+Tofu has one engine (`ServerManager`) and one owner of server processes: the
+**Watchdog** - Tofu's background service (`tofusm_agent.py`, or `TofuSM.exe --agent`). The
 **Watchdog** pill at the top of the window is green while it runs; click it to turn it on or off.
 
 - Opening the app starts the Watchdog automatically if it isn't running. The window
@@ -29,7 +29,7 @@ BaoBun has one engine (`ServerManager`) and one owner of server processes: the
 - If the Watchdog can't start (or you turn it off in Settings), the window runs servers
   itself, the old way.
 
-**Stopping is graceful.** BaoBun asks the game to save and quit, waits, and only then
+**Stopping is graceful.** Tofu asks the game to save and quit, waits, and only then
 force-stops the whole process tree:
 
 | Game | How it stops | Grace period |
@@ -48,30 +48,30 @@ every 30 seconds: Steam's server query (Source games, Rust, Valheim, Enshrouded,
 7 Days to Die, ...) or RCON `ListPlayers` for ARK. They show in the server list, the
 status line and on the Discord buttons. Vintage Story has no query protocol, so its
 count is not shown (its player activity still comes from the join lines in its log).
-If BaoBun can't find a game's query port, set `"queryPort": 12345` on the server.
+If Tofu can't find a game's query port, set `"queryPort": 12345` on the server.
 
-**One data folder.** `dist\data_dir.txt` points the exe at the main BaoBun folder,
-so `start.bat` and `dist\BaoBunCP.exe` use the same servers.json, settings and
+**One data folder.** `dist\data_dir.txt` points the exe at the main Tofu folder,
+so `start.bat` and `dist\TofuSM.exe` use the same servers.json, settings and
 backups. (Delete `data_dir.txt` to give the exe its own folder again.)
 
 **Secrets are encrypted.** The Steam password (settings.json) and the Discord bot
 token (discord_config.json) are encrypted with Windows DPAPI on first start: only
 your Windows account on this PC can read them. To change the Discord token, paste
-the new one into `"token"`; BaoBun encrypts it on the next start. SteamCMD gets the
+the new one into `"token"`; Tofu encrypts it on the next start. SteamCMD gets the
 password through a temporary script file (deleted immediately), not the command line.
 
-**Updates.** Before downloading, BaoBun compares the installed build
+**Updates.** Before downloading, Tofu compares the installed build
 (`steamapps/appmanifest_*.acf`) with Steam's latest, so "Update before start",
 Update All and scheduled updates only download when there is something new.
 Servers that share an install folder (all maps of an ARK cluster) are updated
 together: all of them are warned, stopped, updated once, and restarted.
 Set `"steamBranch": "beta-name"` on a server to follow a Steam beta branch.
 
-**Building the exe.** Double-click `build_exe.bat` (close BaoBun first).
+**Building the exe.** Double-click `build_exe.bat` (close Tofu first).
 
-**Sharing BaoBun with other people.** Give them `dist\BaoBunCP.exe` - that's all
+**Sharing Tofu with other people.** Give them `dist\TofuSM.exe` - that's all
 they need (no Python). It keeps its data (server list, settings, backups, logs) in
-its own folder, or in `%LOCALAPPDATA%\BaoBun` if that folder can't be written to
+its own folder, or in `%LOCALAPPDATA%\TofuSM` if that folder can't be written to
 (e.g. Program Files). Nothing in the exe is tied to your PCs: on first start they
 get the welcome screen and an empty server list. If you share the source folder
 instead, leave out your own `servers.json`, `settings.json`, `discord_config.json`,
@@ -83,7 +83,7 @@ and the PC-down alerts page - are all off until someone turns them on.
 It starts fake servers in temporary folders to check start/stop/console, crash
 restarts, the Watchdog link, backups, RCON and Steam queries. Your servers aren't touched.
 `run_tests.bat` runs the same tests plus a **desktop smoke test** that really opens
-BaoBun's windows (Nightly restart, PC-down alerts, Status page, Checkup, Ports, ARK World,
+Tofu's windows (Nightly restart, PC-down alerts, Status page, Checkup, Ports, ARK World,
 Install, Mods and the mod browser) for a moment and closes them - it catches window
 mistakes the engine tests can't see. Results go to `logs\tests.log`. (If the project
 is ever put on GitHub, a small workflow file can run all of this on a Windows machine
@@ -119,7 +119,7 @@ with the shared theme and folders in `ui/app_common.py`. The engine is in `core/
 
 ## What it does
 
-- Start / Stop / Restart servers from a dark, BaoBun-branded GUI.
+- Start / Stop / Restart servers from a dark, TofuSM-branded GUI.
 - **Auto-restart on crash** with crash-loop protection (backs off, up to 5 retries).
 - **Config editor** for JSON / YAML / TOML / INI / key=value / raw text (with a form
   mode for INI and key=value files, and automatic `.bak` backups on save).
@@ -129,7 +129,7 @@ with the shared theme and folders in `ui/app_common.py`. The engine is in `core/
 - **Workshop mods** — download Steam Workshop items into a server folder via
   SteamCMD.
 - **Vintage Story mods** — browse the VS ModDB, install mods and check for updates.
-  BaoBun reads the server's game version and installs the newest release made for
+  Tofu reads the server's game version and installs the newest release made for
   it (warning you if none matches); the old version of an updated mod is moved to
   `Mods-old-versions` (next to the Mods folder) so the server never loads two copies.
 - **SteamCMD install** — give it a Steam App ID and it downloads SteamCMD, runs
@@ -176,11 +176,11 @@ The app looks for `steamcmd.exe` in this order, using the first one it finds:
 1. A path you set in **Settings -> SteamCMD Path** (gear icon in the top bar).
 2. A `SteamCMD\steamcmd.exe` folder sitting next to the app / `servers.json`
    (this is the "ship a copy in the folder" option — drop it here and it's detected).
-3. The per-user cache `%LOCALAPPDATA%\BaoBun\SteamCMD`.
+3. The per-user cache `%LOCALAPPDATA%\TofuSM\SteamCMD`.
 4. A system Steam install (`C:\Program Files (x86)\Steam`).
 
 If none of those exist, it **auto-downloads** SteamCMD from Valve's CDN into
-`%LOCALAPPDATA%\BaoBun\SteamCMD` and runs it. No manual install is required.
+`%LOCALAPPDATA%\TofuSM\SteamCMD` and runs it. No manual install is required.
 
 > If an install fails with a SteamCMD network error (e.g. code 7), it usually means
 > that machine can't reach Steam's servers (firewall/proxy), not that SteamCMD is
@@ -193,7 +193,7 @@ it in **Edit Server** (Executable).
 
 ## Vintage Story and Minecraft (one-click download)
 
-These two don't come from Steam, so BaoBun downloads them from their official sites.
+These two don't come from Steam, so Tofu downloads them from their official sites.
 Pick the game in **+ Add Server** and click **Create & install** (desktop), or tick
 **Download it now** (web panel). For a server you already have, use **Install Game** /
 **Install / update game** in Settings. Progress is written to `install.log` in the
@@ -202,7 +202,7 @@ server's folder.
 - **Vintage Story** - the official Windows server zip from vintagestory.at (newest
   stable, or pick a version). Running it again on an official install *updates* it:
   worlds, mods and `serverconfig.json` live in the data folder, which the zip never
-  touches, and BaoBun takes a world backup first. The card shows "game update
+  touches, and Tofu takes a world backup first. The card shows "game update
   available" when a newer stable is out. With *Update the game automatically when
   nobody is online* on, only patch updates (1.21.4 -> 1.21.5) install by themselves;
   a new 1.x version waits for you, because mods are tied to it. A custom build such
@@ -210,16 +210,16 @@ server's folder.
   runtime - the install tells you if it's missing.
 - **Minecraft (Java)** - choose **Vanilla**, **Paper** (plugins), **Fabric**,
   **NeoForge** or **Forge** (mods) and a version. You have to tick the Minecraft EULA
-  box once. BaoBun also finds the right Java (Minecraft 1.20.5+ needs Java 21,
+  box once. Tofu also finds the right Java (Minecraft 1.20.5+ needs Java 21,
   1.18-1.20.4 Java 17, older Java 8) and, if this PC doesn't have it, downloads
-  Eclipse Temurin into `runtime\java` next to BaoBun. You can switch type or version
+  Eclipse Temurin into `runtime\java` next to Tofu. You can switch type or version
   later the same way; the world stays, but back it up first - worlds can't go back to
   an older version.
 
 Minecraft servers run as `java -Xmx<memory> -jar server.jar nogui` (Forge/NeoForge:
 the `@...win_args.txt` line from their `run.bat`). Edit Server has the memory (default
 4096 MB), a fixed Java path and extra Java flags; the web panel can change the memory
-only. BaoBun sends `stop` for a clean shutdown, `save-all` before backups, and reads
+only. Tofu sends `stop` for a clean shutdown, `save-all` before backups, and reads
 players with the normal Minecraft server-list ping (names come from the join/leave
 lines when the server hides them). Mods for Fabric/Forge/NeoForge/Paper come from
 Modrinth in the **Mods** tab - the loader and version are filled in by the install.
@@ -257,10 +257,10 @@ Modrinth in the **Mods** tab - the loader and version are filled in by the insta
    missing.
 4. Restart the app (the bot runs inside the Watchdog, so it keeps working
    with the window closed).
-5. In Discord, run **`/baobun-setup`** to pick the panel, activity, alert and
+5. In Discord, run **`/tofu-setup`** to pick the panel, activity, alert and
    game-night channels and the admin / "may start servers" roles - no file editing.
    Until admins are set, the Discord server's owner and anyone allowed to *Manage
-   Server* count as admins. (These choices are kept in BaoBun's settings, so the token
+   Server* count as admins. (These choices are kept in Tofu's settings, so the token
    file is never touched.)
 
 **The panel**: a status card (online/offline, who's playing, update available) and
@@ -268,7 +268,7 @@ one button per server, 4 per row. Green = start it, gray = running (shows player
 red = crashed (start it again), hourglass = starting/updating (can't be clicked twice).
 Pressing a running server tells you who's on and how to join; admins also get
 **Stop** / **Restart** buttons, with a warning when people are playing. The panel is
-edited in place when BaoBun restarts, rebuilt if someone deletes it, and grows by
+edited in place when Tofu restarts, rebuilt if someone deletes it, and grows by
 itself when you add servers.
 
 **Slash commands** (server names autocomplete; answers only visible to whoever asked
@@ -283,7 +283,7 @@ unless noted):
 - admins: `/stop`, `/restart`, `/say`, `/backup`, `/restore` (pick one of the last 5
   backups; the current world is saved first), `/logs` (last console lines, passwords
   hidden), `/update` (game files and mods; players are warned), `/checkup`,
-  `/baobun-setup`
+  `/tofu-setup`
 
 **Game nights**: `/event title:"ARK boss fight" when:"sat 8pm" server:ARK` posts the
 event with **I'm in** / **Can't make it** buttons. Times can be `8pm`, `tomorrow
@@ -315,7 +315,7 @@ in the Watchdog log (`logs\agent.log`).
 
 - **Settings tab → Essentials** (desktop; *Game settings* on the web): the things everyone changes - server
   name, password, max players, description, PvP, public listing - as a simple form.
-  BaoBun writes them where each game keeps them (Vintage Story serverconfig.json,
+  Tofu writes them where each game keeps them (Vintage Story serverconfig.json,
   Minecraft server.properties, Valheim launch options, PalWorldSettings.ini,
   7 Days to Die serverconfig.xml, Project Zomboid .ini, Rust / ARK launch options,
   V Rising ServerHostSettings.json, Arma / DayZ .cfg, Arma Reforger config.json,
@@ -332,17 +332,17 @@ in the Watchdog log (`logs\agent.log`).
 - **Game update badges**: the Watchdog asks Steam every few hours which servers have a
   newer build and the card says "Game update available" (click it on the web panel
   to update). Tick *Update the game automatically when nobody is online* in Edit
-  Server to let BaoBun do it by itself - it never updates a running server while
+  Server to let Tofu do it by itself - it never updates a running server while
   players are on (or when it can't tell).
 - **Announcements**: Manage > Announcements (or the web Schedules tab) posts a
   message in game every N hours or at set times.
-- **Find existing servers** (Home): point BaoBun at a folder and it finds servers
+- **Find existing servers** (Home): point Tofu at a folder and it finds servers
   that are already installed (by their program and Steam manifests) and adds them.
 - **Second backup folder**: Settings > *Also copy every backup to* (another drive, a
-  NAS, or a shared folder on another PC such as `\\BACKUP-PC\BaoBun-backups`). Old copies
-  there are pruned the same way, every copy is size-checked, **Test** checks BaoBun
+  NAS, or a shared folder on another PC such as `\\BACKUP-PC\TofuSM-backups`). Old copies
+  there are pruned the same way, every copy is size-checked, **Test** checks Tofu
   can write there, and a failed copy shows in Checkup. Also in the web panel under
-  **Server PC**. If BaoBun starts at boot, set that up *with network access*
+  **Server PC**. If Tofu starts at boot, set that up *with network access*
   (Settings > Nightly restart) - Windows asks for your password once in its own window
   - otherwise copies to another PC fail after a restart.
 - Console logs are rotated when a server starts (over 20 MB, 3 old copies kept).
@@ -376,7 +376,7 @@ Reading config files on the web is admin-only, because they can contain password
 Every server's **Manage** page has a **Mods** tab (also in the web panel). It knows
 where each game gets its mods and how that game's server turns them on:
 
-| Game | Mods come from | What BaoBun does |
+| Game | Mods come from | What Tofu does |
 |---|---|---|
 | Vintage Story | VS ModDB | downloads into the data `Mods` folder, picks the release for your game version, flags missing dependencies and duplicates |
 | ARK: Survival Ascended | CurseForge | keeps the `-mods=` list (one shared list for a cluster); the server downloads the mods |
@@ -403,7 +403,7 @@ dedicated server's) or a mods folder.
   preset exported from the Arma 3 Launcher (.html) and adds every mod in it.
 - CurseForge needs a free API key (console.curseforge.com) only to show ARK mod
   names - mods work without it. Set it in the Mods tab on the server PC.
-- Before installs and updates BaoBun backs up the world (unless a backup is less
+- Before installs and updates Tofu backs up the world (unless a backup is less
   than 30 minutes old). Removed mods are never deleted: they go to
   `backups\<server>\removed-mods`. Changes made while a server runs show
   "restart to apply".
@@ -420,7 +420,7 @@ bottom of the Mods tab (desktop and web) picks what happens:
 - **Update automatically** - applied during the nightly restart while the servers
   are stopped (or right away on stopped servers if the nightly restart is off). The
   world is backed up and the mod folder is copied first. If the server then crashes
-  within 3 hours, BaoBun puts the old mods back, marks the updated ones *Keep
+  within 3 hours, Tofu puts the old mods back, marks the updated ones *Keep
   version* and says so on Discord - unpin them once the mod author fixes it.
 
 **Keep version** on a mod pins it: Update all and automatic updates skip it, but its
@@ -439,7 +439,7 @@ category chips to narrow the list. Mods you already have show **✓ Installed**.
 
 Click a card for the mod's page: screenshots (click to enlarge), the full
 description, its tags, whether it works with your server's game version and which
-version BaoBun would install, whether players need it too, and links to its
+version Tofu would install, whether players need it too, and links to its
 source and issue tracker. **Install on this server** works the same as typing the
 mod ID (dependencies, world backup and restart hints included). Descriptions are
 shown as plain text and pictures only - nothing from a mod page can run in the panel.
@@ -474,7 +474,7 @@ older *Discord alert when RAM use passes* setting still just alerts.
 
 A backup nobody has opened isn't proven. Once a week the Watchdog opens the newest
 backup of every server and checks it the way a restore would: every file reads back
-with the right checksum, BaoBun's manifest is there, world databases (Vintage Story's
+with the right checksum, Tofu's manifest is there, world databases (Vintage Story's
 `.vcdbs`, `.db`, `.sqlite`) pass SQLite's own check, and it isn't suddenly less than
 half the size of the last good one (a sign the world folder moved). The copy on the
 second backup folder gets the checksum check too. A failed check shows in Checkup
@@ -486,9 +486,9 @@ restore one even after this PC's own copy is gone. Setting `backup_check_days` (
 
 ## First start
 
-On a fresh install BaoBun opens a short walkthrough: what it does and what this PC can
+On a fresh install Tofu opens a short walkthrough: what it does and what this PC can
 handle (cores, memory), where game servers get installed (it suggests the drive with
-the most free space and checks BaoBun can write there), how many backups to keep and
+the most free space and checks Tofu can write there), how many backups to keep and
 an optional second folder for copies, the Watchdog and starting with Windows, and
 optional extras (Discord bot, web panel, nightly restart). It ends with **Add a server**
 or **Bring servers from another PC**. Skip it any time; run it again from Settings.
@@ -497,9 +497,9 @@ Installs that already have servers never see it.
 ## Discord bot without editing files
 
 Settings > **Discord bot**: open the developer portal, make an application, copy the
-bot token and paste it in. BaoBun keeps it encrypted in `settings.json` (it is never
+bot token and paste it in. Tofu keeps it encrypted in `settings.json` (it is never
 shown again or sent to the web panel), connects the bot straight away and gives you an
-**Invite the bot** button with the right permissions. Then type `/baobun-setup` in
+**Invite the bot** button with the right permissions. Then type `/tofu-setup` in
 Discord to choose channels and who may start servers. A token already in
 `discord_config.json` keeps working and wins.
 
@@ -517,12 +517,12 @@ changes who may join, who is banned and who is an admin, the same way for every 
 | Rust, Project Zomboid, ... | - | console ban command | - | while running |
 
 Tick **Do it on all my … servers** (Discord: `everywhere`) to ban or allow someone on
-every server of that game at once. BaoBun records every change (who, when, by whom) and
+every server of that game at once. Tofu records every change (who, when, by whom) and
 shows the recent ones. Online players can be picked with one click.
 
-## Installing BaoBun on another PC, and updates
+## Installing Tofu on another PC, and updates
 
-**For people you share BaoBun with:** run `BaoBun-Setup-<version>.exe`. It installs
+**For people you share Tofu with:** run `TofuSM-Setup-<version>.exe`. It installs
 for the current user without admin rights (or for everyone, into Program Files, if
 chosen), adds a Start menu entry and opens the first-start walkthrough. Updating or
 uninstalling never touches servers, settings or backups.
@@ -530,29 +530,29 @@ uninstalling never touches servers, settings or backups.
 **Making the installer:** bump `VERSION` in `core/version.py`, then run
 `build_installer.bat`. The first time, it installs [Inno Setup 6](https://jrsoftware.org/isdl.php)
 (free, only needed on the PC that makes the installer) with winget. It builds
-the exe and writes `build\installer\BaoBun-Setup-<version>.exe` plus a `.sha256`
+the exe and writes `build\installer\TofuSM-Setup-<version>.exe` plus a `.sha256`
 checksum file.
 
 **Updates:** set `UPDATE_REPO` in `core/version.py` to your GitHub repository
 (`owner/name`) before building, and publish each installer and its `.sha256` on a
 GitHub release (tag `v1.2.0`). Installed copies check once a day; when there's a newer
-release, a blue **BaoBun 1.2.0** button appears at the top (and the alert channel is
+release, a blue **Tofu 1.2.0** button appears at the top (and the alert channel is
 told once). It shows what's new and **Download and install** fetches the installer from
-that release (GitHub only, size and checksum checked), runs it and BaoBun opens again.
-The installer can replace BaoBun while it runs: the Watchdog moves to the new version
+that release (GitHub only, size and checksum checked), runs it and Tofu opens again.
+The installer can replace Tofu while it runs: the Watchdog moves to the new version
 by itself when nobody is playing, so game servers keep running. The web panel shows
 the notice too. With no `UPDATE_REPO` (or the `update_repo` setting) the check is off;
 Settings has **Check for updates** and shows the version.
 
-## One BaoBun for several PCs (Linked PCs)
+## One Tofu for several PCs (Linked PCs)
 
-Servers always run on the PC they're installed on, each PC with its own BaoBun. Link the
-PCs and one BaoBun - its window, web panel and Discord bot - shows and controls the
+Servers always run on the PC they're installed on, each PC with its own Tofu. Link the
+PCs and one Tofu - its window, web panel and Discord bot - shows and controls the
 servers on all of them:
 
-1. On each PC that hosts servers: Settings > **Linked PCs** > turn on *Let another BaoBun
+1. On each PC that hosts servers: Settings > **Linked PCs** > turn on *Let another Tofu
    control this PC*, press **Allow through Windows Firewall**, then **Copy code** (a
-   `baobun://address:8792/...` pairing code - use the Tailscale one across networks).
+   `tofu://address:8792/...` pairing code - use the Tailscale one across networks).
 2. On your main PC: Settings > **Linked PCs** > paste the code under *Add a PC*.
 
 The other PC's servers then appear on the home screen ("Valheim · on GSERVER"), in the
@@ -568,15 +568,15 @@ program paths or download files. Each PC records what the link did in its own ac
 log. **Make a new code** cuts off every PC linked with the old one. Links don't chain
 (a linked PC's own links aren't passed on).
 
-## How well BaoBun knows each game
+## How well Tofu knows each game
 
-The game picker marks games with **basic support**: BaoBun installs and runs them and
-finds their settings by searching the server folder, but nothing in BaoBun was made for
+The game picker marks games with **basic support**: Tofu installs and runs them and
+finds their settings by searching the server folder, but nothing in Tofu was made for
 that game yet, so some settings may need setting by hand. The others are fully supported
 (known settings files and/or the Essentials view, launch options they need). See
 `core/game_support.py`.
 
-**For every game, even basic ones:** before a server's first start BaoBun notes which
+**For every game, even basic ones:** before a server's first start Tofu notes which
 settings-like files already exist; files the game writes itself afterwards are listed first
 in the Settings tab ("written by the game") and shipped data files are left out. The
 Essentials view of a game without a hand-made page looks for the usual settings (server
@@ -586,7 +586,7 @@ and offers them as a simple form (`core/auto_settings.py`). Start options and se
 for several games were checked against WindowsGSM's notes (no code taken).
 
 **Game smoke test** (`run_game_smoke_test.bat`, best overnight on a PC with lots of free
-space): in a separate test copy of BaoBun it installs each popular game that needs no
+space): in a separate test copy of Tofu it installs each popular game that needs no
 Steam account, starts it, waits for it to be ready, notes what the Settings tab would
 show, stops it and deletes it again. Your real servers are never touched. The report is
 `logs\game_smoke_report.md`; games already tested are skipped on the next run (`--redo`
@@ -594,14 +594,14 @@ to test again, `--games "Valheim,Terraria"` for specific ones, `--keep` to keep 
 
 ## Restore on another PC (Bring Servers Here)
 
-If the PC that runs your servers dies, or you move to a new one, any PC with BaoBun
+If the PC that runs your servers dies, or you move to a new one, any PC with Tofu
 can take the servers over from the backup copies (Settings > "Also copy backups to" -
 another drive, a NAS or a shared folder on another PC). Each server's copy folder
 holds its backups and a `server.json` describing it.
 
 On the new PC press **Bring Servers Here** (desktop tools column; on the web panel it's
 under **Add a server**), point it at the copy folder and tick the servers. For each
-one BaoBun copies the newest backup to this PC, adds the server, installs the game
+one Tofu copies the newest backup to this PC, adds the server, installs the game
 (Steam, Vintage Story, Minecraft, Hytale - the same Vintage Story / Minecraft version
 when it can) and puts the world back. Paths move along: the server goes into a folder
 under "Install into" (default: the default install folder), save folders that were in
@@ -614,13 +614,13 @@ It is manual on purpose: brought-over servers are set to start only when you sta
 them. Make sure a server isn't still running on the old PC first - one world running
 on two PCs splits into two different worlds. The web panel only looks in the copy
 folder set on this PC and never takes over Java options. Hytale servers need signing
-in again on the new PC; games BaoBun can't download need their server files copied in.
+in again on the new PC; games Tofu can't download need their server files copied in.
 
 ## Save diagnostics (when something goes wrong)
 
 **Save diagnostics** (Checkup window, or Settings) writes one zip into the
 `diagnostics` folder and shows it in Explorer; admins can also download one from the
-web panel (**Server PC** > *Something not working?*). It holds BaoBun's logs, the end of
+web panel (**Server PC** > *Something not working?*). It holds Tofu's logs, the end of
 each server's console log and install log, the server list and settings, what
 Checkup says, the server statuses and basic facts about the PC (Windows version,
 CPU, RAM). Passwords, tokens, keys, webhooks and internet IP addresses are replaced
@@ -632,7 +632,7 @@ asking for help.
 
 **Checkup** on the home screen (and the *Needs attention* box in the web panel)
 looks over every server and lists what will cause trouble, worst first, with a
-button where BaoBun can fix it:
+button where Tofu can fix it:
 
 - game files or the server program missing (**Install**)
 - Minecraft without the right Java or with the EULA not accepted; Vintage Story
@@ -648,7 +648,7 @@ The web panel re-checks every 5 minutes; **Check again** runs it right away.
 
 ## Crash help and Discord alerts
 
-When a server stops by itself BaoBun reads the end of its console and its exit
+When a server stops by itself Tofu reads the end of its console and its exit
 code and says what went wrong in plain words - for example *Port 42420 is already
 in use*, *.NET isn't installed*, *Visual C++ Redistributable is missing*, *the
 server ran out of memory*, *a mod failed to load* or *the world save looks
@@ -658,7 +658,7 @@ on the card, in the crash pop-up, on the web panel and in the alert.
 **Settings > Set up Discord alerts** sends a Discord message when a server crashes,
 keeps crashing (auto-restart gave up), a game update or backup fails, the PC's RAM
 passes a limit (default 90%), a server drive gets low on space, or a server passes
-its own RAM limit (Edit Server > Advanced). Alerts go through the BaoBun bot if it
+its own RAM limit (Edit Server > Advanced). Alerts go through the Tofu bot if it
 runs (set `alert_channel_id` in `discord_config.json` for a separate channel), or
 through a Discord webhook URL (stored encrypted). The same alert is sent at most
 once per cooldown, so a crash loop doesn't flood the channel. **Send test alert**
@@ -684,12 +684,12 @@ Roles (decided by your guild, re-checked at every login, sessions last 12 hours)
 | Operator (`web_operator_role_ids`) | view, start/stop/restart, console |
 
 Never changeable from the web, only here on this PC: a server's program and
-folder, Steam login, bot token, and BaoBun's own settings. New servers from the
+folder, Steam login, bot token, and Tofu's own settings. New servers from the
 web always go into your default install folder.
 
 ### Setup (one time, about 10 minutes)
 
-1. **Tailscale** - install it on the PC that runs BaoBun (tailscale.com/download)
+1. **Tailscale** - install it on the PC that runs Tofu (tailscale.com/download)
    and sign in. In the Tailscale admin console, open *Machines*, click `...` on
    this PC, **Share**, and send the invite to each helper (free). They install
    Tailscale and accept. Turn on MagicDNS (DNS page) for a friendly name.
@@ -698,7 +698,7 @@ web always go into your default install folder.
    **Client ID**, reset and copy the **Client Secret**.
 3. **IDs** - in Discord turn on *Settings > Advanced > Developer Mode*, then
    right-click your server > Copy Server ID, and right-click roles/users to copy theirs.
-4. In BaoBun click **Web Panel**: tick *Turn on*, press **Detect** for the panel
+4. In Tofu click **Web Panel**: tick *Turn on*, press **Detect** for the panel
    URL, fill in Client ID/Secret, server ID and the admin/operator IDs, then
    **Copy** the Redirect URL and add it under *OAuth2 > Redirects* in the
    Developer Portal. Press **Save & apply** (running servers are not touched).
@@ -738,7 +738,7 @@ and Minecraft Bedrock.
 **Hytale** installs with one button: **Install / Update** downloads Java 25 (if the
 PC has none) and Hytale's own downloader, and runs it. The first time, the install
 window (desktop or web) shows a link and a code - open it, sign in with your Hytale
-account and type the code; BaoBun never sees your password, and the downloader
+account and type the code; Tofu never sees your password, and the downloader
 remembers the sign-in for updates. Updating keeps the server's `config.json`,
 permissions, whitelist, bans, worlds (`universe`), mods and sign-in. The server
 itself must then be linked to your account once: **Sign the server in** (install
@@ -747,7 +747,7 @@ window, or Checkup) starts it if needed, sends `/auth persistence Encrypted` and
 the same two commands. Hytale uses UDP port 5520.
 
 When a preset's server program isn't where expected (games move it between
-updates), BaoBun looks for it in the install and remembers where it found it.
+updates), Tofu looks for it in the install and remembers where it found it.
 
 Presets come from two places, merged at startup:
 
@@ -801,14 +801,14 @@ Settings notes:
 
 Some servers ignore anything typed into their console window: **ARK (ASA and
 Evolved), Palworld, Conan Exiles, Squad, V Rising, and the BattlEye games Arma 3,
-DayZ and Arma Reforger**. For those BaoBun sends
+DayZ and Arma Reforger**. For those Tofu sends
 the console, quick commands, restart warnings, scheduled announcements, the save
 before a backup and the clean stop (Palworld: `Save` + `DoExit`, ARK: `SaveWorld` +
 `DoExit`, Arma 3/DayZ: `#shutdown`, broadcasts as `say -1`) over RCON automatically. Replies show up in the live console marked
 `[RCON]`, and Palworld/ARK/Squad/Conan player lists come from RCON when the Steam
 query doesn't answer.
 
-BaoBun reads the port and password from the game's own settings - nothing extra to
+Tofu reads the port and password from the game's own settings - nothing extra to
 type in:
 
 | Game | Where RCON is turned on |
@@ -827,9 +827,9 @@ type in:
 If RCON is off for one of the console-ignoring games, the console says what to turn
 on. Minecraft, Project Zomboid and Source games keep using their console and only
 fall back to RCON when the console isn't attached (for example after the server was
-started outside BaoBun).
+started outside Tofu).
 
-There is no separate RCON tab: type commands in the **Live Console** and BaoBun
+There is no separate RCON tab: type commands in the **Live Console** and Tofu
 sends them the right way.
 
 **Turn on RCON** (Checkup, or the Ports page) switches it on for you for every game
@@ -839,9 +839,9 @@ shown once with a Copy button and saved in the game's own settings, so you'll al
 find it in Settings later. An existing password is never replaced. In ARK and
 Palworld that password is also the in-game admin password.
 
-RCON ports are only for BaoBun on the server PC: they're left out of the Windows
-Firewall rules and router forwarding. Before every RCON command BaoBun checks who is
-listening on the port, and refuses if it's another BaoBun server - so two servers
+RCON ports are only for Tofu on the server PC: they're left out of the Windows
+Firewall rules and router forwarding. Before every RCON command Tofu checks who is
+listening on the port, and refuses if it's another Tofu server - so two servers
 left on the same RCON port can never get (or stop) each other.
 
 ## Ports (many games share the same defaults)
@@ -856,14 +856,14 @@ that use several in a row (Valheim 2456-2458, Arma 2302-2306). Clashes are red.
   otherwise the first server in the list keeps its ports and later ones move.
 * **Change** sets a server's ports by hand.
 * New servers get free ports when you add them.
-* BaoBun writes the ports into the game's own settings (launch options, ARK's map
+* Tofu writes the ports into the game's own settings (launch options, ARK's map
   URL, or the config file). If the game hasn't made its config file yet (Vintage
   Story, Enshrouded, Unturned...), the port is written as soon as the file exists -
   the first start uses the game's default, which Checkup mentions.
-* A server won't start on top of a running BaoBun server's ports, and BaoBun warns
+* A server won't start on top of a running Tofu server's ports, and Tofu warns
   when some other program already uses one.
 
-BaoBun knows the ports of: ARK (both), Palworld, Valheim, Conan Exiles,
+Tofu knows the ports of: ARK (both), Palworld, Valheim, Conan Exiles,
 Satisfactory, Soulmask, Icarus, Abiotic Factor, Insurgency: Sandstorm, Mordhau,
 Arma 3, DayZ, Arma Reforger, Rust, 7 Days to Die, Project Zomboid, Vintage Story,
 Minecraft, Enshrouded, V Rising, Unturned, Squad and the Source games. For any other
@@ -924,7 +924,7 @@ web panel) works on a whole cluster at once - or on a single ARK server.
 - **Health** checks that every map can safely trade with the others:
   - every map has the cluster's mods (a creature or item from a mod vanishes when
     it's downloaded on a map without that mod) - **Sync all maps** fixes it, and
-    BaoBun also puts the mod list back on a map right before it starts
+    Tofu also puts the mod list back on a map right before it starts
   - every map has `-clusterid`
   - no two maps save into the same world folder
   - maps on different install folders share one cluster folder
@@ -940,18 +940,18 @@ web panel) works on a whole cluster at once - or on a single ARK server.
   boss/alpha drops give. Per crate: *Add to its normal loot* or *Replace its loot*,
   how many items it gives, and per item the amount, quality (Primitive ->
   Ascendant), blueprint chance and how likely it is (`ConfigOverrideSupplyCrateItems`).
-  Hand-written entries BaoBun can't show as a list are kept untouched.
+  Hand-written entries Tofu can't show as a list are kept untouched.
 - **Rules**: rates, world, players, tames, transfers (upload/download blocks, how
   long uploads are kept, the tame level cap that must match on every map) and loot
   quality - blank means ARK's default.
 
 ARK keeps these settings per install folder, so maps sharing one install share
-them automatically; with several installs BaoBun writes them into every one. Every
+them automatically; with several installs Tofu writes them into every one. Every
 save keeps the rest of Game.ini / GameUserSettings.ini as it was and leaves a
 `.bak`. Changes are used when the maps restart.
 
 **Updating a cluster**: Update on any map updates the whole cluster - every map gets
-a warning and stops, each install folder is updated, BaoBun checks they all ended up
+a warning and stops, each install folder is updated, Tofu checks they all ended up
 on the same game build (and says so if not), then the maps that were running start
 again. Automatic updates and the nightly restart do the same: with "Update the game
 automatically when nobody is online" on, waiting game updates are installed during
@@ -1023,7 +1023,7 @@ each server's logs for player joins (patterns come from the game plugin; set
 ## Nightly restart
 
 Settings > **Nightly restart & start at boot**. Every night at the time you pick
-(default 05:00) BaoBun:
+(default 05:00) Tofu:
 
 1. posts in Discord which servers will come back and which will sleep, and warns
    players in-game 15, 5 and 1 minute before (it goes ahead even if people are on)
@@ -1035,17 +1035,17 @@ Settings > **Nightly restart & start at boot**. Every night at the time you pick
    ... Sleeping: ..." in Discord.
 
 The web panel's **Server PC** button shows and changes the same settings (plus how
-BaoBun updates itself and the PC-down alerts page) from any browser - admins only.
+Tofu updates itself and the PC-down alerts page) from any browser - admins only.
 
 While this runs nobody can start a server (Discord says "restarting for
-maintenance"). If Windows refuses to restart, BaoBun brings the servers back right
+maintenance"). If Windows refuses to restart, Tofu brings the servers back right
 away instead. The window shows what would happen if it ran now.
 
-**Start BaoBun when the PC turns on** (same window) is needed for this: the normal
+**Start Tofu when the PC turns on** (same window) is needed for this: the normal
 "start when I sign in" only runs after someone logs in. It adds a Windows scheduled
 task (one admin prompt) that starts the Watchdog at boot as your Windows user. **Simple**
 stores no password but can't open network folders (`\\PC\folder`); **with network
-access** has Windows ask for your password once (in its own window - BaoBun never sees
+access** has Windows ask for your password once (in its own window - Tofu never sees
 it) so backups to another PC and servers on network folders keep working. Checkup
 warns when something needs the network version.
 
@@ -1066,31 +1066,31 @@ players type** to your domain (otherwise it shows the PC's public IP). Servers w
 
 ## PC-down alerts (Discord message when the server PC is down)
 
-If the server PC freezes, loses power or Windows hangs, BaoBun on it can't tell
+If the server PC freezes, loses power or Windows hangs, Tofu on it can't tell
 anyone. Settings > **PC-down alerts** fixes that with a second PC (for example your own PC):
 
-- On the server PC, BaoBun answers a tiny "I'm alive" page on port 8791
+- On the server PC, Tofu answers a tiny "I'm alive" page on port 8791
   (`/healthz`, home network and Tailscale only). Click **Allow it through Windows
   Firewall** once there.
 - On your own PC, type the server PC's name or address and click **Test**, then
-  Save. BaoBun on the watching PC (its Watchdog) checks every minute and posts to
+  Save. Tofu on the watching PC (its Watchdog) checks every minute and posts to
   the Discord alert webhook set on that PC when the server PC hasn't answered for 3
-  minutes - saying whether the whole PC is gone or only BaoBun - and again when it's
+  minutes - saying whether the whole PC is gone or only Tofu - and again when it's
   back. The nightly restart doesn't trigger it.
 
-## Running BaoBun on a separate game-host PC
+## Running Tofu on a separate game-host PC
 
 Recommended setup: develop and play on your own PC, and run the game servers on a
 separate machine (more cores/RAM, never interrupted by your gaming).
 
-1. **On the host:** make a folder, e.g. `D:\BaoBun`, and share it on your home
+1. **On the host:** make a folder, e.g. `D:\Tofu`, and share it on your home
    network (right-click > Properties > Sharing) so your PC can write to it.
 2. **On your PC:** double-click **`deploy_to_host.bat`**. The first time it asks for
-   the share path (e.g. `\\SERVER-PC\BaoBun`) and remembers it in
-   `deploy_target.txt`. It builds the exe and copies **only `BaoBunCP.exe`** over -
+   the share path (e.g. `\\SERVER-PC\Tofu`) and remembers it in
+   `deploy_target.txt`. It builds the exe and copies **only `TofuSM.exe`** over -
    the host keeps its own servers, settings, backups and Steam login. It works while
-   BaoBun runs on the host (same rename trick as `build_exe.bat`).
-3. **On the host:** start `BaoBunCP.exe`, add your servers there (one-click installs
+   Tofu runs on the host (same rename trick as `build_exe.bat`).
+3. **On the host:** start `TofuSM.exe`, add your servers there (one-click installs
    download onto the host), turn on the **Watchdog**, and turn on **Web Panel**.
 4. **Manage it from your PC in a browser.** Either install Tailscale on both PCs, or
    tick **Also allow PCs on my home network** in Web Panel settings and use the host's
@@ -1105,8 +1105,8 @@ host itself.
 ## Rebuilding the executable
 
 Double-click **`build_exe.bat`** (no need to run it as administrator). It builds into
-`build\out` and then swaps the new exe into `dist\BaoBunCP.exe`. If BaoBun is running
-from that exe, the running copy is renamed to `BaoBunCP.old-NNNN.exe` (Windows allows
+`build\out` and then swaps the new exe into `dist\TofuSM.exe`. If Tofu is running
+from that exe, the running copy is renamed to `TofuSM.old-NNNN.exe` (Windows allows
 renaming a running program, not deleting it) and cleaned up by the next build.
 
 **Switching to the new version** happens by itself: the Watchdog notices the
@@ -1116,10 +1116,10 @@ the nightly restart. Game servers keep running while it switches; RCON games (AR
 Palworld...) don't even notice. To switch right away, click **Update ready** in the
 top bar (the window reopens itself) or **Switch now** in the web panel. Servers
 controlled through their console lose that console until they're next restarted,
-so their next stop is a force-stop - BaoBun lists them before you confirm.
+so their next stop is a force-stop - Tofu lists them before you confirm.
 
 Set `"self_update": "manual"` in settings.json to only switch when you click.
-Running BaoBun from source (python app.py) doesn't update itself.
+Running Tofu from source (python app.py) doesn't update itself.
 
 Requires a Python 3.14 env with `requirements.txt` installed
 (`customtkinter`, `discord.py`, `pyyaml`, `Pillow`, `psutil`, `toml`, plus

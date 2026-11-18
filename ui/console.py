@@ -80,7 +80,7 @@ class LiveConsole(ctk.CTkFrame):
         self.get_quick = get_quick
         self.get_players = get_players
         self._quick = []
-        self.schedule = schedule          # app.after (thread-safe in BaoBunApp)
+        self.schedule = schedule          # app.after (thread-safe in TofuApp)
         self.server_id: Optional[str] = None
         self._follower: Optional[LogFollower] = None
         self._lines = []                  # every line received (for re-filtering)

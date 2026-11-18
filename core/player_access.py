@@ -1,12 +1,12 @@
 """Players: who may join (allow list / whitelist), who is banned, who is an admin.
 
-Each game keeps these differently, so BaoBun has one small adapter per game and
+Each game keeps these differently, so Tofu has one small adapter per game and
 shows them the same way everywhere (desktop Players window, web panel, Discord
 /access):
 
 * Minecraft - whitelist.json, ops.json, banned-players.json and white-list= in
   server.properties. While the server runs, changes go through its console (so
-  the server writes its own files); while it's stopped BaoBun edits the files
+  the server writes its own files); while it's stopped Tofu edits the files
   and looks the player's id up (or works out the offline-mode id).
 * Vintage Story - lists are read from the data folder's Playerdata files;
   changes go through the console (/player ... whitelist, /player ... role,
@@ -19,9 +19,9 @@ shows them the same way everywhere (desktop Players window, web panel, Discord
 * Anything else whose console has a ban command (Rust, Project Zomboid, ...) gets
   ban / unban through the console while running.
 
-BaoBun also keeps its own record of every change (runtime/player_access.json:
+Tofu also keeps its own record of every change (runtime/player_access.json:
 what, who, when, by whom) so lists show names next to IDs and games that can't
-list their bans still show what was done from BaoBun.
+list their bans still show what was done from Tofu.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ class AccessError(Exception):
 
 
 # --------------------------------------------------------------------------- #
-# BaoBun's own record
+# Tofu's own record
 # --------------------------------------------------------------------------- #
 def _ledger_path(mgr) -> str:
     return os.path.join(str(mgr.config_path.parent), "runtime", "player_access.json")
@@ -251,7 +251,7 @@ class Minecraft(Adapter):
             if lst == "admin":
                 entry.update(level=4, bypassesPlayerLimit=False)
             if lst == "ban":
-                entry.update(created=time.strftime("%Y-%m-%d %H:%M:%S +0000", time.gmtime()), source="BaoBun",
+                entry.update(created=time.strftime("%Y-%m-%d %H:%M:%S +0000", time.gmtime()), source="Tofu",
                              expires="forever", reason=reason or "Banned by an operator.")
             rest.append(entry)
             _write_json(self._p(f), rest)
@@ -385,7 +385,7 @@ class Valheim(Adapter):
         path = os.path.join(self._savedir(), self.FILES[lst])
         cur = _read_lines(path)
         cur = [x for x in cur if x != sid] + ([sid] if action == "add" else [])
-        _write_lines(path, cur, "// Managed by BaoBun - one Steam ID per line")
+        _write_lines(path, cur, "// Managed by Tofu - one Steam ID per line")
         return {"id": sid, "how": "file"}
 
     def notes(self):
@@ -514,7 +514,7 @@ def overview(mgr, sid: str) -> dict:
     a = adapter_for(mgr, srv)
     if a is None:
         return {"supported": False, "name": srv.get("name"),
-                "why": "BaoBun doesn't know how this game stores its allow list, bans or admins yet."}
+                "why": "Tofu doesn't know how this game stores its allow list, bans or admins yet."}
     try:
         data = a.read()
     except Exception as e:
@@ -536,7 +536,7 @@ def change(mgr, sid: str, lst: str, action: str, who: str, reason: str = "", by:
         raise AccessError("Server not found")
     a = adapter_for(mgr, srv)
     if a is None or lst not in a.lists:
-        raise AccessError("BaoBun can't change that list for this game.")
+        raise AccessError("Tofu can't change that list for this game.")
     reason = re.sub(r"[\x00-\x1f]", " ", str(reason or ""))[:200].strip()
     try:
         res = a.change(lst, action, str(who or "").strip(), reason, by)
@@ -590,7 +590,7 @@ def set_allow_on(mgr, sid: str, on: bool, by: str = "system") -> dict:
         raise AccessError("Server not found")
     a = adapter_for(mgr, srv)
     if a is None:
-        raise AccessError("BaoBun can't change this for this game.")
+        raise AccessError("Tofu can't change this for this game.")
     try:
         res = a.set_allow_on(bool(on), by)
     except RuntimeError as e:

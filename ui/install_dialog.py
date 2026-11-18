@@ -199,7 +199,7 @@ def open_hytale_install(app, theme, server_id, opts, on_finished=None):
 
     label("Folder: " + (srv.get("directory") or "?"))
     label("Install / Update gets Java 25 if needed and runs Hytale's own downloader. The first time it shows a "
-          "link and a code: open the link, sign in with your Hytale account and type the code - BaoBun never "
+          "link and a code: open the link, sign in with your Hytale account and type the code - Tofu never "
           "sees your password. Updating keeps the server's settings, worlds, mods and sign-in.",
           color=t["text_light"])
     if opts.get("signedIn"):

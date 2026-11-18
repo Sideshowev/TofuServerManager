@@ -81,7 +81,7 @@ def _run(mgr, firewall: bool) -> dict:
             why = None
         if why:
             items.append(_item(srv, "warning", "Its folder is %s" % why,
-                               "%s is %s, not a folder of its own, so BaoBun only looks at the top of it for "
+                               "%s is %s, not a folder of its own, so Tofu only looks at the top of it for "
                                "settings and backups. Move the server into its own folder (for example "
                                "GameServers\\%s) and update it in Edit Server." % (d0, why, srv.get("name") or "Server")))
         try:
@@ -109,7 +109,7 @@ def _run(mgr, firewall: bool) -> dict:
                     javas = []
             if not (srv.get("javaPath") and os.path.isfile(srv["javaPath"])) and not mc.pick_java(need, javas):
                 items.append(_item(srv, "problem", "Java %d isn't installed" % need,
-                                   "Run Install on the server (BaoBun downloads Java), or install "
+                                   "Run Install on the server (Tofu downloads Java), or install "
                                    "Temurin %d from adoptium.net." % need, "install"))
             if not gi._eula_ok(os.path.join(srv.get("directory") or "", "eula.txt")):
                 items.append(_item(srv, "problem", "Minecraft EULA not accepted",
@@ -141,7 +141,7 @@ def _run(mgr, firewall: bool) -> dict:
                 from core import rcon_setup
                 auto = rcon_setup.supported(srv)
                 items.append(_item(srv, "warning", "RCON is off",
-                                   "%s ignores its console, so BaoBun can't warn players, save before "
+                                   "%s ignores its console, so Tofu can't warn players, save before "
                                    "backups or stop it cleanly (it gets force-stopped). %s"
                                    % (prof.get("name", "This game"),
                                       "Turn on RCON sets it up with its own port and a strong password."
@@ -150,7 +150,7 @@ def _run(mgr, firewall: bool) -> dict:
         if srv.get("portsPending"):
             items.append(_item(srv, "tip", "Ports will be set on the next start",
                                "The game hasn't made its config file yet, so its first start uses the default "
-                               "port. Start it once, stop it, and BaoBun writes the planned ports in."))
+                               "port. Start it once, stop it, and Tofu writes the planned ports in."))
         # backups
         try:
             b = mgr.list_server_backups(sid)
@@ -203,28 +203,33 @@ def _run(mgr, firewall: bool) -> dict:
             why = (st.get("crashHelp") or [{}])[0]
             items.append(_item(srv, "problem", "Crashed: " + (why.get("title") or "exit code %s" % st.get("exitCode")),
                                why.get("fix") or "Check the console for the last lines before it stopped."))
-    # nightly restart needs BaoBun to start at boot; without a stored password the boot
+    # nightly restart needs Tofu to start at boot; without a stored password the boot
     # task can't open network shares (server folders or the second backup folder)
     mirror = (mgr.get_setting("backup_mirror_dir", "") or "").strip()
     if os.name == "nt":
         try:
             from core import boot_task, nightly
             mode = boot_task.mode()
+            if boot_task.old_task_left():
+                items.append(_item(None, "warning", "Start-at-boot needs setting up again",
+                                   "It was set up before the app was renamed and still starts the old program "
+                                   "file, which updating removed. Set up \"Start Tofu when the PC turns on\" "
+                                   "again (Settings > Nightly restart).", "nightly"))
             if nightly.config(mgr)["enabled"] and mode is None and boot_task.installed() is False:
-                items.append(_item(None, "warning", "Nightly restart is on, but BaoBun only starts when someone "
-                                   "signs in", "Set up \"Start BaoBun when the PC turns on\" so the servers come "
+                items.append(_item(None, "warning", "Nightly restart is on, but Tofu only starts when someone "
+                                   "signs in", "Set up \"Start Tofu when the PC turns on\" so the servers come "
                                    "back after the restart by themselves.", "nightly"))
             if mode == "s4u":
                 for srv in servers:
                     d = srv.get("directory") or ""
                     if d.startswith("\\\\") or d.startswith("//"):
                         items.append(_item(srv, "warning", "Folder is on a network share",
-                                           "When BaoBun starts at boot it can't open network shares. Move the "
+                                           "When Tofu starts at boot it can't open network shares. Move the "
                                            "server to a drive on this PC, or set up start-at-boot again with "
                                            "network access (Settings > Nightly restart).", "nightly"))
                 if mirror.startswith("\\\\") or mirror.startswith("//"):
                     items.append(_item(None, "warning", "Backups to %s stop after a restart" % mirror,
-                                       "BaoBun starts at boot without network access, so it can't copy backups to "
+                                       "Tofu starts at boot without network access, so it can't copy backups to "
                                        "another PC. Set up start-at-boot with network access (Settings > Nightly "
                                        "restart) - Windows asks for your password once.", "nightly"))
         except Exception:

@@ -40,7 +40,7 @@ class ImageCache:
             return path
         try:
             os.makedirs(self.folder, exist_ok=True)
-            req = urllib.request.Request(url, headers={"User-Agent": "BaoBun-ControlPanel"})
+            req = urllib.request.Request(url, headers={"User-Agent": "TofuSM-ControlPanel"})
             with (opener or urllib.request.urlopen)(req, timeout=15) as r:
                 data = r.read(MAX_BYTES + 1)
             if not data or len(data) > MAX_BYTES:

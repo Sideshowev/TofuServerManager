@@ -23,7 +23,7 @@ def open_hytale_signin(app, theme, server_id, start_first=False):
     body = ctk.CTkFrame(dlg, fg_color=t["bg_card"], corner_radius=10)
     body.pack(fill="both", expand=True, padx=16, pady=16)
     ctk.CTkLabel(body, text="Hytale servers have to be linked to a Hytale account once before players can join. "
-                 "BaoBun asks the server for a sign-in link; open it, sign in with your Hytale account and enter "
+                 "Tofu asks the server for a sign-in link; open it, sign in with your Hytale account and enter "
                  "the code. The sign-in is kept, encrypted, in the server's folder.",
                  anchor="w", justify="left", wraplength=460, text_color=t["text_muted"]).pack(fill="x", padx=14,
                                                                                               pady=(12, 8))

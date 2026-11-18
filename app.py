@@ -56,7 +56,7 @@ except Exception:
     pass
 
 
-class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyModsMixin, ctk.CTk):
+class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyModsMixin, ctk.CTk):
     def after(self, ms, func=None, *args):
         """Tk isn't thread-safe: calls from worker threads are queued and run on
         the UI thread by _pump_ui instead of touching Tk directly."""
@@ -113,7 +113,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         ctk.set_window_scaling(self.ui_scale)
         ctk.set_widget_scaling(self.ui_scale)
 
-        self.title("BaoBun Control Panel")
+        self.title("Tofu Server Manager")
         _s = self.ui_scale
         self.geometry("%dx%d" % (int(1300 * _s), int(800 * _s)))
         self.minsize(int(900 * _s), int(600 * _s))
@@ -147,6 +147,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         perf.watch(self)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         threading.Thread(target=self._startup_engine, daemon=True).start()
+        self._move_old_startup_entry()
         self.after(400, self.maybe_show_onboarding)
 
     def _apply_theme(self):
@@ -363,7 +364,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         open_linked_pcs_dialog(self, THEME)
 
     def _check_new_version(self, force=False):
-        """Is a newer BaoBun published? Asks at most once a day (the Watchdog asks too)."""
+        """Is a newer Tofu published? Asks at most once a day (the Watchdog asks too)."""
         def work():
             try:
                 from core import updates
@@ -377,7 +378,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
 
     def _show_new_version(self, info, told=False):
         if info.get("newer"):
-            self.btn_newver.configure(text="\u2B07 BaoBun %s" % info["latest"])
+            self.btn_newver.configure(text="\u2B07 Tofu %s" % info["latest"])
             if not self.btn_newver.winfo_ismapped():
                 self.btn_newver.pack(side="right", padx=8, pady=15)
             if told:
@@ -385,11 +386,11 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         elif told:
             from core.version import VERSION
             if not info.get("enabled"):
-                msg = "This copy of BaoBun has no update source set."
+                msg = "This copy of Tofu has no update source set."
             elif info.get("error"):
                 msg = "Couldn't check: %s" % info["error"]
             else:
-                msg = "BaoBun %s is the newest version." % VERSION
+                msg = "Tofu %s is the newest version." % VERSION
             messagebox.showinfo("Updates", msg)
 
     def show_update_dialog(self, info=None):
@@ -409,7 +410,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
                 "Yes - stop them, then close\n"
                 "No - leave them running (the Watchdog takes them over when it starts; "
                 "their console is unavailable until they are restarted)\n"
-                "Cancel - keep BaoBun open")
+                "Cancel - keep Tofu open")
             if ans is None:
                 return
             if ans:
@@ -435,7 +436,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
             except Exception as e:
                 err = e
                 self.after(0, lambda: (on_error(err) if on_error else
-                                       messagebox.showerror("BaoBun", str(err))))
+                                       messagebox.showerror("Tofu", str(err))))
                 self.after(0, self.refresh_servers)
                 return
             if on_done:
@@ -456,7 +457,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
                 side="left", padx=(20, 8), pady=10,
             )
         ctk.CTkLabel(
-            topbar, text="BaoBun Control Panel",
+            topbar, text="Tofu Server Manager",
             font=("Bahnschrift SemiBold", 20, "bold"), text_color=THEME["accent_gold"],
         ).pack(side="left", padx=(0, 20))
 
@@ -480,12 +481,12 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
             text_color=THEME["text_muted"], width=130, corner_radius=14,
         )
         self.btn_agent.pack(side="right", padx=8, pady=15)
-        # shown when a newer BaoBun has been deployed onto this PC
+        # shown when a newer Tofu has been deployed onto this PC
         self.btn_update = ctk.CTkButton(
             topbar, text="\u2B06 Update ready", command=self.apply_self_update,
             fg_color=THEME["accent_green"], width=110,
         )
-        # shown when a newer BaoBun has been published (core/updates.py)
+        # shown when a newer Tofu has been published (core/updates.py)
         self.btn_newver = ctk.CTkButton(
             topbar, text="\u2B07 New version", command=self.show_update_dialog,
             fg_color=THEME["accent_blue"], width=120,
@@ -853,7 +854,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         self._run_bg("Collecting diagnostics...", lambda: diagnostics.build(self.manager), on_done=done)
 
     def base_dir_for_wizard(self):
-        """Default parent for new servers: the drive BaoBun is on (e.g. F:/GameServers)."""
+        """Default parent for new servers: the drive Tofu is on (e.g. F:/GameServers)."""
         return Path(APP_DIR).anchor or str(Path.home())
 
     def _build_logs_tab(self, parent):
@@ -901,7 +902,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         try:
             if ready and not self.btn_update.winfo_ismapped():
                 self.btn_update.pack(side="right", padx=8, pady=15)
-                self._show_status("A newer BaoBun was deployed to this PC - click Update ready to switch "
+                self._show_status("A newer Tofu was deployed to this PC - click Update ready to switch "
                                   "(game servers keep running).")
             elif not ready and self.btn_update.winfo_ismapped():
                 self.btn_update.pack_forget()
@@ -911,19 +912,19 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
     def apply_self_update(self):
         info = getattr(self, "_agent_update", {}) or {}
         lost = info.get("console_servers") or []
-        msg = "Switch to the new BaoBun now? Game servers keep running."
+        msg = "Switch to the new Tofu now? Game servers keep running."
         if lost:
             msg += ("\n\nThese servers lose their console window until they're restarted (you can still stop "
                     "them): " + ", ".join(lost))
         if info.get("playing"):
             msg += "\n\nPeople are playing right now - they won't notice, the game servers aren't touched."
-        if not self.ask_yes_no("Update BaoBun", msg):
+        if not self.ask_yes_no("Update Tofu", msg):
             return
         try:
             if info.get("ready"):
                 self.manager._forward("agent.update_now", timeout=15)
         except Exception as e:
-            self.show_error("Update BaoBun", str(e))
+            self.show_error("Update Tofu", str(e))
             return
         if getattr(sys, "frozen", False):
             import subprocess as _sp
@@ -933,8 +934,8 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
                 _sp.Popen(["cmd", "/c", cmd] if os.name == "nt" else [sys.executable], cwd=str(APP_DIR),
                           creationflags=flags | (_sp.CREATE_NO_WINDOW if os.name == "nt" else 0))
             except Exception as e:
-                print("[WARN] could not reopen BaoBun:", e)
-        self._show_status("Updating - BaoBun reopens in a few seconds.")
+                print("[WARN] could not reopen Tofu:", e)
+        self._show_status("Updating - Tofu reopens in a few seconds.")
         self.after(1500, self.destroy)
 
     def _poll(self):
@@ -1626,7 +1627,7 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         frozen = getattr(sys, "frozen", False)
         if frozen:
             return [sys.executable, "--agent"]
-        return [sys.executable, str(BASE_DIR / "baobun_agent.py")]
+        return [sys.executable, str(BASE_DIR / "tofusm_agent.py")]
 
     def is_run_at_startup(self):
         try:
@@ -1635,10 +1636,30 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
                 winreg.HKEY_CURRENT_USER,
                 r"Software\Microsoft\Windows\CurrentVersion\Run",
                 0, winreg.KEY_READ) as k:
-                winreg.QueryValueEx(k, "BaoBunAgent")
+                try:
+                    winreg.QueryValueEx(k, "TofuSMAgent")
+                except FileNotFoundError:
+                    winreg.QueryValueEx(k, "BaoBunAgent")     # set up before the rename
             return True
         except Exception:
             return False
+
+    def _move_old_startup_entry(self):
+        """The "start with Windows" entry made before the rename starts the old program file
+        (BaoBunCP.exe), which the installer removes: make it again for this one."""
+        if os.name != "nt":
+            return
+        try:
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run",
+                                0, winreg.KEY_READ) as k:
+                winreg.QueryValueEx(k, "BaoBunAgent")
+        except Exception:
+            return
+        try:
+            self.set_run_at_startup(True)
+        except Exception as e:
+            print("[WARN] moving the start-with-Windows entry:", e)
 
     def set_run_at_startup(self, enabled):
         import winreg
@@ -1650,12 +1671,16 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
         with winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as k:
             if enabled:
-                winreg.SetValueEx(k, "BaoBunAgent", 0, winreg.REG_SZ, cmd)
+                winreg.SetValueEx(k, "TofuSMAgent", 0, winreg.REG_SZ, cmd)
             else:
                 try:
-                    winreg.DeleteValue(k, "BaoBunAgent")
+                    winreg.DeleteValue(k, "TofuSMAgent")
                 except FileNotFoundError:
                     pass
+            try:
+                winreg.DeleteValue(k, "BaoBunAgent")          # the old name's entry, either way
+            except FileNotFoundError:
+                pass
 
     def center_window(self, dlg, width, height, fit=True):
         dlg.update_idletasks()
@@ -1954,11 +1979,11 @@ class BaoBunApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMo
 
 if __name__ == "__main__":
     if "--agent" in sys.argv:
-        import baobun_agent
-        baobun_agent.main()
+        import tofusm_agent
+        tofusm_agent.main()
     else:
         try:
-            app = BaoBunApp()
+            app = TofuApp()
             app.mainloop()
         except Exception:
             # With no console (start.bat uses pythonw), make startup errors visible.
@@ -1970,7 +1995,7 @@ if __name__ == "__main__":
             except Exception:
                 pass
             try:
-                messagebox.showerror("BaoBun could not start",
+                messagebox.showerror("Tofu could not start",
                                      err[-1500:] + "\n\n(saved to logs\\app_error.log)")
             except Exception:
                 pass

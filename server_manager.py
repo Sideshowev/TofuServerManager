@@ -1,5 +1,5 @@
 """
-BaoBun Control Panel — Server Management Backend
+Tofu Server Manager — Server Management Backend
 Handles process spawning, watchdog monitoring, config editing, log reading.
 """
 
@@ -221,7 +221,7 @@ def sqlite_snapshot(path: str) -> str | None:
         return None
     import sqlite3
     import tempfile
-    fd, tmp = tempfile.mkstemp(prefix="baobun_snap_", suffix=".db")
+    fd, tmp = tempfile.mkstemp(prefix="tofusm_snap_", suffix=".db")
     os.close(fd)
     try:
         src = sqlite3.connect("file:" + Path(path).as_posix() + "?mode=ro", uri=True, timeout=30)
@@ -506,7 +506,7 @@ def build_ark_launch_args(map_id, friendly_name, cluster_id, index, server_passw
                           map_mod="", server_name="", ports=None):
     """Build a single-token, space-free launch argument string for one map.
     ``ports`` (game, query, rcon) keeps ports a map already has (Ports page)."""
-    cid = (cluster_id or "BaoBunCluster").strip().replace(" ", "")
+    cid = (cluster_id or "TofuCluster").strip().replace(" ", "")
     sess = (server_name or friendly_name).replace(" ", "").replace("'", "").replace('"', "")
     ports = ports or (None, None, None)
     game_port = ports[0] or ARK_BASE_GAME_PORT + index * 2
@@ -538,6 +538,12 @@ def build_ark_launch_args(map_id, friendly_name, cluster_id, index, server_passw
 def _local_appdata() -> Path:
     """The user's local app-data folder (wherever Windows keeps it on this PC)."""
     return Path(os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local"))
+
+
+def _appdata_tofu() -> Path:
+    """%LOCALAPPDATA%\\TofuSM (moved over from the old BaoBun folder the first time)."""
+    from core.rebrand import appdata_folder
+    return appdata_folder()
 
 class ServerManager:
     """Core server lifecycle management.
@@ -710,7 +716,7 @@ class ServerManager:
         if not directory or not Path(directory).exists():
             raise FileNotFoundError("ARK install directory not found: " + directory)
 
-        cid = (cluster_id or "BaoBunCluster").strip().replace(" ", "")
+        cid = (cluster_id or "TofuCluster").strip().replace(" ", "")
         exe = os.path.join(directory, "ShooterGame", "Binaries", "Win64", "ArkAscendedServer.exe")
         pw = settings.get("serverPassword", "")
         apw = settings.get("adminPassword", "")
@@ -985,7 +991,7 @@ class ServerManager:
             rec = self._read_registry(server_id)
             if rec.get("pid") and pid_alive(rec.get("pid"), rec.get("create_time")):
                 return {"status": "already_running", "pid": rec.get("pid"), "server_id": server_id,
-                        "note": "started by another BaoBun instance"}
+                        "note": "started by another Tofu instance"}
             if self._states.get(server_id) in ("starting", "updating"):
                 return {"status": "already_starting", "server_id": server_id}
             self.processes.pop(server_id, None)
@@ -1014,7 +1020,7 @@ class ServerManager:
             print(f"[WARN] cluster check skipped for {srv_def.get('name')}: {e}")
 
     def _port_check(self, srv_def: dict):
-        """Refuse to start on top of another running BaoBun server's ports (the game
+        """Refuse to start on top of another running Tofu server's ports (the game
         would fail to bind, or worse, players would land on the wrong server)."""
         try:
             from core import port_plan
@@ -1088,7 +1094,7 @@ class ServerManager:
         if _mc.looks_minecraft(srv_def) and exe.lower().endswith((".jar", "run.bat")):
             _mc.resolve_java(srv_def)   # clear "install Java" message instead of a crash
 
-        # Refresh the double-clickable start.bat (manual use only; BaoBun itself
+        # Refresh the double-clickable start.bat (manual use only; Tofu itself
         # launches the executable directly).
         try:
             self.generate_start_bat(server_id)
@@ -1120,24 +1126,24 @@ class ServerManager:
 
         log_dir = os.path.join(directory, "logs")
         os.makedirs(log_dir, exist_ok=True)
-        log_path = os.path.join(log_dir, f"baobun-{server_id}.log")
+        log_path = os.path.join(log_dir, f"tofusm-{server_id}.log")
         rotate_log(log_path)
         log_file = open(log_path, "ab", buffering=0)
         try:
-            log_file.write(("\n==== BaoBun: starting " + srv_def.get("name", server_id) + " at "
+            log_file.write(("\n==== Tofu: starting " + srv_def.get("name", server_id) + " at "
                             + time.strftime("%Y-%m-%d %H:%M:%S") + " ====\n").encode("utf-8"))
             if applied:
-                log_file.write(("==== BaoBun: applied settings changed while the server was running: "
+                log_file.write(("==== Tofu: applied settings changed while the server was running: "
                                 + "; ".join(applied) + " ====\n").encode("utf-8"))
             if first["applied"]:
-                log_file.write(("==== BaoBun: set what you chose when adding the server: "
+                log_file.write(("==== Tofu: set what you chose when adding the server: "
                                 + ", ".join(first["applied"]) + " ====\n").encode("utf-8"))
             if first["waiting"]:
-                log_file.write(("==== BaoBun: the game makes its settings file on this first start. When it has, "
-                                "and nobody is playing, BaoBun restarts it once to set the "
+                log_file.write(("==== Tofu: the game makes its settings file on this first start. When it has, "
+                                "and nobody is playing, Tofu restarts it once to set the "
                                 + ", ".join(first["waiting"]) + " you chose. ====\n").encode("utf-8"))
             if filled:
-                log_file.write(("==== BaoBun: this game won't start without some launch options, so BaoBun set "
+                log_file.write(("==== Tofu: this game won't start without some launch options, so Tofu set "
                                 + ", ".join(filled) + ". Change them in the server's Settings tab. ====\n"
                                 ).encode("utf-8"))
         except Exception:
@@ -1225,7 +1231,7 @@ class ServerManager:
 
     def firewall_ports(self, server_id: str) -> list:
         """Ports to allow in Windows Firewall. RCON (and other "this PC only" ports) are
-        left out on purpose: only BaoBun on this PC talks to them."""
+        left out on purpose: only Tofu on this PC talks to them."""
         srv = self.get_server(server_id) or {}
         local = set()
         try:
@@ -1274,9 +1280,9 @@ class ServerManager:
             from core.diagnose import explain
             path = self.get_console_log_path(server_id)
             lines = tail_lines(path, 300) if path else []
-            # only look at the latest run (BaoBun writes a header at every start)
+            # only look at the latest run (Tofu writes a header at every start)
             for i in range(len(lines) - 1, -1, -1):
-                if lines[i].startswith("==== BaoBun: starting"):
+                if lines[i].startswith(("==== Tofu: starting", "==== BaoBun: starting")):
                     lines = lines[i + 1:]
                     break
             return explain(exit_code, lines, self.get_server(server_id) or {}, uptime=uptime)
@@ -1489,7 +1495,7 @@ class ServerManager:
     def generate_start_bat(self, server_id: str) -> str:
         """Write a double-clickable start.bat next to the server (for manual use).
 
-        BaoBun launches the executable directly, so this file is only a
+        Tofu launches the executable directly, so this file is only a
         convenience. It never contains a Steam password: account games log in
         with the username only and SteamCMD reuses its cached login.
         """
@@ -1522,7 +1528,7 @@ class ServerManager:
                 print(f"[WARN] start.bat validate step skipped: {e}")
 
         lines = ["@echo off",
-                 "REM Generated by BaoBun Control Panel for manual launching.",
+                 "REM Generated by Tofu Server Manager for manual launching.",
                  'cd /d "' + directory + '"']
         if validate_line:
             lines.append("echo Updating game files (SteamCMD)...")
@@ -1641,7 +1647,7 @@ class ServerManager:
                 status["installed"] = os.path.isfile(exe_path) if d and os.path.isdir(d) else None
                 if status["installed"] is False:
                     from core.game_installers import folder_is_empty
-                    if not folder_is_empty(d):   # files are there, just not the program BaoBun expects
+                    if not folder_is_empty(d):   # files are there, just not the program Tofu expects
                         status["installed"] = None
                         status["exeMissing"] = os.path.basename(exe_path)
             except Exception:
@@ -1713,7 +1719,7 @@ class ServerManager:
     # ── Config Editor ────────────────────────────────────
 
     def _other_server_dirs(self, server_id: str) -> list:
-        """Other servers' folders (and BaoBun's own), skipped when searching one server's folder."""
+        """Other servers' folders (and Tofu's own), skipped when searching one server's folder."""
         out = [str(self.config_path.parent)]
         for s in self.load_servers():
             if s.get("id") != server_id and s.get("directory"):
@@ -2045,7 +2051,7 @@ class ServerManager:
         Search order:
           1) A user-configured override (Settings -> SteamCMD path).
           2) A bundled 'SteamCMD' folder next to the app / servers.json.
-          3) The per-user BaoBun SteamCMD cache (where auto-download lands).
+          3) The per-user Tofu SteamCMD cache (where auto-download lands).
           4) A system-wide Steam installation.
           5) Auto-download from Valve's CDN.
         """
@@ -2059,7 +2065,7 @@ class ServerManager:
         # 2-4) Well-known locations (app-relative first so a shipped copy wins).
         candidates = [
             self.config_path.parent / "SteamCMD" / "steamcmd.exe",
-            _local_appdata() / "BaoBun" / "SteamCMD" / "steamcmd.exe",
+            _appdata_tofu() / "SteamCMD" / "steamcmd.exe",
             Path("C:/Program Files (x86)/Steam/steamcmd.exe"),
         ]
         for c in candidates:
@@ -2071,7 +2077,7 @@ class ServerManager:
 
     def _download_steamcmd(self) -> str:
         """Download and extract SteamCMD, returning the exe path."""
-        steamcmd_dir = _local_appdata() / "BaoBun" / "SteamCMD"
+        steamcmd_dir = _appdata_tofu() / "SteamCMD"
         steamcmd_dir.mkdir(parents=True, exist_ok=True)
         zip_path = steamcmd_dir / "steamcmd.zip"
         urls = [
@@ -2082,7 +2088,7 @@ class ServerManager:
         for url in urls:
             try:
                 print(f"[INFO] Downloading SteamCMD from {url} ...")
-                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (BaoBunCP steamcmd)"})
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (TofuSM steamcmd)"})
                 with urllib.request.urlopen(req, timeout=120) as resp, open(zip_path, "wb") as f:
                     shutil.copyfileobj(resp, f)
                 with zipfile.ZipFile(zip_path, "r") as z:
@@ -2117,7 +2123,7 @@ class ServerManager:
         we warm it up once and mark it primed with a marker file next to it.
         """
         steamcmd_dir = Path(steamcmd).parent
-        marker = steamcmd_dir / ".baobun_primed"
+        marker = steamcmd_dir / ".tofusm_primed"
         if marker.exists():
             return
         print("[INFO] Warming up SteamCMD (one-time self-update)...")
@@ -2274,7 +2280,7 @@ class ServerManager:
                     "This game requires a Steam account login (it cannot be downloaded "
                     "anonymously). Add your Steam username and password in Settings, then retry.")
             import tempfile
-            fd, script = tempfile.mkstemp(prefix="baobun_login_", suffix=".txt")
+            fd, script = tempfile.mkstemp(prefix="tofusm_login_", suffix=".txt")
             q = (lambda v: '"' + v + '"' if (" " in v or not v) else v)
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write("login " + q(user) + " " + q(pw) + "\n")
@@ -2565,7 +2571,7 @@ class ServerManager:
         """Download the newest official Vintage Story server over this install."""
         from core import game_installers as gi
         if not gi.vs_is_vanilla(srv):
-            raise ValueError("This Vintage Story server isn't an official install BaoBun can update.")
+            raise ValueError("This Vintage Story server isn't an official install Tofu can update.")
         info = gi.check_update(self, srv)
         if not force and info.get("update_available") is False:
             self._write_registry(server_id, update_available=False, update_checked_at=time.time())
@@ -2658,11 +2664,11 @@ class ServerManager:
             self._log_players = LogPlayers()
         sid = srv["id"]
         rec = self._read_registry(sid)
-        cap = os.path.join(srv.get("directory") or "", "logs", f"baobun-{sid}.log")
+        cap = os.path.join(srv.get("directory") or "", "logs", f"tofusm-{sid}.log")
         game_log = next((c for c in self.get_log_candidates(sid)
-                         if os.path.isfile(c) and not c.endswith(f"baobun-{sid}.log")), None)
+                         if os.path.isfile(c) and not c.endswith(f"tofusm-{sid}.log")), None)
         found = None
-        # BaoBun's console capture (this run only) and the game's own log: a player
+        # Tofu's console capture (this run only) and the game's own log: a player
         # counts as online if either source says so.
         if sid in self.processes and os.path.isfile(cap):
             found = self._log_players.update(sid + ":console", cap, patterns, run_started=rec.get("started_at"))
@@ -2777,7 +2783,7 @@ class ServerManager:
             raise ValueError(f"Server {server_id} not found")
         k = gi.kind(srv)
         if k is None:
-            raise ValueError("BaoBun can't download this game - copy its server files into the folder.")
+            raise ValueError("Tofu can't download this game - copy its server files into the folder.")
         if self.is_running(server_id):
             raise RuntimeError("Stop the server first.")
         directory = srv.get("directory") or ""
@@ -2910,7 +2916,7 @@ class ServerManager:
         url = self.VS_MODDB_API + path
         if params:
             url += "?" + urllib.parse.urlencode(params)
-        req = urllib.request.Request(url, headers={"User-Agent": "BaoBunCP/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "TofuSM/1.0"})
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read().decode("utf-8"))
 
@@ -3050,7 +3056,7 @@ class ServerManager:
 
         filename = os.path.basename(filename)
         dest = os.path.join(folder, filename)
-        req = urllib.request.Request(url, headers={"User-Agent": "BaoBunCP/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "TofuSM/1.0"})
         with urllib.request.urlopen(req, timeout=600) as resp:
             data = resp.read()
         tmp = dest + ".partial"
@@ -3127,7 +3133,7 @@ class ServerManager:
     # ── Logs ──────────────────────────────────────────────
 
     def get_log_candidates(self, server_id: str) -> list[str]:
-        """Every existing log file for a server (game logs and BaoBun's console capture)."""
+        """Every existing log file for a server (game logs and Tofu's console capture)."""
         srv_def = self.get_server(server_id)
         if not srv_def:
             return []
@@ -3139,7 +3145,7 @@ class ServerManager:
                 paths.extend(plugin.log_candidates(srv_def))
             except Exception:
                 pass
-        paths += [os.path.join(directory, "logs", f"baobun-{server_id}.log"),
+        paths += [os.path.join(directory, "logs", f"tofusm-{server_id}.log"),
                   os.path.join(directory, "server.log"),
                   os.path.join(directory, "console-output.log")]
         out = []
@@ -3149,7 +3155,7 @@ class ServerManager:
         return out
 
     def get_log_path(self, server_id: str) -> str | None:
-        """Best log file for a server: the game's own log (via its plugin), else BaoBun's capture."""
+        """Best log file for a server: the game's own log (via its plugin), else Tofu's capture."""
         srv_def = self.get_server(server_id)
         if not srv_def:
             return None
@@ -3164,10 +3170,10 @@ class ServerManager:
         if srv_def.get("type") == "vintage-story":
             candidates += [os.path.join(directory, "Data", "Logs", "stratum-server.log"),
                            os.path.join(directory, "Data", "Logs", "server.log")]
-        captured = os.path.join(directory, "logs", f"baobun-{server_id}.log")
+        captured = os.path.join(directory, "logs", f"tofusm-{server_id}.log")
         existing = [c for c in candidates if c and os.path.isfile(c)]
         # Prefer whichever was written most recently: game logs when the game
-        # writes them, otherwise the console output BaoBun captured.
+        # writes them, otherwise the console output Tofu captured.
         if os.path.isfile(captured):
             existing.append(captured)
         for name in ("server.log", "console-output.log"):
@@ -3179,10 +3185,10 @@ class ServerManager:
         return max(existing, key=lambda p: os.path.getmtime(p))
 
     def get_console_log_path(self, server_id: str) -> str | None:
-        """The server's console output as BaoBun captured it (includes replies to
+        """The server's console output as Tofu captured it (includes replies to
         commands); falls back to the game's own log file."""
         srv = self.get_server(server_id) or {}
-        cap = os.path.join(srv.get("directory") or "", "logs", f"baobun-{server_id}.log")
+        cap = os.path.join(srv.get("directory") or "", "logs", f"tofusm-{server_id}.log")
         if os.path.isfile(cap):
             return cap
         return self.get_log_path(server_id)
@@ -3234,11 +3240,11 @@ class ServerManager:
             except Exception:
                 prof = None
             if prof and not prof.get("stdin"):
-                raise RuntimeError("%s doesn't read commands from its console window - BaoBun uses RCON "
+                raise RuntimeError("%s doesn't read commands from its console window - Tofu uses RCON "
                                    "for it. %s" % (prof.get("name", "This game"), prof.get("setup") or ""))
             raise RuntimeError(
-                "This server's console is not available (it was started outside this BaoBun session). "
-                "Restart it from BaoBun to get the console back, or turn on RCON in its config.")
+                "This server's console is not available (it was started outside this Tofu session). "
+                "Restart it from Tofu to get the console back, or turn on RCON in its config.")
         if not info.send(command):
             raise RuntimeError("Could not write to the server console (it may be shutting down).")
         self._audit("console_command", server_id, user=user, command=command[:200])
@@ -3254,7 +3260,7 @@ class ServerManager:
         return None
 
     def port_owner(self, port: int):
-        """(owning BaoBun server id or None, pids listening on port) - (None, set()) if unknown."""
+        """(owning Tofu server id or None, pids listening on port) - (None, set()) if unknown."""
         try:
             import psutil
             owners = {c.pid for c in psutil.net_connections(kind="inet")
@@ -3285,9 +3291,9 @@ class ServerManager:
             return
         if owner:
             other = (self.get_server(owner) or {}).get("name", owner)
-            raise RuntimeError("RCON port %s belongs to %s, not this server - BaoBun won't send the command "
+            raise RuntimeError("RCON port %s belongs to %s, not this server - Tofu won't send the command "
                                "there. Give each server its own RCON port (Ports page)." % (port, other))
-        # Another program (not a BaoBun server) answers on this port. That's normal when the
+        # Another program (not a Tofu server) answers on this port. That's normal when the
         # game hands RCON to a helper process or was started by a .bat that detaches, so
         # only note it - refusing here would turn clean stops into force-kills.
 
@@ -3517,7 +3523,7 @@ class ServerManager:
         """Back up a server's config + world (save) data to a timestamped zip.
 
         Uses the game plugin's save folders (which may live outside the install,
-        e.g. %APPDATA%/VintagestoryData) plus BaoBun's config/save heuristics,
+        e.g. %APPDATA%/VintagestoryData) plus Tofu's config/save heuristics,
         asks a running server to flush its world first, and prunes old backups.
         """
         srv = self.get_server(server_id)
@@ -3585,7 +3591,7 @@ class ServerManager:
                     for fn in files:
                         fp = os.path.join(root, fn)
                         add(fp, prefix + "/" + os.path.relpath(fp, full))
-            z.writestr("baobun_backup.json", json.dumps(manifest, indent=2))
+            z.writestr("tofusm_backup.json", json.dumps(manifest, indent=2))
         os.replace(tmp_path, zip_path)
 
         if keep is None:
@@ -3669,13 +3675,13 @@ class ServerManager:
             return {}
 
     def test_mirror(self, target=None) -> dict:
-        """Can BaoBun write to the second backup folder right now?"""
+        """Can Tofu write to the second backup folder right now?"""
         target = (target or self.get_setting("backup_mirror_dir", "") or "").strip()
         if not target:
             return {"ok": False, "error": "No second backup folder set"}
         try:
             Path(target).mkdir(parents=True, exist_ok=True)
-            probe = Path(target) / ".baobun-write-test"
+            probe = Path(target) / ".tofusm-write-test"
             probe.write_text("ok", encoding="utf-8")
             probe.unlink()
             usage = shutil.disk_usage(target)
@@ -3774,15 +3780,16 @@ class ServerManager:
         with zipfile.ZipFile(zp, "r") as z:
             names = z.namelist()
             external = {}
-            if "baobun_backup.json" in names:
+            manifest = next((m for m in ("tofusm_backup.json", "baobun_backup.json") if m in names), None)
+            if manifest:
                 try:
-                    external = json.loads(z.read("baobun_backup.json")).get("external", {}) or {}
+                    external = json.loads(z.read(manifest)).get("external", {}) or {}
                 except Exception:
                     external = {}
             if external_map:
                 external = dict(external, **external_map)
             for n in names:
-                if n.endswith("/") or n == "baobun_backup.json":
+                if n.endswith("/") or n in ("tofusm_backup.json", "baobun_backup.json"):
                     continue
                 arc = Path(n)
                 if arc.is_absolute() or ".." in arc.parts:
@@ -3810,7 +3817,7 @@ class ServerManager:
         if not srv:
             raise ValueError("Server not found")
         export = {k: v for k, v in srv.items() if k != "id"}
-        export["_baoBunProfile"] = 1
+        export["_tofuProfile"] = 1
         Path(dest_path).write_text(json.dumps(export, indent=2), encoding="utf-8")
         return dest_path
 
@@ -3821,7 +3828,8 @@ class ServerManager:
             data = data[0] if data else {}
         if not isinstance(data, dict):
             raise ValueError("Not a valid server profile")
-        data.pop("_baoBunProfile", None)
+        data.pop("_tofuProfile", None)
+        data.pop("_baoBunProfile", None)          # exported before the rename
         name = data.get("name")
         if not name:
             raise ValueError("Profile has no name")
