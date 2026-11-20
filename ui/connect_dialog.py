@@ -35,6 +35,24 @@ def open_connect_dialog(app, theme, server_id):
         if err:
             ctk.CTkLabel(body, text="Couldn't check: " + err, text_color=t["warning"]).pack(fill="x", padx=8)
             return
+        r = d.get("reach") or {}
+        if r:
+            good = r.get("verdict") in ("ok", "likely", "relay")
+            bad = r.get("verdict") in ("blocked", "cgnat")
+            box = ctk.CTkFrame(body, fg_color="#2a2413" if bad else t["bg_dark"], corner_radius=10)
+            box.pack(fill="x", padx=8, pady=(4, 2))
+            ctk.CTkLabel(box, text="Can friends connect?", anchor="w", text_color=t["text_muted"],
+                         font=("Segoe UI", 11)).pack(fill="x", padx=12, pady=(10, 0))
+            ctk.CTkLabel(box, text=r.get("title") or "", anchor="w",
+                         text_color=t["status_online"] if good else (t["warning"] if bad else t["text_light"]),
+                         font=("Bahnschrift SemiBold", 18, "bold")).pack(fill="x", padx=12)
+            ctk.CTkLabel(box, text=r.get("detail") or "", anchor="w", justify="left", wraplength=540,
+                         text_color=t["text_light"]).pack(fill="x", padx=12, pady=(0, 10))
+            if r.get("verdict") == "cgnat":
+                ctk.CTkLabel(body, text="Tailscale: install it on this PC and on each friend's PC, sign in, and share "
+                             "this PC with them from the Tailscale admin page. They then join at the Tailscale "
+                             "address below.", anchor="w", justify="left", wraplength=560,
+                             text_color=t["text_muted"]).pack(fill="x", padx=12, pady=(2, 0))
         heading("Addresses to share")
         rows = [("From the internet (friends)", d["addresses"].get("internet"), "Needs the ports below forwarded on your router."),
                 ("Same home network", d["addresses"].get("lan"), ""),
@@ -115,9 +133,20 @@ def open_connect_dialog(app, theme, server_id):
     def work():
         try:
             from core.network import connect_info
+            from core import reach
             d, err = connect_info(app.manager, server_id), None
+            try:
+                d["reach"] = reach.check(app.manager, server_id)      # fresh: the user asked
+            except Exception as e:
+                d["reach"] = {"title": "Couldn't check", "detail": str(e)[:200]}
         except Exception as e:
             d, err = None, str(e)
         app.after(0, lambda: show(d, err))
     threading.Thread(target=work, daemon=True).start()
-    ctk.CTkButton(dlg, text="Close", width=90, command=dlg.destroy).pack(pady=(0, 12))
+    def again():
+        dlg.destroy()
+        open_connect_dialog(app, theme, server_id)
+    row = ctk.CTkFrame(dlg, fg_color="transparent")
+    row.pack(pady=(0, 12))
+    ctk.CTkButton(row, text="Check again", width=110, fg_color=t["border"], command=again).pack(side="left", padx=4)
+    ctk.CTkButton(row, text="Close", width=90, command=dlg.destroy).pack(side="left", padx=4)

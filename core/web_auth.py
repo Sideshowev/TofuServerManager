@@ -35,7 +35,7 @@ USER_AGENT = "DiscordBot (https://github.com/tofu-server-manager, 1.0) TofuServe
 
 VIEW = {"server.status", "logs.since", "backup.list",
         "schedules.get", "server.get", "server.check_update", "games.list", "activity.list",
-        "mods.list", "mods.check", "mods.updates", "mods.search", "metrics.history", "metrics.series", "server.connect_info", "server.game_settings", "server.quick_commands",
+        "mods.list", "mods.check", "mods.updates", "mods.search", "metrics.history", "metrics.series", "server.connect_info", "server.reach", "server.game_settings", "server.quick_commands",
         "metrics.sparklines", "server.install_status", "server.install_options",
         "server.install_versions", "health.checkup", "mods.details", "ports.plan",
         "ark.cluster", "ark.rules", "ark.spawns", "ark.loot", "ark.catalog", "agent.update_status", "host.settings",

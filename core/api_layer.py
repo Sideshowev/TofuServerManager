@@ -106,7 +106,7 @@ READ_ONLY = {
     "ports.conflicts", "backup.list", "settings.get", "audit.list", "plugins.list",
     "presets.list", "metrics.history", "health.check_all", "ai.health", "ai.log_insight",
     "server.check_update", "server.players", "games.list", "schedules.get",
-    "mods.list", "mods.check", "mods.updates", "mods.search", "metrics.series", "metrics.sparklines", "server.connect_info", "server.game_settings", "server.quick_commands",
+    "mods.list", "mods.check", "mods.updates", "mods.search", "metrics.series", "metrics.sparklines", "server.connect_info", "server.reach", "server.game_settings", "server.quick_commands",
     "server.install_status", "server.install_options", "server.install_versions", "health.checkup",
     "config.form_files", "config.form", "mods.details", "ports.plan",
     "ark.cluster", "ark.rules", "ark.spawns", "ark.loot", "ark.catalog", "agent.update_status", "host.settings",
@@ -150,6 +150,7 @@ class ApiLayer:
             "alerts.test": self._handle_alerts_test,
 
             "server.connect_info": lambda p: __import__("core.network", fromlist=["x"]).connect_info(self.mgr, self._sid(p)),
+            "server.reach": lambda p: __import__("core.reach", fromlist=["x"]).check(self.mgr, self._sid(p)),
             "server.upnp": self._handle_upnp,
             "server.quick_commands": lambda p: {"commands": __import__("core.quick_commands", fromlist=["x"]).for_server(
                 self.mgr.get_server(self._sid(p)))},

@@ -546,7 +546,8 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
         self.home_view = HomeView(
             self, THEME, on_toggle=self._card_toggle, on_manage=self.show_manage,
             on_add=self.show_add_wizard, presets=GAME_PRESETS, get_server=self.manager.get_server,
-            on_import=self.show_import_dialog, on_checkup=self.show_checkup_dialog)
+            on_import=self.show_import_dialog, on_checkup=self.show_checkup_dialog,
+            get_reach=self._reach_for, on_fix=self._reach_fix)
         self.home_view.pack(fill="both", expand=True)
         self._summary = None
         self._summary_at = 0.0
@@ -1420,6 +1421,22 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
     def show_import_dialog(self):
         from ui.import_dialog import open_import_dialog
         open_import_dialog(self, THEME)
+
+    def _reach_for(self, server_id, running):
+        """Last "can friends connect?" answer for a home card; starts a fresh check in the
+        background when it's missing or old (the card shows it on the next refresh)."""
+        if str(server_id).startswith("@"):
+            return None
+        from core import reach
+        if reach.stale(server_id, running):
+            reach.check_async(self.manager, server_id)
+        return reach.cached(server_id)
+
+    def _reach_fix(self, server_id, kind=None):
+        from core import reach
+        from ui.connect_dialog import open_connect_dialog
+        reach.forget(server_id)          # check again once they've fixed it
+        open_connect_dialog(self, THEME, server_id)
 
     def show_connect_dialog(self):
         if not self.selected_server_id:

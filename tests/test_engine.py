@@ -1886,6 +1886,10 @@ class FakeBattlEye:
         while True:
             try:
                 data, addr = self.sock.recvfrom(4096)
+            except ConnectionResetError:
+                # Windows: a reply sent to a client that had already closed (the wrong-password
+                # login) comes back as "port unreachable" on the next read. Keep serving.
+                continue
             except OSError:
                 return
             p = be._parse(data)
@@ -4740,3 +4744,59 @@ class RebrandTests(unittest.TestCase):
         p.write_text("Ann joined\n==== BaoBun: starting X ====\nBob joined\n")
         got = LogPlayers().update("s", str(p), {"join": [r"(?P<name>\w+) joined"], "leave": []})
         self.assertEqual(sorted(got), ["Bob"])
+
+
+class ReachTests(unittest.TestCase):
+    """Can friends connect? (core/reach.py) - every network answer is faked."""
+
+    def _mgr(self, srv, running=True, pid=None):
+        tmp = make_env([dict({"id": "s", "name": "Pals", "appId": "2394010", "port": 8211}, **srv)])
+        m = engine(tmp).manager
+        st = {"id": "s", "isRunning": running, "pid": pid, "state": "running" if running else "stopped"}
+        m.get_all_statuses = lambda: [st]
+        return m
+
+    def test_verdicts(self):
+        from core import reach
+        m = self._mgr({})
+        base = {"public_ip": "203.0.113.24", "router_ip": "203.0.113.24", "listening": True}
+        r = reach.check(m, "s", dict(base, steam=True, hairpin=False))
+        self.assertEqual((r["verdict"], r["address"]), ("ok", "203.0.113.24:8211"))
+        self.assertIn("203.0.113.24:8211", r["invite"])
+        r = reach.check(m, "s", dict(base, steam=False, hairpin=True))
+        self.assertEqual(r["verdict"], "ok")
+        r = reach.check(m, "s", dict(base, steam=False, hairpin=False, firewall=False))
+        self.assertEqual((r["verdict"], r["fix"]), ("blocked", "firewall"))
+        r = reach.check(m, "s", dict(base, steam=False, hairpin=False, firewall=True, forwarded=False))
+        self.assertEqual(r["verdict"], "blocked")
+        self.assertIn("8211", r["title"])
+        r = reach.check(m, "s", dict(base, steam=False, hairpin=False, firewall=True, forwarded=True))
+        self.assertEqual(r["verdict"], "likely")
+        r = reach.check(m, "s", dict(base, steam=None, hairpin=False, firewall=None, forwarded=None))
+        self.assertEqual(r["verdict"], "unknown")
+        r = reach.check(m, "s", dict(base, router_ip="100.72.1.9"))
+        self.assertEqual((r["verdict"], r["fix"], r["invite"]), ("cgnat", "tailscale", None))
+        r = reach.check(m, "s", dict(base, listening=False))
+        self.assertEqual(r["verdict"], "unknown")
+        self.assertIs(reach.cached("s"), r)
+        off = self._mgr({}, running=False)
+        r = reach.check(off, "s", {"public_ip": "203.0.113.24"})
+        self.assertEqual((r["verdict"], r["address"]), ("off", "203.0.113.24:8211"))
+        self.assertTrue(reach.stale("s", True))          # it was off, now runs: check again
+
+    def test_core_keeper_joins_by_game_id(self):
+        from core import reach
+        m = self._mgr({"appId": "1963720", "executable": "CoreKeeperServer.exe", "port": None})
+        d = Path(m.get_server("s")["directory"])
+        (d / "GameID.txt").write_text("ABCDEFGHJKLMNPQRSTUVWZ12\n")
+        r = reach.check(m, "s", {})
+        self.assertEqual((r["verdict"], r["address"]), ("relay", "ABCDEFGHJKLMNPQRSTUVWZ12"))
+        self.assertIn("Game ID", r["invite"])
+
+    def test_steam_list_parsing(self):
+        from core import reach
+        data = {"response": {"success": True, "servers": [{"addr": "203.0.113.24:27015", "gameport": 8211}]}}
+        self.assertTrue(reach.steam_sees("203.0.113.24", [8211], fetch=lambda u: data))
+        self.assertTrue(reach.steam_sees("203.0.113.24", [27015], fetch=lambda u: data))
+        self.assertFalse(reach.steam_sees("203.0.113.24", [7777], fetch=lambda u: data))
+        self.assertIsNone(reach.steam_sees("203.0.113.24", [7777], fetch=lambda u: 1 / 0))
