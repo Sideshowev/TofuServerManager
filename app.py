@@ -591,10 +591,16 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
             header, text="", font=("Bahnschrift SemiBold", 11), text_color=THEME["text_muted"],
         )
         self.activity_label.pack(side="left", padx=20, pady=15)
+        self.btn_all_tools = ctk.CTkButton(
+            header, text="Show all tools", width=120, fg_color="transparent", border_width=1,
+            border_color=THEME["border"], text_color=THEME["text_light"], command=self._toggle_all_tools,
+        )
+        self.btn_all_tools.pack(side="right", padx=(0, 4), pady=15)
 
-        # Server controls: all visible in clean horizontal columns
+        # Every tool in horizontal columns - hidden until "Show all tools" (the Overview tab
+        # has what most people need)
         controls = ctk.CTkFrame(detail_frame, fg_color="transparent")
-        controls.pack(fill="x", pady=(0, 15))
+        self._controls = controls
 
         col_power = ctk.CTkFrame(controls, fg_color="transparent")
         col_power.pack(side="left", fill="y", padx=(0, 12))
@@ -633,6 +639,10 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
             fg_color="transparent", border_color=THEME["border"],
             text_color=THEME["text_light"], command=self.show_message_schedule_dialog)
         self.btn_msg_sched.pack(fill="x", pady=(0, 4))
+        self.btn_edit = ctk.CTkButton(col_game, text="Edit Server",
+            fg_color="transparent", border_color=THEME["border"],
+            text_color=THEME["text_light"], command=self.show_edit_dialog)
+        self.btn_edit.pack(fill="x", pady=(0, 4))
         self.btn_remove = ctk.CTkButton(col_game, text="Remove Server",
             fg_color="transparent", border_color=THEME["danger"],
             text_color=THEME["text_light"], command=self.remove_selected)
@@ -735,6 +745,7 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
             detail_frame, fg_color=THEME["bg_card"], corner_radius=10,
         )
         self.tabview.pack(fill="both", expand=True)
+        tab_over = self.tabview.add("Overview")
         tab_live = self.tabview.add("Live Console")
         tab_game = self.tabview.add("Settings")
         tab_mods = self.tabview.add("Mods")
@@ -759,7 +770,22 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
         self.history_panel = HistoryPanel(tab_hist, THEME, get_db=lambda: self.engine.db,
                                           schedule=self.after)
         self.history_panel.pack(fill="both", expand=True, padx=10, pady=10)
-        self.tabview.set("Live Console")
+        from ui.server_overview import ServerOverview
+        self.overview = ServerOverview(
+            tab_over, THEME, on_action=self._overview_action, on_power=self._overview_power,
+            shortcuts=[("Game settings", lambda: self._go_tab("Settings")),
+                       ("Mods", lambda: self._go_tab("Mods")),
+                       ("Players and bans", self.show_players_dialog),
+                       ("Console", lambda: self._go_tab("Live Console")),
+                       ("Restore a backup", self.restore_backup),
+                       ("Edit server", self.show_edit_dialog)])
+        self.overview.pack(fill="both", expand=True, padx=6, pady=6)
+        self._overview_at = 0.0
+        self._overview_sid = None
+        self._overview_busy = False
+        self.tabview.set("Overview")
+        if self.manager.get_setting("show_all_tools", False):
+            self._toggle_all_tools(save=False)
         try:
             self.tabview.configure(command=self._on_tab_changed)
         except Exception:
@@ -771,7 +797,9 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
     # ------------------------------------------------------------------ #
     def _on_tab_changed(self):
         try:
-            if self.tabview.get() == "Mods":
+            if self.tabview.get() == "Overview":
+                self._overview_refresh(force=True)
+            elif self.tabview.get() == "Mods":
                 self.mods_panel.on_shown()
             elif self.tabview.get() == "History":
                 self.history_panel.on_shown()
@@ -798,6 +826,10 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
         if server_id and self.server_tree.exists(server_id):
             self.server_tree.selection_set(server_id)
             self.server_tree.see(server_id)
+        if server_id:
+            self.tabview.set("Overview")
+            self.selected_server_id = server_id
+            self._overview_refresh(force=True)
             self.on_server_selected()
 
     def _card_toggle(self, server_id, state):
@@ -1099,6 +1131,7 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
         st = next((s for s in self._statuses if s["id"] == self.selected_server_id), None)
         if st:
             self._update_detail_status(st)
+        self._overview_refresh(force=True)
 
     def _clear_per_server_ui(self):
         try:
@@ -1438,6 +1471,117 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
         reach.forget(server_id)          # check again once they've fixed it
         open_connect_dialog(self, THEME, server_id)
 
+    # ------------------------------------------------------------------ #
+    # Overview tab: status, the "Getting it ready" checklist, shortcuts
+    # ------------------------------------------------------------------ #
+    OVERVIEW_SECONDS = 30
+
+    def _go_tab(self, name):
+        self.tabview.set(name)
+        self._on_tab_changed()
+
+    def _toggle_all_tools(self, save=True):
+        shown = self._controls.winfo_ismapped()
+        if shown:
+            self._controls.pack_forget()
+        else:
+            self._controls.pack(fill="x", pady=(0, 15), before=self.tabview)
+        self.btn_all_tools.configure(text="Show all tools" if shown else "Hide tools")
+        if save:
+            try:
+                self.manager.set_setting("show_all_tools", not shown)
+            except Exception:
+                pass
+
+    def _overview_refresh(self, force=False):
+        """Status every poll; the checklist (reads the game's files) at most every
+        OVERVIEW_SECONDS, in the background, unless forced."""
+        sid = self.selected_server_id
+        if not sid or not self.detail_view.winfo_ismapped() or self.tabview.get() != "Overview":
+            return
+        from core import reach
+        st = next((s for s in self._statuses if s["id"] == sid), None) or {}
+        running = bool(st.get("isRunning"))
+        r = self._reach_for(sid, running)
+        self.overview.show_status(st, r)
+        if sid != self._overview_sid:
+            force = True
+        if self._overview_busy or (not force and time.time() - self._overview_at < self.OVERVIEW_SECONDS):
+            return
+        self._overview_busy = True
+        self._overview_sid = sid
+
+        def work():
+            from core import checklist
+            try:
+                r = reach.cached(sid)
+                if r is None or reach.stale(sid, running):
+                    r = reach.check(self.manager, sid)
+                items = checklist.items(self.manager, sid, st, r)
+            except Exception as e:
+                print("[WARN] checklist:", e)
+                items = None
+
+            def apply():
+                self._overview_busy = False
+                self._overview_at = time.time()
+                if items is not None and self.selected_server_id == sid:
+                    self.overview.show_items(items)
+            self.after(0, apply)
+        threading.Thread(target=work, daemon=True, name="checklist").start()
+
+    def _overview_soon(self, seconds=4):
+        self.after(int(seconds * 1000), lambda: self._overview_refresh(force=True))
+
+    def _overview_power(self, kind):
+        sid = self.selected_server_id
+        if not sid:
+            return
+        {"start": self.start_server, "stop": self.stop_server, "restart": self.restart_server}[kind](sid)
+        self._overview_soon()
+
+    def _overview_action(self, action):
+        sid = self.selected_server_id
+        if not sid or not action:
+            return
+        from core import reach
+        if action.startswith("copy:"):
+            self.clipboard_clear()
+            self.clipboard_append(action[5:])
+            self._show_status("Invite copied - paste it to your friends.")
+            return
+        if action.startswith("fix:"):
+            kind = action[4:]
+            reach.forget(sid)
+            if kind == "firewall":
+                self.open_firewall_for_selected()
+            elif kind == "edit":
+                self.show_edit_dialog()
+            else:
+                self._reach_fix(sid, kind)
+        elif action == "connect":
+            self._reach_fix(sid, None)
+        elif action == "install":
+            self.install_game()
+        elif action == "settings":
+            self._go_tab("Settings")
+            return
+        elif action == "schedule":
+            self.show_backup_schedule_dialog()
+        elif action == "backup":
+            self.backup_now()
+        elif action == "start":
+            self.start_server(sid)
+        self._overview_soon(6)
+
+    def show_edit_dialog(self):
+        sid = self.selected_server_id
+        srv = self.manager.get_server(sid) if sid else None
+        if not srv:
+            messagebox.showwarning("No server selected", "Select a server first.")
+            return
+        self._open_server_form("Edit Server", dict(srv), "Save")
+
     def show_connect_dialog(self):
         if not self.selected_server_id:
             messagebox.showwarning("No server selected", "Select a server first.")
@@ -1736,6 +1880,7 @@ class TofuApp(ServerFormMixin, SettingsDialogsMixin, ArkDialogsMixin, LegacyMods
                    if s["id"] == self.selected_server_id), None)
         if st:
             self._update_detail_status(st)
+            self._overview_refresh()
 
     def _server_name(self, sid):
         return (self.manager.get_server(sid) or {}).get("name", "server")

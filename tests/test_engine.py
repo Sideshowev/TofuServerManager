@@ -4800,3 +4800,52 @@ class ReachTests(unittest.TestCase):
         self.assertTrue(reach.steam_sees("203.0.113.24", [27015], fetch=lambda u: data))
         self.assertFalse(reach.steam_sees("203.0.113.24", [7777], fetch=lambda u: data))
         self.assertIsNone(reach.steam_sees("203.0.113.24", [7777], fetch=lambda u: 1 / 0))
+
+
+class ChecklistTests(unittest.TestCase):
+    class _Mgr:
+        def get_server(self, sid):
+            return {"id": sid, "name": "Pal", "appId": "2394010"}
+
+    def _items(self, status, reach, **known):
+        from core import checklist
+        k = {"installed": True, "settings": {"name": "Pal", "password": True, "players": 16},
+             "schedules": {}, "nightly": {}, "last_backup": None}
+        k.update(known)
+        return {i["key"]: i for i in checklist.items(self._Mgr(), "p", status, reach, known=k)}
+
+    def test_blocked_server(self):
+        from core import checklist
+        it = self._items({"isRunning": True}, {"verdict": "blocked", "title": "Your router is blocking port 8211",
+                                                "fix": "forward"},
+                         schedules={"p": {"backup": {"enabled": True, "mode": "daily", "times": ["04:00"]}}})
+        self.assertEqual(it["install"]["state"], "done")
+        self.assertEqual(it["settings"]["detail"], "Pal, password set, 16 players")
+        self.assertEqual((it["reach"]["state"], it["reach"]["action"]), ("needs", "fix:forward"))
+        self.assertEqual(it["backup"]["state"], "done")
+        self.assertIn("Every day at 04:00", it["backup"]["detail"])
+        self.assertFalse(it["invite"]["enabled"])
+        self.assertEqual(checklist.progress(list(it.values())), "3 of 5 done")
+
+    def test_ready_server_and_gaps(self):
+        it = self._items({"isRunning": True}, {"verdict": "ok", "address": "1.2.3.4:8211", "invite": "Join Pal: 1.2.3.4:8211"},
+                         nightly={"enabled": True, "backup": True, "time": "05:00"})
+        self.assertEqual(it["invite"]["action"], "copy:Join Pal: 1.2.3.4:8211")
+        self.assertIn("nightly restart at 05:00", it["backup"]["detail"])
+        it = self._items({"isRunning": False}, None, installed=False, settings={}, last_backup=None)
+        self.assertEqual((it["install"]["state"], it["install"]["action"]), ("needs", "install"))
+        self.assertEqual(it["settings"]["state"], "todo")
+        self.assertEqual(it["reach"]["action"], "start")
+        self.assertEqual((it["backup"]["state"], it["backup"]["action"]), ("needs", "schedule"))
+        it = self._items({"isRunning": True}, {"verdict": "relay", "address": "ABCD", "invite": "Game ID ABCD"},
+                         settings={"name": None, "password": False, "players": None}, last_backup=time.time() - 3 * 86400)
+        self.assertEqual(it["settings"]["state"], "needs")
+        self.assertEqual(it["backup"]["state"], "todo")
+        self.assertIn("3 days ago", it["backup"]["detail"])
+        self.assertTrue(it["invite"]["detail"].startswith("Game ID"))
+
+    def test_schedule_text(self):
+        from core.checklist import schedule_text
+        self.assertEqual(schedule_text({"hours": 6}), "Every 6 hours")
+        self.assertEqual(schedule_text({"hours": 24}), "Every day")
+        self.assertEqual(schedule_text({"hours": 48}), "Every 2 days")
