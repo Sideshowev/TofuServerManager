@@ -15,6 +15,9 @@ if not exist logs mkdir logs
 echo Installing build tools (first time only)...
 %PYTHON% -m pip install -q -r requirements.txt pyinstaller
 echo Building - this takes a minute or two...
+REM a leftover exe from an earlier build must not pass for a fresh one
+if exist build\out\TofuSM.exe del /q build\out\TofuSM.exe
+if exist build\out\TofuSM.exe goto failed
 %PYTHON% -m PyInstaller --noconfirm --clean --distpath build\out TofuSM.spec > logs\build.log 2>&1
 if errorlevel 1 goto failed
 if not exist build\out\TofuSM.exe goto failed
