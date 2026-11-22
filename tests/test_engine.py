@@ -3826,6 +3826,8 @@ class UpdateCheckTests(unittest.TestCase):
         self.assertFalse(U.newer("1.0.0-beta", "1.0.0"))
         tmp = make_env([])
         m = engine(tmp).manager
+        self.addCleanup(setattr, U, "UPDATE_REPO", U.UPDATE_REPO)
+        U.UPDATE_REPO = ""                                  # as in a build that isn't published
         self.assertFalse(U.enabled(m))                      # no update source: off
         self.assertFalse(U.check(m, force=True)["newer"])
         m.set_setting("update_repo", "https://github.com/someone/baobun/")

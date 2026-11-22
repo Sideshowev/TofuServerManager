@@ -9,4 +9,4 @@ also point it elsewhere with the "update_repo" setting.
 
 VERSION = "1.1.1"      # 1.1.1: home screen cards, 'can friends connect?', server Overview checklist
 #        1.1.0: renamed from BaoBun Control Panel to Tofu Server Manager
-UPDATE_REPO = ""
+UPDATE_REPO = "Sideshowev/TofuServerManager"
